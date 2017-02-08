@@ -1,0 +1,669 @@
+
+[ITEMDEF i_world_spawner]
+id=i_deed
+name=World Spawner
+type=t_normal
+weight=1
+
+on=@create
+ATTR=attr_newbie|attr_move_never|attr_magic
+color= 04f2
+
+on=@dclick
+if <src.account.plevel> < 3
+remove
+else
+dialog d_world_spawner
+return 1
+
+[DIALOG d_world_spawner]
+200,100
+resizepic 10 10 9200 255 280//gray
+resizepic 52 97 9350 199 122//white
+resizepic 35 20 9200 205 20//high back title
+dtext 100 20 1947 World Spawner
+
+resizepic 100 40 9350 90 22//version
+dtext 110 40 1947 Version:
+dtext 157 40 026 1.0.0
+
+resizepic 26 60 9350 230 22//white
+dtext 31 60 1947 Special thanks to :
+dtext 159 60 17 Nerun's Distro
+
+//WORLD
+dtext 60 98 026 Felluca//2
+button 25 97 4005 4007 1 0 1 //Felluca
+dtext 60 118 044 Trammel//2
+button 25 117 4005 4007 1 0 2 //Trammel
+dtext 60 138 035 Ilshenar//3
+button 25 137 4005 4007 1 0 3 //Ilshenar
+dtext 60 158 0122 Malas//4
+button 25 157 4005 4007 1 0 4 //Malas
+dtext 60 178 1947 Tokuno//5
+button 25 177 4005 4007 1 0 5 //Tokuno
+dtext 60 198 0158 Ter Mur//6
+button 25 197 4005 4007 1 0 6 //Ter Mur
+//
+resizepic 40 230 9350 150 22//white remove spawns
+dtext 60 230 1947 Remove    Spawns//2
+dtext 107 230 026 ALL
+button 25 230 4005 4007 1 0 7 //remove spawns
+tilepic 210 230 13945 1 0 7 //skull
+
+
+checkbox 35 255 9725 9724 <qval <var0.validate_spawns>?1:0> 1
+dtext 65 260 1000 Validate Spawn Defs
+
+[dialog d_world_spawner button]
+onbutton=0
+if (<argchk[1]> == 1)
+  var.validate_spawns=1
+  else
+  var.validate_spawns=
+endif
+
+onbutton=1,6
+if (<argchk[1]> == 1)
+  var.validate_spawns=1
+  else
+  var.validate_spawns=
+endif
+doswitch <eval <argn>-1>
+  src.dialog d_felucca_spawner
+  src.dialog d_trammel_spawner
+  src.dialog d_ilshenar_spawner
+  src.dialog d_malas_spawner
+  src.dialog d_tokuno_spawner
+  src.dialog d_termur_spawner
+enddo
+
+onbutton=7 
+if (<argchk[1]> == 1)
+  var.validate_spawns=1
+  else
+  var.validate_spawns=
+endif
+src.remove_all_spawns	//remove spawns and remove vars
+src.dialog d_world_spawner
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_felucca_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 026 Felucca Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <eval <var.felucca_vendors>>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn Graveyards
+dtext 220 100 1947 <eval <var.felucca_graveyards>>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Towns	
+dtext 220 120 1947 <eval <var.felucca_Towns>>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Wild Life
+dtext 220 140 1947 <eval <var.felucca_WildLife>>
+button 35 140 210 211 1 0 4
+
+dtext 70 160 1947 Spawn Dungeons
+dtext 220 160 1947 <eval <var.felucca_dungeons>>
+button 35 160 210 211 1 0 5
+
+dtext 70 180 1947 Spawn Sea Life
+dtext 220 180 1947 <eval <var.felucca_sealife>>
+button 35 180 210 211 1 0 6
+
+dtext 70 200 1947 Spawn Reagents
+dtext 220 200 1947 <eval <var.felucca_reagents>>
+button 35 200 210 211 1 0 7
+
+dtext 70 220 1947 Spawn Lost Lands
+dtext 220 220 1947 <eval <var.felucca_lostlands>>
+button 35 220 210 211 1 0 8
+
+dtext 70 240 1947 Spawn Outdoors
+dtext 220 240 1947 <eval <var.felucca_outdoors>>
+button 35 240 210 211 1 0 9 
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_felucca_spawner button]
+
+onbutton=1,10
+var.map_plane=0		//set map plane to 0 for Felucca
+
+if <argn>==1
+spawn_vendors_felucca
+  var.felucca_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+elseif <argn>==2
+spawn_graveyards_felucca
+  var.felucca_graveyards=1
+  src.sysmessage @06 Graveyard spawns complete.
+
+elseif <argn>==3
+spawn_townslife_felucca
+spawn_townspeople_felucca
+  var.felucca_Towns=1
+  src.sysmessage @06 Town spawns complete.
+
+elseif <argn>==4
+spawn_wildlife_felucca
+  var.felucca_WildLife=1
+  src.sysmessage @06 Wild life spawns complete.
+
+elseif <argn>==5
+spawn_blightedgrove_felucca
+spawn_britainsewer_felucca
+spawn_covetous_felucca
+spawn_deceit_felucca
+spawn_despise_felucca
+spawn_destard_felucca
+spawn_fire_felucca
+spawn_hythloth_felucca
+spawn_ice_felucca
+spawn_orccaves_felucca
+spawn_paintedcaves_felucca
+spawn_khaldun_felucca
+spawn_palaceofparoxysmus_felucca
+spawn_prismoflight_felucca
+spawn_shame_felucca
+spawn_solenhive_felucca
+spawn_terathankeep_felucca
+spawn_wrong_felucca
+  var.felucca_dungeons=1
+  src.sysmessage @06 Dungeon spawns complete.
+
+elseif <argn>==6
+spawn_sealife_felucca
+  var.felucca_sealife=1
+  src.sysmessage @06 Sea life spawns complete.
+
+elseif <argn>==7
+spawn_reagents_felucca
+  var.felucca_reagents=1
+  src.sysmessage @06 Reagent spawns complete.
+
+elseif <argn>==8
+spawn_lostlands_felucca
+  var.felucca_lostlands=1
+  src.sysmessage @06 Spawn Lost Lands complete.
+
+elseif <argn>==9
+spawn_outdoors_felucca
+spawn_sanctuary_felucca
+spawn_trinsicpassage_felucca
+  var.felucca_outdoors=1
+  src.sysmessage @06 Spawn Outdoors complete.
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane 
+return 1
+endif
+
+dialog d_felucca_spawner
+var.map_plane=	//clear map plane 
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_trammel_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 044 Trammel Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <eval <var.trammel_vendors>>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn Graveyards
+dtext 220 100 1947 <eval <var.trammel_graveyards>>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Towns	
+dtext 220 120 1947 <eval <var.trammel_Towns>>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Wild Life
+dtext 220 140 1947 <eval <var.trammel_WildLife>>
+button 35 140 210 211 1 0 4
+
+dtext 70 160 1947 Spawn Dungeons
+dtext 220 160 1947 <eval <var.trammel_dungeons>>
+button 35 160 210 211 1 0 5
+
+dtext 70 180 1947 Spawn Sea Life
+dtext 220 180 1947 <eval <var.trammel_sealife>>
+button 35 180 210 211 1 0 6
+
+dtext 70 200 1947 Spawn Reagents
+dtext 220 200 1947 <eval <var.trammel_reagents>>
+button 35 200 210 211 1 0 7
+
+dtext 70 220 1947 Spawn Lostlands
+dtext 220 220 1947 <eval <var.trammel_lostlands>>
+button 35 220 210 211 1 0 8
+
+dtext 70 240 1947 Spawn Outdoors
+dtext 220 240 1947 <eval <var.trammel_outdoors>>
+button 35 240 210 211 1 0 9
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_trammel_spawner button]
+
+onbutton=1,10
+var.map_plane=1	//set map plane
+
+if <argn>==1
+spawn_vendors_trammel
+  var.trammel_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+
+elseif <argn>==2
+spawn_graveyards_trammel
+  var.trammel_graveyards=1
+  src.sysmessage @06 Graveyard spawns complete.
+
+
+elseif <argn>==3
+spawn_townslife_trammel
+spawn_townspeople_trammel
+  var.trammel_Towns=1
+  src.sysmessage @06 Town spawns complete.
+
+
+elseif <argn>==4
+spawn_wildlife_trammel
+  var.trammel_WildLife=1
+  src.sysmessage @06 Wild life spawns complete.
+
+
+elseif <argn>==5
+spawn_blightedgrove_trammel
+spawn_britainsewer_trammel
+spawn_covetous_trammel
+spawn_deceit_trammel
+spawn_despise_trammel
+spawn_destard_trammel
+spawn_fire_trammel
+spawn_hythloth_trammel
+spawn_ice_trammel
+spawn_orccaves_trammel
+spawn_paintedcaves_trammel
+spawn_palaceofparoxysmus_trammel
+spawn_prismoflight_trammel
+spawn_shame_trammel
+spawn_solenhive_trammel
+spawn_terathankeep_trammel
+spawn_wrong_trammel
+  var.trammel_dungeons=1
+  src.sysmessage @06 Dungeon spawns complete.
+
+
+elseif <argn>==6
+spawn_sealife_trammel
+  var.trammel_sealife=1
+  src.sysmessage @06 Sea life spawns complete.
+
+
+elseif <argn>==7
+spawn_reagents_trammel
+  var.trammel_reagents=1
+  src.sysmessage @06 Reagent spawns complete.
+
+elseif <argn>==8
+spawn_lostlands_trammel
+  var.trammel_lostlands=1
+  src.sysmessage @06 Spawn Lost Lands complete.
+
+elseif <argn>==9
+spawn_outdoors_trammel
+spawn_sanctuary_trammel
+spawn_trinsicpassage_trammel
+  var.trammel_outdoors=1
+  src.sysmessage @06 Spawn Outdoors complete.
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane
+return 1
+endif
+
+dialog d_trammel_spawner
+var.map_plane=	//clear map plane
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_ilshenar_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 035 Ilshenar Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <dvar.ilshenar_vendors>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn Caves
+dtext 220 100 1947 <dvar.ilshenar_caves>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Towns	
+dtext 220 120 1947 <dvar.ilshenar_Towns>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Dungeons
+dtext 220 140 1947 <dvar.ilshenar_dungeons>
+button 35 140 210 211 1 0 4
+
+dtext 70 160 1947 Spawn Outdoors
+dtext 220 160 1947 <dvar.ilshenar_outdoors>
+button 35 160 210 211 1 0 5
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_ilshenar_spawner button]
+
+onbutton=1,10
+
+var.map_plane=2	//set map plane
+
+if <argn>==1
+spawn_vendors_ilshenar
+  var.ilshenar_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+
+elseif <argn>==2
+spawn_ancientlair_ilshenar
+spawn_mushroom_ilshenar
+spawn_ratmancave_ilshenar
+  var.ilshenar_caves=1
+  src.sysmessage @06 Cave spawns complete.
+
+
+elseif <argn>==3
+spawn_towns_ilshenar
+  var.ilshenar_Towns=1
+  src.sysmessage @06 Town spawns complete.
+
+
+elseif <argn>==4
+spawn_ankh_ilshenar
+spawn_blood_ilshenar
+spawn_exodus_ilshenar
+spawn_rock_ilshenar
+spawn_sorcerers_ilshenar
+spawn_spectre_ilshenar
+spawn_twistedweald_ilshenar
+spawn_wisp_ilshenar
+  var.ilshenar_dungeons=1
+  src.sysmessage @06 Dungeon spawns complete.
+
+
+elseif <argn>==5
+spawn_outdoors_ilshenar
+  var.ilshenar_outdoors=1
+  src.sysmessage @06 Outdoors spawns complete.
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane
+return 1
+endif
+
+dialog d_ilshenar_spawner
+var.map_plane=	//clear map plane
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_malas_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 0122 Malas Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <dvar.malas_vendors>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn Dungeons
+dtext 220 100 1947 <dvar.malas_dungeons>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Orc Forts	
+dtext 220 120 1947 <dvar.malas_orcforts>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Outdoors
+dtext 220 140 1947 <dvar.malas_outdoors>
+button 35 140 210 211 1 0 4
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_malas_spawner button]
+
+onbutton=1,10
+
+var.map_plane=3	//set map plane
+
+if <argn>==1
+spawn_vendors_malas
+  var.malas_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+elseif <argn>==2
+spawn_bedlam_malas
+spawn_citadel_malas
+spawn_doom_malas
+spawn_labyrinth_malas
+  var.malas_dungeons=1
+  src.sysmessage @06 Dungeons spawns complete.
+
+
+elseif <argn>==3
+spawn_orcforts_malas
+  var.malas_orcforts=1
+  src.sysmessage @06 Orc Forts spawns complete.
+
+elseif <argn>==4
+spawn_north_malas
+spawn_south_malas
+  var.malas_outdoors=1
+  src.sysmessage @06 Outdoors spawns complete.
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane
+return 1
+endif
+
+dialog d_malas_spawner
+var.map_plane=	//clear map plane
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_tokuno_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 1947 Tokuno Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <dvar.tokuno_vendors>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn Towns
+dtext 220 100 1947 <dvar.tokuno_towns>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Dungeons
+dtext 220 120 1947 <dvar.tokuno_dungeons>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Outdoors
+dtext 220 140 1947 <dvar.tokuno_outdoors>
+button 35 140 210 211 1 0 4
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_tokuno_spawner button]
+
+onbutton=1,10
+
+var.map_plane=4	//set map plane
+
+if <argn>==1
+spawn_vendors_tokuno
+  var.tokuno_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+
+elseif <argn>==2
+spawn_townslife_tokuno
+  var.tokuno_towns=1
+  src.sysmessage @06 Towns spawns complete.
+
+elseif <argn>==3
+spawn_fandancersdojo_tokuno
+spawn_yomutsomines_tokuno
+  var.tokuno_dungeons=1
+  src.sysmessage @06 Dungeons spawns complete.
+
+
+elseif <argn>==4
+spawn_outdoors_tokuno
+spawn_wildlife_tokuno
+  var.tokuno_outdoors=1
+  src.sysmessage @06 Outdoors spawns complete.
+
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane
+return 1
+endif
+
+dialog d_tokuno_spawner
+var.map_plane=	//clear map plane
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+[DIALOG d_termur_spawner]
+200,100
+resizepic 10 10 9200 255 280			//gray
+resizepic 35 80 9350 210 180			//white
+resizepic 35 20 9200 205 20			//high back title
+dtext 100 20 1947 World Spawner
+resizepic 35 40 9200 120 20			//high back title
+dtext 50 40 0158 Termur Spawns
+
+dtext 70 80 1947 Spawn Vendors			
+dtext 220 80 1947 <dvar.termur_vendors>
+button 35 80 210 211 1 0 1 
+	
+dtext 70 100 1947 Spawn TerMur
+dtext 220 100 1947 <dvar.termur_termur>	
+button 35 100 210 211 1 0 2
+
+dtext 70 120 1947 Spawn Underworld
+dtext 220 120 1947 <dvar.termur_underworld>
+button 35 120 210 211 1 0 3
+
+dtext 70 140 1947 Spawn Abyss
+dtext 220 140 1947 <dvar.termur_abyss>
+button 35 140 210 211 1 0 4
+
+dtext 55 264 1947 Go back
+button 20 263 4014 4016 1 0 10 
+
+[dialog d_termur_spawner button]
+
+onbutton=1,10
+
+var.map_plane=5	//set map plane
+
+if <argn>==1
+spawn_Vendors_TerMur
+  var.termur_vendors=1
+  src.sysmessage @06 Vendor spawns complete.
+
+
+elseif <argn>==2
+spawn_TerMur_TerMur
+  var.termur_termur=1
+  src.sysmessage @06 TerMur spawns complete.
+
+elseif <argn>==3
+spawn_Underworld_TerMur
+  var.termur_underworld=1
+  src.sysmessage @06 Underworld spawns complete.
+
+
+elseif <argn>==4
+spawn_Abyss_TerMur
+  var.termur_abyss=1
+  src.sysmessage @06 Abyss spawns complete.
+
+
+elseif <argn>==10
+dialog d_world_spawner //return
+var.map_plane=	//clear map plane
+return 1
+endif
+
+dialog d_termur_spawner
+var.map_plane=	//clear map plane
+
+
+[EOF]

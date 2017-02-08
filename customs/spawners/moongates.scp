@@ -1,0 +1,142 @@
+[defname moongate_settings]
+facet_1_moongates	1
+facet_2_moongates	1
+facet_3_moongates	1
+facet_4_moongates	1
+facet_5_moongates	1
+facet_6_moongates	1
+
+facet_1_moongates_0 Felucca
+facet_1_moongates_1 1336,1997,5,0,Britain	 	//britain
+facet_1_moongates_2 4467,1283,5,0,Moonglow 		//moonglow
+facet_1_moongates_3 1499,3771,5,0,Jhelom		//jhelom
+facet_1_moongates_4 771,752,5,0,Yew 			//yew
+facet_1_moongates_5 1828,2948,-20,0,Trinsic 		//trinsic
+facet_1_moongates_6 643,2067,5,0,Skara Brae		//skara
+facet_1_moongates_7 3564,2140,34,0,Magincia 		//magincia
+facet_1_moongates_8 2701,692,5,0,Vesper			//vesper
+facet_1_moongates_9 2711,2234,0,0,Buccaneer's Den 	//bucs den
+
+facet_2_moongates_0 Trammel
+facet_2_moongates_1 1336,1997,5,1,Britain 	//britain
+facet_2_moongates_2 4467,1283,5,1,Moonglow 	//moonglow
+facet_2_moongates_3 1499,3771,5,1,Jhelom 	//jhelom
+facet_2_moongates_4 771,752,5,1,Yew 		//yew
+facet_2_moongates_5 1828,2948,-20,1,Trinsic 	//trinsic
+facet_2_moongates_6 643,2067,5,1,Skara Brae 	//skara
+facet_2_moongates_7 3564,2140,34,1,Magincia 	//magincia
+facet_2_moongates_8 2701,692,5,1,Vesper 	//vesper
+facet_2_moongates_9 3450,2677,26,1,Haven 	//haven
+
+facet_3_moongates_0 Ilshenar		
+facet_3_moongates_1 1749,236,58,2,Chaos Shrine 		//chaos
+facet_3_moongates_2 1215,467,-13,2,Compassion Shrine 	//compassion
+facet_3_moongates_3 722,1366,-60,2,Honesty Shrine 	//honesty
+facet_3_moongates_4 752,724,-27,2,Honor Shrine	 	//honor
+facet_3_moongates_5 281,1016,0,2,Humility Shrine 	//humility
+facet_3_moongates_6 987,1011,-32,2,Justice Shrine 	//justice
+facet_3_moongates_7 1183,1287,-30,2,Sacrifice Shrine 	//sacrifice
+facet_3_moongates_8 1525,1341,2,2,Spirituality Shrine 	//spirituality
+facet_3_moongates_9 523,217,-46,2,Valor Shrine 		//valor
+
+facet_4_moongates_0 Malas
+facet_4_moongates_1 1015,527,-65,3,Luna 	//luna
+facet_4_moongates_2 1997,1386,-85,3,Umbra 	//umbra
+
+facet_5_moongates_0 Tokuno Islands
+facet_5_moongates_1 1169,998,42,4,Isamu Jim 	//isamu jim
+facet_5_moongates_2 270,628,15,4,Homare Jima 	//homare jima
+facet_5_moongates_3 802,1204,25,4,Makato Jima 	//makato jima
+
+facet_6_moongates_0 Ter Mur
+facet_6_moongates_1 851,3525,-38,5,Royal City	//royal city
+
+[itemdef i_moongate]
+id=i_moongate_blue
+type=t_script
+name=Moongate
+
+on=@DClick
+if (<distance> > 3)
+        src.sysmessage You are too far away to use that.
+        return 1
+        else
+	sdialog d_moongates <eval <src.p.m>+1>
+	sound snd_spell_gate_travel
+	return 1
+endif 
+
+on=@step 
+if (!<ARGN1>==1) 
+	sdialog d_moongates <eval <src.p.m>+1>
+	sound snd_spell_gate_travel
+endif 
+
+[dialog d_moongates]
+90,90 
+
+PAGE 0 
+resizepic 0 0 5054 465 345 
+
+dtext 10 10 0 Pick your destination: 
+
+button 15 275 4005 4006 1 0 1000
+dtext 50 275 0 OKAY
+button 15 300 4005 4006 1 0 0
+dtext 50 300 0 CANCEL
+
+////////////FACET LISTINGS
+for 1 6
+if <def0.facet_<dlocal._for>_moongates>
+button 10 <eval 42+(<local._for>*25)> 2117 2118 1 0 <local._for>
+dtext 30 <eval 40+(<local._for>*25)> <qval <dargn>==<dlocal._for>?044:0> <def0.facet_<dlocal._for>_moongates_0>
+endif
+endfor
+
+////////////MOONGATE LISTINGS
+page <argn>
+
+for 1 10
+ if <def0.facet_<argn>_moongates_<dlocal._for>>
+  button 210 <eval 42+(<local._for>*25)> 9026 9027 1 0 <argn><local._for>
+  dtext 233 <eval 40+(<local._for>*25)> 0 <streat <streat <streat <streat <def0.facet_<argn>_moongates_<dlocal._for>>>>>>
+ endif
+endfor
+
+[dialog d_moongates button]
+onbutton=1,6
+dialog d_moongates <argn>
+
+onbutton=7,1000
+if <distance> > 3
+  src.sysmessage You are too far away from the moongate.
+  return 1
+endif
+
+local.facet=<eval <argn>/100>
+local.moongate=<eval <argn>-(<local.facet>*100)>
+args=<def0.facet_<dlocal.facet>_moongates_<dlocal.moongate>>
+src.p=<argv[0]>,<argv[1]>,<argv[2]>,<argv[3]>
+src.flags |= statf_hidden
+src.update
+src.sound snd_spell_recall
+
+[FUNCTION makegates] 
+if !<serv.itemdef.i_moongate>
+  serv.log You need Soulless' moongate script to generate moongates
+endif
+
+for f 6
+ if <def0.facet_<dlocal.f>_moongates>
+  for m 10
+    if <def0.facet_<dlocal.f>_moongates_<dlocal.m>>
+      serv.newitem i_moongate
+      new.p <def0.facet_<dlocal.f>_moongates_<dlocal.m>>
+      new.attr attr_static|attr_move_never 
+    endif
+  endfor
+ endif
+endfor
+
+
+[EOF]

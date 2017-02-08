@@ -1,0 +1,129 @@
+
+
+//    0     1     2     3     4     5   6 7 8   9     10      11         12         13        14     15    16     17     18     19     20
+//*|List1|List2|List3|List4|List5|List6|X|Y|Z|facet|MinTime|MaxTime|WalkingRange|HomeRange|SpawnID|Count1|Count2|Count3|Count4|Count5|Count6
+
+
+[function create_spawner]
+for 0 5
+  if (<var0.validate_spawns>) && !(<isempty <argv<dlocal._for>>>)
+    if !(strmatch(*:*,<argv[<dlocal._for>]>) 
+      if (!<serv.chardef.<argv<dlocal._for>>>) && (!<serv.itemdef.<argv<dlocal._for>>>)
+        serv.log <argv<dlocal._for>> is not a valid chardef or itemdef, needs to be added.
+      endif
+    endif
+  elseif !<isempty <argv<dlocal._for>>> 
+        if (strmatch(*:*,<argv<dlocal._for>>)	//check to see if more than one npc on the spawner
+          local.spawn_array=<explode :,<argv<dlocal._for>>>
+        endif
+      if <serv.chardef.<argv<dlocal._for>>>	//check for if it's an npc or an item
+        local.type=t_spawn_char
+        elseif <serv.itemdef.<argv<dlocal._for>>>
+        local.type=t_spawn_item
+      endif
+      serv.newitem i_worldgem_bit
+      new.type=<local.type>					//<qval <serv.chardef.<argv<dlocal._for>>>?t_spawn_char:t_spawn_item>
+      //new.attr=0b0
+      //new.color=026
+        if <local.spawn_array>
+          new.tag.spawn_array=<local.spawn_array>
+	  new.more1=<strarg <local.spawn_array>>
+          new.events=+t_custom_spawner
+          else
+          new.more1=<argv<dlocal._for>> 				//more1
+        endif
+      new.p=<argv[6]>,<argv[7]>,<argv[8]>,<dvar0.map_plane>	//<argv[9]>	//p
+      new.morep=<argv[10]>,<argv[11]>,<argv[12]>			//morep
+      new.amount=<argv[<eval 15 + <local._for>>]>			//amount
+      new.update	
+      new.timer=<R15,30>
+  endif
+local.spawn_array=
+endfor
+
+[typedef t_custom_spawner]
+
+on=@timer
+args=<tag0.spawn_array>
+more1=<def0.<argv[<R0,<eval <argv>-1>>]>>	//pick one of the random spawns assigned
+return 0
+
+[function destroy_world]
+local.p=<P>
+p=1,1,1,0
+update
+for 0 5
+p=1,1,1,<dlocal._for>
+  foritems 10000
+    remove
+  endfor
+  forchars 10000
+    if <brain>
+       remove
+    endif
+  endfor
+endfor
+p=<local.p>
+update
+reset_spawn_counters
+sysmessage @026 World completey destroyed
+
+
+[function remove_all_spawns]
+local.p=<P>
+p=1,1,1,0
+update
+for 0 5
+p=1,1,1,<dlocal._for>
+  foritems 10000
+    if (<type>==t_spawn_char) || (<type>==t_spawn_item)
+      remove
+    endif
+  endfor
+endfor
+p=<local.p>
+update
+reset_spawn_counters
+sysmessage @026 All spawns removed
+
+
+[function reset_spawn_counters]
+var.felucca_vendors=
+var.felucca_graveyards=
+var.felucca_Towns=
+var.felucca_WildLife=
+var.felucca_dungeons=
+var.felucca_sealife=
+var.felucca_reagents=
+var.felucca_lostlands=
+var.felucca_outdoors=
+var.trammel_vendors=
+var.trammel_graveyards=
+var.trammel_Towns=
+var.trammel_WildLife=
+var.trammel_dungeons=
+var.trammel_sealife=
+var.trammel_reagents=
+var.trammel_lostlands=
+var.trammel_outdoors=
+var.ilshenar_vendors=
+var.ilshenar_caves=
+var.ilshenar_Towns=
+var.ilshenar_dungeons=
+var.ilshenar_outdoors=
+var.malas_vendors=
+var.malas_dungeons=
+var.malas_orcforts=
+var.malas_outdoors=
+var.tokuno_vendors=
+var.tokuno_towns=
+var.tokuno_animals=
+var.tokuno_dungeons=
+var.tokuno_outdoors=
+var.termur_vendors=
+var.termur_termur=
+var.termur_underworld=
+var.termur_abyss=
+
+
+[EOF]

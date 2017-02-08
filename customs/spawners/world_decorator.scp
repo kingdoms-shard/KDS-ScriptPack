@@ -1,0 +1,981 @@
+////////////WORLD DECORATOR///////////////////////////
+
+
+[itemdef i_world_decorator]
+ID=0E2F
+name=World Decorator
+type=t_normal
+WEIGHT=1
+//
+CATEGORY=Provisions - GM
+SUBSECTION=Items
+DESCRIPTION=GM Generator
+//
+on=@create
+ATTR=attr_newbie|attr_move_never|attr_magic
+color=06
+//
+ON=@DClick// THX TO STAFF STANIC
+IF (<SRC.ACCOUNT.PLEVEL> >= 6)
+ SRC.Worldgen
+ENDIF
+return 1 
+
+[function worldgen]
+dialog d_spawner
+
+////////////////////////////////////////////
+[DIALOG d_spawner]
+220,30
+//nomove
+resizepic 10 10 9200 360 435		
+resizepic 30 30 9350 320 50		
+dtext 110 35 1947 World Decorator
+dtext 110 55 5 Version: 1.0.0
+resizepic 30 90 9350 320 30		//caixa branca 2 thanks!
+dtext 95 95 1947 Special Thanks to:
+dtext 215 95 17 Nerun's Distro.
+checkertrans 29 169 320 75		//world items transp
+checkertrans 29 265 320 142		//dungeons transp
+dtext 150 150 100 World Items
+button 30 170 4005 4007 1 0 1		//door
+dtext 65 170 1947 Generate Doors	 //button 1
+button 200 170 4005 4007 1 0 2		//remove door
+dtext 235 170 1947 Remove Doors 	//button 1
+button 30 195 4005 4007 1 0 3		//gen signs
+dtext 65 195 1947 Generate Signs 	//button 1
+button 200 195 4005 4007 1 0 4 		// remove signs
+dtext 235 195 1947 Remove Signs		//button 1
+button 30 220 4005 4007 1 0 5		//gen Moongate
+dtext 65 220 1947 Generate Moongates 	//button 1
+button 200 220 4005 4007 1 0 6 		// remove Moongate
+dtext 235 220 1947 Remove Moongates 	//button 1
+//////////////////////////////////////////// Apocalypse Now!
+button 30 420 1209 1210 1 0 7 		// Apocalypse Now
+dtext 50 418 1947 Apocalypse Now (Remove all items from server!) 	//button 1	
+////////////////////////////////////////////	
+dtext 155 245 4 Decoration		//160 390 4 Decoration
+dtext 65 265 026 Felluca
+button 30 265 4005 4007 1 0 8 		//button  Generate Felluca
+dtext 65 290 044 Trammel
+button 30 290 4005 4007 1 0 9		//button  Generate Trammel
+dtext 65 315 035 Ilshenar
+button 30 315 4005 4007 1 0 10		//button  Generate Ilshenar
+dtext 65 340 0122 Malas
+button 30 340 4005 4007 1 0 11		//button  Generate Malas
+dtext 65 365 1947 Tokuno
+button 30 365 4005 4007 1 0 12		//button  Generate Tokuno
+dtext 65 390 0158 Ter Mur
+button 30 390 4005 4007 1 0 13		//button  Generate Ter Mur
+dtext 235 265 1947 More [Felucca]
+button 200 265 4005 4007 1 0 14 	//
+dtext 235 290 1947 More [Trammel]
+button 200 290 4005 4007 1 0 15		//
+dtext 235 315 1947 More [Ilshenar]
+button 200 315 4005 4007 1 0 16		//
+
+[DIALOG d_spawner BUTTON]
+ON=0 
+return 1
+
+onbutton=1,16
+IF <argn>==1
+GenerateDoors
+ ARGS="Door's Generation complete!"
+ SDIALOG d_spawner
+elseif <argn>==2)
+RDoor
+ ARGS="Doors Removed!"
+ SDIALOG d_spawner
+elseif <argn>==3)
+GenerateSign
+ ARGS="Signs Generation complete!"
+ SDIALOG d_spawner
+elseif <argn>==4)
+RSign
+ ARGS="Signs Removed!"
+ SDIALOG d_spawner
+elseif <argn>==5)
+MakeGates
+ ARGS="Moongates Generation complete!"
+ SDIALOG d_spawner
+elseif <argn>==6)
+RMoonGate
+ ARGS="Moongates Removed!"
+ SDIALOG d_spawner
+elseif <argn>==7)
+ SDIALOG d_apocalypse
+elseif <argn>==8)
+GenFelucca
+ ARGS="The Felucca Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==9)
+GenTrammel
+f_GenerateDoors_T
+f_GenMisc_T
+f_GenerateSign_T
+ ARGS="The Trammel Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==10)
+GenIlshenar
+ ARGS="The Ilshenar Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==11)
+GenMalas
+ ARGS="The Malas Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==12)
+GenTokuno
+ ARGS="The Tokuno Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==13)
+GenTermur
+ ARGS="The Ter Mur Facet Generated."
+ SDIALOG d_spawner
+elseif <argn>==14)
+ SDIALOG d_gen_felucca
+ ARGS=85
+elseif <argn>==15)
+ SDIALOG d_gen_trammel
+ ARGS=85
+elseif <argn>==16)
+ SDIALOG d_spawner_ilshenar
+ ARGS=85
+ENDIF
+IF !(<isempty <ARGS>>)
+ IF (<isnum <ARGS>>)
+  //SOUND <dARGS>
+ ELSE
+  SYSMESSAGE @06 <ARGS>
+ ENDIF
+ENDIF 
+
+
+////////////////////////////////////////////
+[FUNCTION RDOOR]
+	FORITEMS 9999 
+		IF (<TYPE> == t_door)
+			REMOVE
+		ENDIF
+ENDFOR
+
+////////////////////////////////////////////
+[FUNCTION RSIGN]
+	FORITEMS 9999
+		IF (<TYPE> == t_sign_gump)
+			REMOVE
+		ENDIF
+ENDFOR
+////////////////////////////////////////////
+[FUNCTION RMOONGATE]//THX TO STAFF STANIC!
+	FORINSTANCES i_moongate
+		REMOVE
+ENDFOR 
+////////////////////////////////////////////
+[FUNCTION F_APOCALYPSE_FINAL]
+	FORITEMS 9999
+		REMOVE
+	UPDATE
+ENDFOR
+////////////////////////////////////////////
+[function F_APOCALYPSE]
+tag.pos = <src.p>
+src.invis
+SRC.GO 1 1 0
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 0 Done.
+SRC.GO 1 1 0 1
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 1 Done.
+SRC.GO 1 1 0 2
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 2 Done.
+SRC.GO 1 1 0 3
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 3 Done.
+SRC.GO 1 1 0 4
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 4 Done.
+SRC.GO 1 1 0 5
+F_APOCALYPSE_FINAL
+SRC.SYSMESSAGE MAPPLANE 5 Done.
+src.go <tag.pos>
+src.invis
+Tag.pos=
+////////////////////////////////////////////
+[DIALOG d_apocalypse]
+100,100
+resizepic 10 10 9200 300 100
+dtext 110 20 1947 ARE YOU SURE?
+dtext 90 80 1947 Go Back.
+dtext 25 50 026 [ATTENTION ALL ITEMS WILL BE DELETED!]
+button 50 80 4014 4016 1 0 1
+button 210 80 249 248 1 0 2
+
+[DIALOG d_apocalypse BUTTON]
+ON=0 2
+IF (<ARGN> < 2)
+ ARGS="Apocalypse Canceled!"
+ELSE
+destroy_world
+ ARGS="Apocalypse Completed!"
+ENDIF
+SYSMESSAGE @0800 <ARGS>
+SDIALOG d_spawner 
+//
+/////////////////////////////// FELUCA
+[DIALOG d_gen_felucca]
+220,50
+//nomove
+resizepic 10 10 9200 350 550//fundo cinza
+resizepic 110 20 9200 140 20//Felluca
+dtext 160 20 026 Felucca//title
+dtext 30 57 1947 Cities
+button 20 20 4014 4016 1 0 1//Back
+button 155 530 249 248 1 0 2//Okay
+checkertrans 25 80 315 180//back 1
+button 25 80 210 211 1 0 3//check city 1
+dtext 50 80 1947 Britain//city name 1
+button 25 100 210 211 1 0 4//check city 
+dtext 50 100 1947 Minoc//city name 	
+button 25 120 210 211 1 0 5//check city 3
+dtext 50 120 1947 Yew//city name 3
+button 25 140 210 211 1 0 6//check city 4
+dtext 50 140 1947 Vesper//city name 4
+button 25 160 210 211 1 0 7//check city 5
+dtext 50 160 1947 Trinsic//city name 5
+button 25 180 210 211 1 0 8//check city6
+dtext 50 180 1947 Ocllo//city name 6
+button 25 200 210 211 1 0 9//check city6
+dtext 50 200 1947 Magincia//city name 6	
+button 25 220 210 211 1 0 10//check city6
+dtext 50 220 1947 Moonglow//city name 6	
+button 25 240 210 211 1 0 11//check city6
+dtext 50 240 1947 Serpent's Hold
+//side cities
+button 185 80 210 211 1 0 12//check city 7
+dtext 210 80 1947 Jhelom//city name 7
+button 185 100 210 211 1 0 13//check city 6
+dtext 210 100 1947 Skara Brae//city name 6
+button 185 120 210 211 1 0 14//check city 7
+dtext 210 120 1947 Nujel'm//city name 7
+button 185 140 210 211 1 0 15//check city 8
+dtext 210 140 1947 Buccaneer's Den//city name 8
+button 185 160 210 211 1 0 16//check city 9
+dtext 210 160 1947 Cove//city name 9
+button 185 180 210 211 1 0 17//check city 10
+dtext 210 180 1947 Heartwood//city name 10
+button 185 200 210 211 1 0 18//check city 10
+dtext 210 200 1947 Wind
+button 185 220 210 211 1 0 19//check city 10
+dtext 210 220 1947 Delucia
+button 185 240 210 211 1 0 20//check city 10
+dtext 210 240 1947 Papua
+//
+dtext 30 260 1947 Dungeons/Sites
+checkertrans 25 280 315 240//back 
+button 25 280 210 211 1 0 21//check city 1
+dtext 50 280 1947 The Blighted Grove//city name 1
+button 25 300 210 211 1 0 22//check city 1
+dtext 50 300 1947 The Britain Sewers//city name 1
+button 25 320 210 211 1 0 23//check city 1
+dtext 50 320 1947 Covetous//city name 1	
+button 25 340 210 211 1 0 24//check city 1
+dtext 50 340 1947 Deceit//city name 1
+button 25 360 210 211 1 0 25//check city 1
+dtext 50 360 1947 Despise//city name 1
+button 25 380 210 211 1 0 26//check city 1
+dtext 50 380 1947 Destard//city name 1
+button 25 400 210 211 1 0 27//check city 1
+dtext 50 400 1947 Fire Dungeon//city name 1
+button 25 420 210 211 1 0 28//check city 1
+dtext 50 420 1947 Hythloth//city name 1	
+button 25 440 210 211 1 0 29//check city 1
+dtext 50 440 1947 Ice Dungeon//city name 1
+button 25 460 210 211 1 0 30//check city 1
+dtext 50 460 1947 Orc Cave//city name 1	
+button 25 480 210 211 1 0 31//check city 1
+dtext 50 480 1947 Shame//city name 1
+button 25 500 210 211 1 0 43//check city 1
+dtext 50 500 1947 Ruined Magincia//city name 1
+//2 part
+button 185 280 210 211 1 0 32//check city 1
+dtext 210 280 1947 Palace of Paroxysmus//city name 1
+button 185 300 210 211 1 0 33//check city 1
+dtext 210 300 1947 The Prism of Light//city name 1
+button 185 320 210 211 1 0 34//check city 1
+dtext 210 320 1947 The Sanctuary//city name 1
+button 185 340 210 211 1 0 35//check city 1
+dtext 210 340 1947 The Painted Caves//city name 1
+button 185 360 210 211 1 0 36//check city 1
+dtext 210 360 1947 The Solen Hive//city name 1
+button 185 380 210 211 1 0 37//check city 1
+dtext 210 380 1947 The Star Room//city name 1
+button 185 400 210 211 1 0 38//check city 1
+dtext 210 400 1947 The Terathan Keep//city name 1
+button 185 420 210 211 1 0 39//check city 1
+dtext 210 420 1947 Wrong//city name 1
+button 185 440 210 211 1 0 40//check city 1
+dtext 210 440 1947 Khaldun//city name 1	
+button 185 460 210 211 1 0 41//check city 1
+dtext 210 460 1947 Delucia Passage//city name 1
+button 185 480 210 211 1 0 42//check city 1
+dtext 210 480 1947 Sea Market//city name 1
+
+[DIALOG d_gen_felucca BUTTON]
+ON=0 
+SDIALOG d_spawner
+return 1
+ON=1 43
+IF (<ARGN>==1)
+SDIALOG d_spawner
+ARGS=85
+elseif (<ARGN>==2)
+ARGS=85
+elseif (<ARGN>==3)
+SERV.genbritain
+ARGS="The Britain decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==4)
+SERV.genminoc
+ARGS="The Minoc decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==5)
+SERV.genyew
+ARGS="The Yew decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==6)
+SERV.genvesper
+ARGS="The Vesper decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==7)
+SERV.gentrinsic
+ARGS="The Trinsic decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==8)
+SERV.genocllo
+ARGS="The Ocllo decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==9)
+SERV.genmagincia
+ARGS="The Magincia decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==10)
+SERV.genmoonglow
+ARGS="The Moonglow decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==11)
+SERV.genserpent
+ARGS="The Serpent's Hold decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==12)
+SERV.genjhelom
+ARGS="The Jhelom decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==13)
+SERV.genskara
+ARGS="The Skara Brae decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==14)
+SERV.genujelm
+ARGS="The Nujel'm decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==15)
+SERV.genbucs
+ARGS="The Buccaneer's Deen decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==16)
+SERV.gencove
+ARGS="The Cove decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==17)
+SERV.genheart
+ARGS="The Heartwood decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==18)
+SERV.genwind
+ARGS="The Wind decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==19)
+SERV.gendelucia
+ARGS="The Delucia decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==20)
+SERV.genpapua
+ARGS="The Papua decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==21)
+SERV.genblightedgrove
+ARGS="The Blighted Grove decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==22)
+ARGS="The Britain Sewers decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==23)
+SERV.gencovetous
+ARGS="The Covetous decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==24)
+SERV.gendeceit
+ARGS="The Deceit decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==25)
+SERV.gendespise
+ARGS="The Despise decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==26)
+SERV.gendestard
+ARGS="The Destard decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==27)
+SERV.genfire
+ARGS="The Fire Dungeon decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==28)
+SERV.genhythloth
+ARGS="The Hythloth decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==29)
+SERV.genice
+ARGS="The Ice Dungeon decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==30)
+SERV.genorcs
+ARGS="The Orcs Dungeon decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==31)
+SERV.genshame
+ARGS="The Shame decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==32)
+SERV.genparox
+ARGS="The Palace of Paroxysmus decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==33)
+SERV.genprism
+ARGS="The Prism of Light decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==34)
+SERV.gensanctuary
+ARGS="The Sanctuary decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==35)
+SERV.genpainted
+ARGS="The Painted Caves decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==36)
+SERV.gensolen
+ARGS="The Solen Hive decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==37)
+SERV.genmisc
+ARGS="The Star Room decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==38)
+SERV.genterathan
+ARGS="The Terathan's Keep decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==39)
+SERV.genwrong
+ARGS="The Wrong decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==40)
+SERV.genkhaldun
+ARGS="The Khaldun decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==41)
+ARGS="The Delucia Passage decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==42)
+SERV.genseamarket
+ARGS="The Sea Market decorated."
+sdialog d_gen_felucca
+elseif (<ARGN>==43)
+SERV.genruinedmagincia
+ARGS="The Ruined Magincia decorated."
+sdialog d_gen_felucca
+ENDIF
+IF !(<isempty <ARGS>>)
+ IF (<isnum <ARGS>>)
+  //SOUND <dARGS>
+ ELSE
+  SYSMESSAGE @06 <ARGS>
+ ENDIF
+ENDIF 
+//
+////////////////////////////////////////////
+//////////////////////////////////////////// TRAMMEL
+[DIALOG d_gen_trammel]
+180,50
+//nomove
+resizepic 10 10 9200 600 525//fundo cinza
+resizepic 110 20 9200 140 20//Felluca
+dtext 160 20 044 Trammel//title
+dtext 30 57 1947 Cities
+button 20 20 4014 4016 1 0 1//Back
+button 535 500 249 248 1 0 2//Okay
+checkertrans 25 80 315 180//back 1
+button 25 80 210 211 1 0 3//check city 1
+dtext 50 80 1947 Britain//city name 1
+button 25 100 210 211 1 0 4//check city 
+dtext 50 100 1947 Minoc//city name 	
+button 25 120 210 211 1 0 5//check city 3
+dtext 50 120 1947 Yew//city name 3
+button 25 140 210 211 1 0 6//check city 4
+dtext 50 140 1947 Vesper//city name 4
+button 25 160 210 211 1 0 7//check city 5
+dtext 50 160 1947 Trinsic//city name 5
+button 25 180 210 211 1 0 8//check city6
+dtext 50 180 1947 Haven//city name 6
+button 25 200 210 211 1 0 9//check city6
+dtext 50 200 1947 Magincia//city name 6	
+button 25 220 210 211 1 0 10//check city6
+dtext 50 220 1947 Moonglow//city name 6	
+button 25 240 210 211 1 0 11//check city6
+dtext 50 240 1947 Serpent's Hold
+//side cities
+button 185 80 210 211 1 0 12//check city 7
+dtext 210 80 1947 Jhelom//city name 7
+button 185 100 210 211 1 0 13//check city 6
+dtext 210 100 1947 Skara Brae//city name 6
+button 185 120 210 211 1 0 14//check city 7
+dtext 210 120 1947 Nujel'm//city name 7
+button 185 140 210 211 1 0 15//check city 8
+dtext 210 140 1947 Buccaneer's Den//city name 8
+button 185 160 210 211 1 0 16//check city 9
+dtext 210 160 1947 Cove//city name 9
+button 185 180 210 211 1 0 17//check city 10
+dtext 210 180 1947 Heartwood//city name 10
+button 185 200 210 211 1 0 18//check city 10
+dtext 210 200 1947 Wind
+button 185 220 210 211 1 0 19//check city 10
+dtext 210 220 1947 Delucia
+button 185 240 210 211 1 0 20//check city 10
+dtext 210 240 1947 Papua
+//
+dtext 30 260 1947 Dungeons/Sites
+checkertrans 25 280 500 240//back 
+button 25 280 210 211 1 0 21//check city 1
+dtext 50 280 1947 The Blighted Grove//city name 1
+button 25 300 210 211 1 0 22//check city 1
+dtext 50 300 1947 The Britain Sewers//city name 1
+button 25 320 210 211 1 0 23//check city 1
+dtext 50 320 1947 Covetous//city name 1	
+button 25 340 210 211 1 0 24//check city 1
+dtext 50 340 1947 Deceit//city name 1
+button 25 360 210 211 1 0 25//check city 1
+dtext 50 360 1947 Despise//city name 1
+button 25 380 210 211 1 0 26//check city 1
+dtext 50 380 1947 Destard//city name 1
+button 25 400 210 211 1 0 27//check city 1
+dtext 50 400 1947 Fire Dungeon//city name 1
+button 25 420 210 211 1 0 28//check city 1
+dtext 50 420 1947 Hythloth//city name 1	
+button 25 440 210 211 1 0 29//check city 1
+dtext 50 440 1947 Ice Dungeon//city name 1
+button 25 460 210 211 1 0 30//check city 1
+dtext 50 460 1947 Orc Cave//city name 1	
+button 25 480 210 211 1 0 31//check city 1
+dtext 50 480 1947 Shame//city name 1
+button 25 500 210 211 1 0 43//check city 1
+dtext 50 500 1947 New Haven//city name 1
+//2 part
+button 185 280 210 211 1 0 32//check city 1
+dtext 210 280 1947 Palace of Paroxysmus//city name 1
+button 185 300 210 211 1 0 33//check city 1
+dtext 210 300 1947 The Prism of Light//city name 1
+button 185 320 210 211 1 0 34//check city 1
+dtext 210 320 1947 The Sanctuary//city name 1
+button 185 340 210 211 1 0 35//check city 1
+dtext 210 340 1947 The Painted Caves//city name 1
+button 185 360 210 211 1 0 36//check city 1
+dtext 210 360 1947 The Solen Hive//city name 1
+button 185 380 210 211 1 0 37//check city 1
+dtext 210 380 1947 The Star Room//city name 1
+button 185 400 210 211 1 0 38//check city 1
+dtext 210 400 1947 The Terathan Keep//city name 1
+button 185 420 210 211 1 0 39//check city 1
+dtext 210 420 1947 Wrong//city name 1
+button 185 440 210 211 1 0 40//check city 1
+dtext 210 440 1947 Old Haven//city name 1	
+button 185 460 210 211 1 0 41//check city 1
+dtext 210 460 1947 Delucia Passage//city name 1
+button 185 480 210 211 1 0 42//check city 1
+dtext 210 480 1947 Misc//city name 1
+button 185 500 210 211 1 0 44//check city 1
+dtext 210 500 1947 Uzeraan Turmoil//city name 1
+//part 3
+button 385 280 210 211 1 0 45//check city 1
+dtext 410 280 1947 Ruined Magincia//city name 1
+button 350 80 4005 4007 1 0 46//check city 1
+dtext 390 80 1947 Generate Trammel Doors//city name 1
+button 350 105 4005 4007 1 0 47//check city 1
+dtext 390 105 1947 Remove Trammel Doors//city name 1
+button 350 130 4005 4007 1 0 48//check city 1
+dtext 390 130 1947 Generate Trammel Signs//city name 1
+button 350 155 4005 4007 1 0 49//check city 1
+dtext 390 155 1947 Remove Trammel Signs//city name 1
+
+[DIALOG d_gen_trammel BUTTON]
+ON=0 
+SDIALOG d_spawner
+//SOUND 85
+return 1
+ON=1 50
+IF (<ARGN>==1)
+SDIALOG d_spawner
+ARGS=85
+elseif (<ARGN>==2)
+ARGS=85
+elseif (<ARGN>==3)
+SERV.f_genbritain_t
+ARGS="The Britain decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==4)
+SERV.f_genminoc_t
+ARGS="The Minoc decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==5)
+SERV.f_genyew_t
+ARGS="The Yew decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==6)
+SERV.f_genvesper_t
+ARGS="The Vesper decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==7)
+SERV.f_gentrinsic_t
+ARGS="The Trinsic decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==8)
+SERV.f_genhaven_t
+SERV.f_genhavenadd_t
+ARGS="The Haven decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==9)
+SERV.f_genmagincia_t
+ARGS="The Magincia decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==10)
+SERV.f_genmoonglow_t
+ARGS="The Moonglow decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==11)
+SERV.f_genserpent_t
+ARGS="The Serpent's Hold decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==12)
+SERV.f_genjhelom_t
+ARGS="The Jhelom decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==13)
+SERV.f_genskara_t
+ARGS="The Skara Brae decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==14)
+SERV.f_genujelm_t
+ARGS="The Nujel'm decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==15)
+SERV.f_genbucs_t
+ARGS="The Buccaneer's Deen decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==16)
+SERV.f_gencove_t
+ARGS="The Cove decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==17)
+SERV.f_genheart_t
+ARGS="The Heartwood decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==18)
+SERV.f_genwind_t
+ARGS="The Wind decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==19)
+SERV.f_gendelucia_t
+ARGS="The Delucia decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==20)
+SERV.f_genpapua_t
+ARGS="The Papua decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==21)
+SERV.f_genblightedgrove_t
+ARGS="The Blighted Grove decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==22)
+ARGS="The Britain Sewers decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==23)
+SERV.f_gencovetous_t
+ARGS="The Covetous decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==24)
+SERV.f_gendeceit_t
+ARGS="The Deceit decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==25)
+SERV.f_gendespise_t
+ARGS="The Despise decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==26)
+SERV.f_gendestard_t
+ARGS="The Destard decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==27)
+SERV.f_genfire_t
+ARGS="The Fire Dungeon decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==28)
+SERV.f_genhythloth_t
+ARGS="The Hythloth decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==29)
+SERV.f_genice_t
+ARGS="The Ice Dungeon decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==30)
+SERV.f_genorcs_t
+ARGS="The Orcs Dungeon decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==31)
+SERV.f_genshame_t
+ARGS="The Shame decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==32)
+SERV.f_genparox_t
+ARGS="The Palace of Paroxysmus decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==33)
+SERV.f_genprism_t
+ARGS="The Prism of Light decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==34)
+SERV.f_gensanctuary_t
+ARGS="The Sanctuary decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==35)
+SERV.f_genpainted_t
+ARGS="The Painted Caves decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==36)
+SERV.f_gensolen_t
+ARGS="The Solen Hive decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==37)
+SERV.f_genmisc_t
+ARGS="The Star Room decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==38)
+SERV.f_genterathan_t
+ARGS="The Terathan's Keep decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==39)
+SERV.f_genwrong_t
+ARGS="The Wrong decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==40)
+SERV.f_genoldhaven_t
+SERV.f_genhavenadd_t
+ARGS="The Old Haven decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==41)
+ARGS="The Delucia Passage decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==42)
+SERV.f_genseamarket_t
+ARGS="The Sea Market decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==43)
+SERV.f_genhaven_t
+SERV.f_genhavenadd_t
+ARGS="The New Haven decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==44)
+SERV.f_genuzeeraan
+ARGS="The Uzeraan Turmoil Quest decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==45)
+SERV.f_genruinedmagincia_t
+ARGS="The Ruined Magincia decorated."
+sdialog d_gen_trammel
+elseif (<ARGN>==46)
+SERV.f_generatedoors_t
+ARGS="The Trammel Doors Generated."
+sdialog d_gen_trammel
+elseif (<ARGN>==47)
+rdoor
+ARGS="The Trammel Doors Removed."
+sdialog d_gen_trammel
+elseif (<ARGN>==48)
+SERV.f_generatesign_t
+ARGS="The Trammel Signs Generated."
+sdialog d_gen_trammel
+elseif (<ARGN>==49)
+rsign
+ARGS="The trammel Signs Removed."
+sdialog d_gen_trammel
+ENDIF
+IF !(<isempty <ARGS>>)
+ IF (<isnum <ARGS>>)
+  //SOUND <dARGS>
+ ELSE
+  SYSMESSAGE @06 <ARGS>
+ ENDIF
+ENDIF 
+//
+////////////////////////////////////////////genilshenar
+[DIALOG d_spawner_ilshenar]
+220,50
+//nomove
+resizepic 10 10 9200 350 150//fundo cinza
+resizepic 110 20 9200 140 20//Felluca
+dtext 160 20 044 Ilshenar//title
+button 20 20 4014 4016 1 0 1//Back
+button 155 130 249 248 1 0 2//Okay
+checkertrans 25 80 315 40//back 1
+button 25 80 210 211 1 0 3//check city 1
+dtext 50 80 1947 Gargoyle City//city name 1
+button 25 100 210 211 1 0 4//check city 1
+dtext 50 100 1947 LBR Ilshenar Castle//city name 1
+//
+[DIALOG d_spawner_ilshenar BUTTON]
+ONBUTTON=0
+//sound 85
+return 1
+//
+ONBUTTON=1
+//sound 85
+src.dialog d_spawner
+return 1
+//
+ONBUTTON=2
+//sound 85
+return 1
+//
+ONBUTTON=3
+GENGARGOYLECITY
+src.dialog d_spawner_ilshenar
+src.sysmessage @06 Gargoyle City decorated.
+return 1
+//
+ONBUTTON=4
+gengolem
+src.dialog d_spawner_ilshenar
+src.sysmessage @06 Lord Blackthorne Ilshenar Castle decorated.
+return 1
+
+////////////////////////////////////////////genfelucca
+[function genfelucca]
+genbritain
+genminoc
+genyew
+genvesper
+gentrinsic
+genocllo
+genmagincia
+genmoonglow
+genserpent
+genjhelom
+genskara
+genujelm
+genbucs
+gencove
+genheart
+genwind
+gendelucia
+genpapua
+genblightedgrove
+gencovetous
+gendeceit
+gendespise
+gendestard
+genfire
+genhythloth
+genice
+genorcs
+genshame
+genparox
+genprism
+gensanctuary
+genpainted
+gensolen
+genmisc
+genterathan
+genwrong
+genkhaldun
+genseamarket
+genruinedmagincia
+//////////////////////////////////////////// end of genfelucca
+//
+////////////////////////////////////////////gentrammel
+[function gentrammel]
+f_genbritain_t
+f_genminoc_t
+f_genyew_t
+f_genvesper_t
+f_gentrinsic_t
+f_genmagincia_t
+f_genmoonglow_t
+f_genserpent_t
+f_genjhelom_t
+f_genskara_t
+f_genujelm_t
+f_genbucs_t
+f_gencove_t
+f_genheart_t
+f_genwind_t
+f_gendelucia_t
+f_genpapua_t
+f_genblightedgrove_t
+f_gencovetous_t
+f_gendeceit_t
+f_gendespise_t
+f_gendestard_t
+f_genfire_t
+f_genhythloth_t
+f_genice_t
+f_genorcs_t
+f_genshame_t
+f_genparox_t
+f_genprism_t
+f_gensanctuary_t
+f_genpainted_t
+f_gensolen_t
+f_genterathan_t
+f_genwrong_t
+f_genseamarket_t
+f_genruinedmagincia_t
+
+////////////////////////////////////////////genilshenar
+[Function genilshenar]
+genwisp
+genvinculuminn
+gentwisted
+gensorceres
+genshrines
+gensavage
+genratfortress
+genmistas
+genmiscilshenar
+genmeercatacombs
+genlakeshire
+gengwenno
+//gengolem - AOS
+genexodus
+gencentral
+genblood
+//GENGARGOYLECITY - AOS
+enslavedgar
+gencamp2
+gencamp
+gentwinoaks
+terrotskitas
+gensheepfarm
+genserpentine
+genregvolom
+genratcave
+////////////////////////////////////////////end of genilshenar
+
+[EOF]
