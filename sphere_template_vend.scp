@@ -1,5 +1,5 @@
 //****************************************************************************
-// SPHERE by : Menasoft ©1997-2007
+// SPHERE by : Menasoft ï¿½1997-2007
 // www.sphereserver.net
 // All SPHERE script files and formats are copyright Menasoft & Partners.
 // This file may be freely edited for personal use, but may not be distributed
@@ -33,9 +33,7 @@ SELL=i_deed_thatched_roof_cottage,{2 6}
 SELL=i_deed_brick_house,{2 6}
 SELL=i_deed_two_story_wood_and_plaster_house,{2 6}
 SELL=i_deed_two_story_stone_and_plaster_house,{2 6}
-SELL=i_deed_tower,{2 6}
 SELL=i_deed_small_stone_keep,{2 6}
-SELL=i_deed_Castle,{2 6}
 SELL=i_deed_large_house_with_patio,{2 6}
 SELL=i_deed_marble_house_with_patio,{5 10}
 SELL=i_deed_small_stone_tower,{10 20}
@@ -46,37 +44,31 @@ SELL=i_deed_small_stone_workshop,{10 20}
 SELL=i_deed_small_marble_workshop,{10 20}
 SELL=i_deed_tower,{2 6}
 SELL=i_deed_Castle,{2 6}
-SELL=i_deed_evil_compound,{5 10}
-
-
 
 [TEMPLATE VENDOR_B_DEED_TEMPLATE]
 CATEGORY=Vendor Templates
 SUBSECTION=Buy Templates
 DESCRIPTION=Deed Vendor
-BUY=i_deed_stone_and_plaster_house,{2 6}
-BUY=i_deed_field_stone_house,{2 6}
-BUY=i_deed_small_brick_house,{2 6}
-BUY=i_deed_wooden_house,{2 6}
-BUY=i_deed_wood_and_plaster_house,{2 6}
-BUY=i_deed_thatched_roof_cottage,{2 6}
-BUY=i_deed_brick_house,{2 6}
-BUY=i_deed_two_story_wood_and_plaster_house,{2 6}
-BUY=i_deed_two_story_stone_and_plaster_house,{2 6}
-BUY=i_deed_tower,{2 6}
-BUY=i_deed_small_stone_keep,{2 6}
-BUY=i_deed_Castle,{2 6}
-BUY=i_deed_large_house_with_patio,{2 6}
-BUY=i_deed_marble_house_with_patio,{5 10}
-BUY=i_deed_small_stone_tower,{10 20}
-BUY=i_deed_two_story_log_cabin,{10 20}
-BUY=i_deed_sandstone_house_with_patio,{10 20}
-BUY=i_deed_two_story_villa,{10 20}
-BUY=i_deed_small_stone_workshop,{10 20}
-BUY=i_deed_small_marble_workshop,{10 20}
-BUY=i_deed_tower,{2 6}
-BUY=i_deed_Castle,{2 6}
-BUY=i_deed_evil_compound,{5 10}
+//BUY=i_deed_stone_and_plaster_house,{2 6}
+//BUY=i_deed_field_stone_house,{2 6}
+//BUY=i_deed_small_brick_house,{2 6}
+//BUY=i_deed_wooden_house,{2 6}
+//BUY=i_deed_wood_and_plaster_house,{2 6}
+//BUY=i_deed_thatched_roof_cottage,{2 6}
+//BUY=i_deed_brick_house,{2 6}
+//BUY=i_deed_two_story_wood_and_plaster_house,{2 6}
+//BUY=i_deed_two_story_stone_and_plaster_house,{2 6}
+//BUY=i_deed_small_stone_keep,{2 6}
+//BUY=i_deed_large_house_with_patio,{2 6}
+//BUY=i_deed_marble_house_with_patio,{5 10}
+//BUY=i_deed_small_stone_tower,{10 20}
+//BUY=i_deed_two_story_log_cabin,{10 20}
+//BUY=i_deed_sandstone_house_with_patio,{10 20}
+//BUY=i_deed_two_story_villa,{10 20}
+//BUY=i_deed_small_stone_workshop,{10 20}
+//BUY=i_deed_small_marble_workshop,{10 20}
+//BUY=i_deed_tower,{2 6}
+//BUY=i_deed_Castle,{2 6}
 
 [TEMPLATE VENDOR_S_BAKER_TEMPLATE]
 CATEGORY=Vendor Templates

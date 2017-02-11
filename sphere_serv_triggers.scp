@@ -74,6 +74,10 @@ return 0
 // RETURN
 //	  0 --> normal action (delete)
 //	  1 --> account not deleted
+SERV.LIST.<ARGS>_message.CLEAR
+SERV.LIST.<ARGS>_sender.CLEAR
+SERV.LIST.<ARGS>_time.CLEAR
+SERV.LIST.<ARGS>_friends.CLEAR
 
 
 [FUNCTION f_onaccount_pwchange]

@@ -1,0 +1,4024 @@
+// Enhanced Housing v2.4.3 Created by Mordaunt
+//		Quite possibly the most complex, featureful housing system ever devised (by the mind of a madman)
+//
+// Features:	No more keys to hand out everything runs off the house/guild rosta
+//		Support for the new "custom" built houses & foundations.
+//		Support for static buildings (Requires Crius' static housing script v2)
+//		Put house up for sale via sign, Ideal for static buildings.
+//		Castle/Keep owners can fill (some or all) of those obvious doorways with doors at their discretion.
+//		ALL characters on the Owner's account have full access & privs within the house with def.account_ownership.
+//
+// House Vendor Setup:	This should work with any vendor script, just ensure you set the defnames for vendor obodys adnd the deed.
+//			The house keeps a tally on the number of vendors in it's regions and prevents more vendors being deployed when limit is met.
+//			Dismissal and removal of vendors should be handled by your vendor script.
+//			Vendors can only be placed in public houses.
+//
+// Variable Property Tax: This will allow you to set regions to be cheaper/more expensive than the default, ideal for building player towns or charging for those high traffic zones like Britain.
+//			use this feature the def.maintenance_fee MUST be turned on.
+//			To set an area with a different rate simple go to that place and set region.tag.maintenance_override to the percentage figure you want.
+//			All houses placed in this area will be charge at that percent rather than the rate set in defs.
+//			Players can check a region's maintenance rate by using .rate
+//
+// Estate Tax:		This comes into effect when set to a number other than 0 (but lower than def.account_house_limit if set) and a player has MORE than this number of houses.
+//			def.estate_rate will be overridden by regional maintenance rates.
+//			Flate rate (def.estate_calc = 1) adds an extra def.estate_rate or regional maintenance rate to the cost to refresh a house when a player has more than <def.estate_tax> houses regardless of how many.
+//			Linear rate (def.estate_calc = 2) adds 1 def.estate_rate or regional maintenance rate for each house over <def.estate_tax> (gets more expensive with more houses)
+//
+// IMPORTANT: 	If account ownership is turned on a player can still loose their house if they delete the character who name appears as house owner.
+//		To retain the house the player should use another character on the account and use the transfer ownership option on that character 
+//		(you can use this to transfer the house around the chars in account) BEFORE they delete the named character.
+//
+// Statics:	Static houses may be turned into purchasable property with the use of Crius' static housing system.
+//		Regions must be set using the steps in that script, once complete the area will be given the housing sign from this script and the building MUST
+//		then be given a price via the sign by the person setting up the building.  Inactivity with static houses follows the same rule as the "decay" setting however once the timer expires
+//		the building will be automatically placed as "for sale" at the originally specified price.
+//
+// Cleanup: 	To clear the list of houses owned by an account when the account is deleted add:
+// 		serv.LIST.<ARGS>_houses.CLEAR to your sphere_serv_triggers.scp under [FUNCTION f_onaccount_delete] 
+//
+// New 2.4:	FIXED: Missing check which would prevent players from transfering a house when account_house_limit is set to 0
+// New 2.4.1:	ADDED: Dialog close on region exit
+// New 2.4.2:	FIXED: f_add_list ban error, reported by Shamino
+// New 2.4.3:	FIXED: Added code to prevent raising items into the sky/burying items into the ground, reported by Criminal
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[DEFNAME housing_control]
+//general settings
+account_ownership 	1 		// set to 1 to grant ANY char on house owners account full ownership privs, set to 0 for owner char only 
+account_house_limit 	0		// Number of houses allowed PER ACCOUNT, set to 0 to disable limits
+can_bank 		1 		// set to 1 to allow players to bank from home. (verbal command)(owner, co-owners & friends only)
+allow_custom 		1		// Allow players to convert to custom houses 0 to disable
+redeed_custom 		0 		// 1 allows redeed of custom multi, 0 disables (IF ACTIVE YOU MUST HAVE ALL CUSTOM FOUNDATION DEEDS SCRIPTED)
+wipe_switch_lists 	1 		// if set to 1 access/ban lists are wiped when house is switched between private/public (helps reduce server memory)
+allow_sign_color 	1		// Allow player to change the color of their house signs.
+secure_locks_limit 	1		// Lockdowns & Secures Zero to turn off limitations
+	
+//vendor settings
+vendor_control 		1 	// Maximum house vendors per house. Zero to turn off limitations
+house_list_vendors	0 	// set to 1 to allow players on house list to place vendors, 0 = owner only
+conservative_vendors	1 	// 0 = A vendor slot for co-owner and friend +2 extra, 1= half that amount (can be changed after initial set up but change will only affect new placed/moved houses)
+
+//Set these to the body types for vendors in your script
+vendor_deed_id		i_deed_vendor
+vendor_obody_male	c_vendor_player
+vendor_obody_female	c_vendor_player
+
+//Taxes & Fees 
+redeed_fee 		10	// Cost to redeed a house % of house value, zero disables.
+can_decay 		30 	// set to number of days for a house to decay, or set to 0 to disable
+property_tax		10	// Set to % figure of house value to pay for maintenance on houses, WORKS ONLY WHEN can_decay IS ON! zero disables.
+
+estate_tax 		2	// Extra charges for player with MORE than this many houses.  0 disables
+estate_rate 		10	// % per house over the estate_tax
+estate_calc 		1	// 1 = flat <def.estate_rate>% rate    2 = linear charge increase per house (1 over = + premium rate, 2 over = + premium rate*2, 3 over = + premium rate*3 e.t.c..) 
+
+buy_storage 		1 	// if set to 1 allows players to increase secure storage by up to 100% via house sign, 0 to disable
+buy_increased_list 	1	// if set to 1 players with houses with basic value over 100k can add extra friends/co-owners up to def limits
+xtra_friend_price	5000	// Price for extra Friend slots on house list
+xtra_co-owner_price 	7000 	// As above for co-owners
+
+//DO NOT ALTER THE FOLLOWING AFTER INITIAL SETUP!!! - - Doing so could cause problems when players go over these limits.
+max_friends 		20 	// DO NOT SET THIS ONE ABOVE 20 Dialog doesn't have extra pages for above that amount (actual number is set from building size)
+max_co_owners 		10 	// DO NOT SET THIS ONE ABOVE 10 Dialog is not set up for more than that amount (actual number is set from building size)
+max_container_items 	150 	// Maximum items per secure container. 
+min_secure 		4 	// Minimum secure containers will not be lower than this number (affects only small houses & foundations)
+min_lockdowns 		100 	// Minimum lockdowns will not be lower than this number (affects only small houses & foundations)
+max_secure 		100 	// Cap for secure containers, actual number is set from building size, but will not exceed this number
+max_lockdowns 		500 	// As above
+
+//Available sign colors - Test colors only, set to suit your hues and tastes.
+sign_color_1 06d6
+sign_color_2 07ad
+sign_color_3 0641
+sign_color_4 0975
+sign_color_5 07a1
+sign_color_6 0770
+sign_color_7 079c
+sign_color_8 0455
+sign_color_9 0796
+sign_color_10 0665
+sign_color_11 07d1
+sign_color_12 0400
+sign_color_13 0750
+sign_color_14 0515
+sign_color_15 04de
+sign_color_16 0538
+sign_color_17 079b
+sign_color_18 04ab
+sign_color_19 04a9
+sign_color_20 04aa
+sign_color_21 0157
+sign_color_22 0676
+sign_color_23 0157
+sign_color_24 0235
+sign_color_25 06c0
+sign_color_26 04ac
+sign_color_27 0473
+sign_color_28 02e9
+sign_color_29 04a8
+sign_color_30 0490
+
+//-------------------------------------------------------------------------end of defname settings----------------------------------------------------------------//
+
+[PLEVEL 1]
+rate
+
+[ITEMDEF 0bd1] 
+//brass sign 
+DEFNAME=i_sign_brass 
+TYPE=t_script 
+CAN=can_i_dcignorelos
+CATEGORY=Decoration - Signs 
+SUBSECTION=Blank 
+DESCRIPTION=Brass Blank 
+DUPELIST=0bd2 
+
+ON=@Create
+attr=012
+timerf 1, f_initialise
+
+ON=@Click
+	if !<link.region.tag0.forsale>
+		if <tag0.is_guild>
+			message <name>
+			message [<uid.<tag0.is_guild>.abbrev>]
+			return 1
+		else
+			return 0
+		endif
+	else
+		message For Sale
+		message <link.dtag0.price> gp
+		return 1
+	endif	
+
+
+ON=@ClientToolTip
+if (<link>==04fffffff)
+	return 0
+endif
+link.regionchk
+if <ref1.tag0.demolition>
+	src.addcliloc 1070722, Demolition Scheduled in <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+elif <link.region.tag0.forsale>
+	src.addcliloc 1070722, FOR SALE <link.dtag0.price>gp
+endif
+src.addcliloc 1061639,<name>
+src.addcliloc 1061640,<uid.<more1>.name>
+if <tag0.is_guild>
+	src.addcliloc 1042971,[<uid.<tag0.is_guild>.abbrev>] Guild House
+endif
+src.addcliloc <QVAL (<link.tag0.private>)? 1061642:1061641>
+return 1
+
+ON=@DClick
+if (<link>!=04fffffff)
+	if !(<def.can_decay>)
+		if (<attr>&02)
+			attr &~ 02
+		endif
+	else
+		if !(<attr>&02)
+			attr |= 02
+		endif
+	endif
+endif
+
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.isgm>)
+		if !(<more1>) || !(<region.tag0.sign>)
+			f_initialise
+			return 1
+		endif
+	endif
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.is_friend>) || (<src.isgm>)
+		if (<src.region.uid>==<link>)
+			dialog d_house_menu 
+			return 1		
+		else
+			src.sysmessage @32,,1 You must be standing on your doorstep to access the house menu.
+			return 1
+		endif
+	else
+		if !<link.region.tag0.forsale>
+			dialog d_house_visitor
+			return 1
+		else
+			dialog d_house_forsale
+			return 1
+		endif
+	endif
+
+ON=@Timer
+ref2=<link.more1>
+if (<def.can_decay>)
+	if !(<link.region.tag0.noredeed>)
+		attr 012
+		if <ref2.isonline>
+			ref2.sysmessage @,,1 Your <link.name> in <region.region.name> has collapsed
+		endif
+		if <serv.list.<ref2.account>_houses.count> 
+			if (<serv.list.<ref2.account>_houses.count> < 2)
+				serv.list.<ref2.account>_houses.clear
+			else	
+				serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <link>>.remove
+			endif
+		endif
+		ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+		serv.list.house_<link>_coowners.clear
+		serv.list.house_<link>_friends.clear
+		serv.list.house_<link>_access.clear
+		serv.list.house_<link>_bans.clear
+		link.f_empty
+		link.remove
+	else
+		attr 04010
+		timer= -1
+		link.tag0.price=<link.tag0.value>
+		link.region.tag0.forsale=1
+		tag0.boughtstorage=
+		tag0.xtrastorage=
+		local.multi=<link.multiregion>
+		call co_f_calc <local.multi>
+		link.f_empty
+		link.f_open_house
+		ref2=<link.more1>
+		if <ref2.isonline> && !<ref2.isgm>
+			ref2.sysmessage @,,1 Your <link.name> in <region.region.name> has been repossessed
+		endif
+		if <serv.list.<ref2.account>_houses.count> 
+			if (<serv.list.<ref2.account>_houses.count> < 2)
+				serv.list.<ref2.account>_houses.clear
+			else	
+				serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <link>>.remove
+			endif
+		endif
+		ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+		serv.list.house_<link>_coowners.clear
+		serv.list.house_<link>_friends.clear
+		serv.list.house_<link>_access.clear
+		serv.list.house_<link>_bans.clear
+		link.tag0.private=
+		newitem=i_realtor
+		new.p=<p>
+		more1=<new.uid>
+		link.more1=<new.uid>
+		resendtooltip
+		return 1
+	endif	
+else
+	return 1
+endif
+
+[ITEMDEF i_realtor]
+NAME=Britannic Realtors
+ID=022c4
+TYPE=t_script
+
+ON=@Create
+attr=attr_invis|attr_can_decay|attr_move_never
+color=03d6
+
+
+[FUNCTION f_initialise]
+if !(<link>==04fffffff)
+	if !<more1>
+		attr=02|010
+		more1=<link.more1>
+		local.multi=<link.multiregion>
+		call co_f_calc <local.multi>
+		call lockdown_calc <local.multi>
+		tag.Oname=<link.name>
+		name=<link.name>
+		link.tag0.private=1
+		if (<def0.m_tower>&09c000000)
+			if (<link.baseid>==m_castle)
+				tag.doors=48
+				tag.dused=4
+			elif (<link.baseid>==m_small_stone_keep)
+				tag.doors=22
+				tag.dused=2
+			endif
+		else
+			if (<link.baseid>==i_multi_castle)
+				tag.doors=48
+				tag.dused=4
+			elif (<link.baseid>==i_multi_keep)
+				tag.doors=22
+				tag.dused=2
+			endif		
+		endif
+		if !(<link.value>)
+			attr 04010
+			link.region.tag0.noredeed=1
+			local.topx=<strarg <link.multiregion>> 
+			local.topy=<strarg <streat <link.multiregion>>>
+			local.bottomx= <strarg <streat <streat <link.multiregion>>>> 
+			local.bottomy= <strarg <streat <streat <streat <link.multiregion>>>>>
+			local.x <eval (<local.bottomx>-<local.topx>)+1> 
+			local.y <eval <local.bottomy>-<local.topy>>
+			local.xy <dlocal.x>x<dlocal.y>
+			link.tag0.footprint=<local.xy>
+		endif
+		ref1=<link>
+		ref1.region.events +r_houses
+		ref1.region.tag0.sign=<uid>
+		ref1.f_door_setup
+		ref1=<region.tag0.sign>
+		ref1.attr=012
+		if <def.can_decay>
+			attr=02|010
+			timer=60*60*24*<def.can_decay>	
+		else
+			timer =-1
+			attr=010
+		endif
+		ref3=<ref1.link.more1>
+		if (<ref3.account.plevel> > 4) && (<ref1.region.tag0.noredeed>) 
+			timer=-1
+		endif
+		ref2=<link.more1>
+		ref4 <link>
+		call f_remove_keys <ref4>
+		if !(<ref2.isgm>)
+			ref1=<region.tag0.sign>
+			if !(<ref1.region.tag0.convert>)
+				ref2=<link.more1>
+				if <serv.list.<ref2.account>_houses.count>  //list switch
+					if <def.account_house_limit>
+						if (<serv.list.<ref2.account>_houses.count> < <ddef.account_house_limit>)
+							serv.list.<ref2.account>_houses.add <link>
+							ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+						else
+							ref1=<region.tag0.sign>
+							local.src=<ref1.link.more1>
+							if (<def0.m_tower>&09c000000)
+								serv.newitem i_deed_<STRSUB 2 50 <ref1.link.baseid>>
+							else
+								serv.newitem i_deed_<STRSUB 8 50 <ref1.link.baseid>>
+							endif
+							new.cont=<local.src>
+							ref1.link.remove
+							ref2=<local.src>
+							ref2.sysmessage @,,1 House redeeded, You already own the maximum number of houses permitable
+						endif
+					else
+						serv.list.<ref2.account>_houses.add <link>
+						ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+					endif
+				else
+					serv.list.<ref2.account>_houses.add <link>
+					ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+				endif
+			endif
+		else
+			ref2=<link.more1>
+			serv.list.<ref2.account>_houses.add <link>
+			ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+		endif
+		resendtooltip
+	endif
+endif
+
+[FUNCTION render_list]
+ref1=<region.tag0.sign>
+local.list = <args>
+dtext 125 130 90 <local.list> List
+if ((strmatch(*ban*,<local.list>) || (strmatch(*access*,<local.list>))
+	dtext 230 140 90 <serv.list.house_<ref1.link>_<local.list>.count> / 10
+else
+	dtext 230 140 90 <serv.list.house_<ref1.link>_<local.list>.count> / <dtag0.max_<local.list>s>
+endif
+if (strmatch(*ban*,<local.list>)
+	local.fontcolor = 32
+elif (strmatch(*access*,<local.list>)
+	local.fontcolor =  367
+else
+	local.fontcolor = 90
+endif
+local.y=170
+if <serv.list.house_<ref1.link>_<local.list>.count>
+for  0 <eval <serv.list.house_<ref1.link>_<local.list>.count>-1>
+	if (<local._for> < 11)	
+		local.txt = 57
+		local.btn = 7
+	else
+		local.txt = 250
+		local.btn = 200
+	endif
+	if (<local._for>==11)
+		local.y=170
+	endif
+	if (<src.is_<local.list>>) && ((strmatch(*coowner*,<local.list>) || (strmatch(*friend*,<local.list>))
+		if (<serv.list.house_<ref1.link>_<local.list>.<local._for>>==<src.uid>)
+			dtext 57 <local.y> <local.fontcolor> <uid.<serv.list.house_<ref1.link>_<local.list>.<local._for>>.name>
+			button 7 <local.y> 4017 4018 1 0 <eval (100+<local._for>)>
+		else
+			dtext 57 <local.y> <local.fontcolor> <uid.<serv.list.house_<ref1.link>_<local.list>.<local._for>>.name>
+		endif
+	elif <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || ((<src.is_coowner> && ((strmatch(*friend*,<local.list>) || (strmatch(*access*,<local.list>) ||(strmatch(*ban*,<local.list>)))
+		dtext 57 <local.y> <local.fontcolor> <uid.<serv.list.house_<ref1.link>_<local.list>.<local._for>>.name>
+		button 7 <local.y> 4017 4018 1 0 <eval (100+<local._for>)>
+	endif	
+local.y += 20
+endfor
+endif
+
+[function render_signs]
+local.y=157
+local.btn1 = 7
+local.btn2 = 37
+local.sign=2979
+buttontileart 7 132 07588 07588  1 0 2965 2965 0 -10 -5
+buttontileart 37 132 07588 07588 1 0 2966 2966 0 -10 -5
+for 1 112
+	if (<local.y> > 360)
+		local.y=132
+		local.btn1 += 60
+		local.btn2 += 60
+	endif
+	buttontileart <local.btn1> <local.y> 07588 07588 1 0 <local.sign> <local.sign> 0 -10 -5
+	local.sign +=1
+	buttontileart <local.btn2> <local.y> 07588 07588 1 0 <local.sign> <local.sign> 0 -10 -5
+	local.sign +=1
+	local._for +=1
+	local.y += 25
+	if (<dlocal.sign> == 3087)
+		local.sign = 3139
+	elif (<dlocal.sign> > 3140)
+		return 
+	endif
+endfor
+
+[REGIONTYPE r_houses]
+ON=@Enter
+if <src.isplayer>
+	src.events +e_house_player_events
+	//I.timerf 1,regionchk
+	src.timerf 1, visitor_count
+	ref2 <src>
+	ref1=<tag0.sign>
+	if !<src.isgm>
+		if <ref1.link.dtag0.private>==1
+			if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>) || (<src.is_friend <ref1>>) || (<src.is_access <ref1>>) 
+				return 0
+			elif (<ref1.tag0.is_guild>)
+				if (<src.guild>==<ref1.tag0.is_guild>)
+					return 0
+				else
+					src.sysmessage @32,,1 You are not a member of this guild
+					return 1
+				endif
+			else
+				src.sysmessage @32,,1 This is private property.
+				src.sysmessage @32,,1 You may not trespass.
+				return 1
+			endif
+		else
+			if <src.is_ban <ref1>>
+				src.sysmessage @32,,1 You are banned from this property
+				return 1
+			else
+				return 0
+			endif
+		endif
+	endif
+endif
+
+ON=@Exit	
+	src.dialogclose d_house_menu 
+	src.events -e_house_player_events	
+
+//Begin main menu		
+[DIALOG d_house_menu]
+100,100
+page 0
+ref1=<src.region.tag0.sign>
+tag0.inclocks=<eval ((<tag.maxlockdowns>*10)*<tag0.xtrastorage>)/1000>
+tag0.incconts=<eval ((<tag.maxsecure>*10)*<tag0.xtrastorage>)/1000>
+resizepic 0 0 2620 400 118  						//top box
+checkertrans 5 5 390 108    						//top box
+resizepic 0 123 2620 400 267						//middle box
+checkertrans 5 128 390 257						//middle box		
+resizepic 0 395 2620 400 60						//bottom box						
+checkertrans 5 400 390 50						//bottom box
+gumppic 7 8 100								//brass sign gump
+dhtmlgump 25 30 100 60 0 0 <def.center><name><def.centere>   		
+button 150 8 4005 4007 0 1 1
+dtext 200 8 90 Information
+button 150 28 4005 4007 0 2 2
+dtext 200 28 90 Security
+button 150 48 4005 4007 0 3 3
+dtext 200 48 90 Storage
+button 150 68 4005 4007 0 4 4
+dtext 200 68 90 Customize
+button 150 88 4005 4007 0 5 5
+dtext 200 88 90 Ownership
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	button 7 405 4005 4007 1 0 <QVAL (<link.tag0.private>)? 14:15>
+	dtext 57 405 <QVAL (<link.tag0.private>)? 367 Grant Access:32 Ban Person>
+	button 7 425 4005 4007 1 9 <QVAL (<link.tag0.private>)? 12:13>
+	dtext 57 425 <QVAL (<link.tag0.private>)? 32 Revoke Access:367 Unban Person>
+else
+	dtext 57 405 992 <QVAL (<link.tag0.private>)? Grant Access:Ban Person>
+	dtext 57 425 992 <QVAL (<link.tag0.private>)? Revoke Access:Unban Person>
+endif
+button 200 415 4005 4007 1 0 29
+dtext 250 415 1509 Eject Person
+
+page 1
+dtext 57 140 90 Owner:
+dtext 150 140 90 <uid.<link.more1>.name> 
+if (<tag0.is_guild>)
+	dtext 20 170 90 This house is designated as the [<uid.<tag0.is_guild>.abbrev>] guild house
+endif
+dtext 20 190 90 This house is <QVAL (<link.tag0.private>)? private property:public>
+dtext 20 210 90 This house is of <QVAL (<link.type>==t_multi_custom)? custom:prebuilt> design
+dtext 20 230 <QVAL (<tag0.demolition>)? 32 This house is improperly placed:90 This house is properly placed>
+if <ref1.region.tag0.forsale>
+	dtext 20 250 90 This house is currently for sale for <link.dtag0.price> gp
+endif
+local.value=<eval <ref1.link.tag0.value>+<ref1.link.value>+<ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+if <def.can_decay> && <def.property_tax>
+	if <region.region.tag0.maintenance_override>
+		local.maint=<MULDIV <dlocal.value>,<region.region.dtag0.maintenance_override>,100>
+	else
+		local.maint=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+	endif
+endif
+if <def.can_decay>
+	if (<ref1.dtag0.decay_exempt>==1)
+		dtext 20 270 90 This house has been made exempt from decay
+	else
+		if !<def.property_tax>
+			if (<link.region.tag0.noredeed>)
+				dtext 20 270 90 This house repossessed in <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+			else
+
+				dtext 20 270 90 This house <QVAL (<tag0.demolition>)? will be demolished:will decay> in <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+			endif
+		else
+			dtext 20 270 90 Propery Tax covered for <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+			dtext 20 310 90 Property Tax for this house <dlocal.maint>gp every <ddef.can_decay> days
+		endif
+	endif
+else
+	dtext 20 270 90 This house is currently set to auto refresh
+endif
+dtext 20 290 90 House Value
+
+dtext 150 290 90 <dlocal.value> gp
+dtext 20 350 90 Number of visits this house has had:
+dtext 300 350 90 <eval <more2>>
+
+page 2
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.isgm>)
+	button 7 140 4005 4007 1 7 9
+	dtext 57 140 90 House Co-Owners
+	button 7 160 4005 4007 1 0 17
+	dtext 57 160 90 Add a Co-Owner
+	button 7 180 4005 4007 1 0 18
+	dtext 57 180 90 Clear Co-Owner List
+else
+	dtext 57 160 992 Add a Co-Owner
+	if (<src.is_coowner>)
+		button 7 140 4005 4007 1 7 9
+	endif
+	dtext 57 140 <QVAL (<src.is_coowner>)? 90:992> House Co-Owners
+	dtext 57 180 992 Clear Co-Owner List
+endif
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	button 7 240 4005 4007 1 8 11
+	dtext 57 240 90 House Friends 
+	button 7 260 4005 4007 1 0 19
+	dtext 57 260 90 Add a Friend 
+	button 7 280 4005 4007 1 0 20
+	dtext 57 280 90 Clear Friends List
+else
+	dtext 57 260 992 Add a Friend 
+	if (<src.is_friend>)
+		dtext 57 140 90 House Co-Owners
+		button 7 140 4005 4007 1 7 9
+		button 7 240 4005 4007 1 8 11
+	endif
+	dtext 57 240 <QVAL (<src.is_friend>)? 90:992> House Friends 
+	dtext 57 280 992 Clear Friends List
+endif
+if <link.tag0.private>
+	button 7 340 4005 4007 1 6 12
+	dtext 57 340 90 View Access List
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+		button 7 360 4005 4007 1 0 21
+		dtext 57 360 90 Clear Access List
+	else	
+		dtext 57 360 992 Clear Access List
+	endif
+else
+	button 7 340 4005 4007 1 6 13
+	dtext 57 340 90 View Ban List
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+		button 7 360 4005 4007 1 0 22
+		dtext 57 360 90 Clear Ban List
+	else
+		dtext 57 360 992 Clear Ban List
+	endif
+endif
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.isgm>)
+	dtext 250 190 90 <QVAL (<tag0.is_guild>)? Remove Guild Declaration:Declare Guildhouse>
+	button 200 190 4005 4007 1 0 50
+	button 200 250 4005 4007 1 0 23
+	button 200 220 4005 4007 1 2 26
+	dtext 250 220 90 Recode Doors
+	dtext 250 250 90 Change to <QVAL (<link.tag0.private>)? Public:Private>
+	if <def.wipe_switch_lists>
+		dhtmlgump 230 280 150 60 0 0 <def.small><def.bfont_white>(Will also clear <QVAL (<link.tag0.private>)? access:ban> list, not needed in <QVAL (<link.tag0.private>)? private:public> config)<def.smalle>
+	endif
+else
+	dtext 250 190 992 <QVAL (<tag0.is_guild>)? Remove Guild Declaration:Declare Guildhouse>
+	dtext 250 220 992 Recode Doors
+	dtext 250 250 992 Change to <QVAL (<link.tag0.private>)? Public:Private>
+endif
+
+page 3
+if <def.buy_storage> && <def.secure_locks_limit>
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>)
+		dtext 20 150 90 Increased Storage
+		dtext 200 150 90 <dtag0.xtrastorage>%
+		button 240 150 4005 4007 0 11 35
+		dtext 280 150 90 Buy Storage
+	else
+		dtext 20 150 992 Increased Storage
+		dtext 200 150 992 <dtag0.xtrastorage>%
+		dtext 280 150 992 Buy Storage
+	endif
+endif
+dtext 20 180 90 Maximum Secure Containers
+dtext 200 180 90 <QVAL (<def.secure_locks_limit>)? <eval (<tag0.maxsecure>+<tag0.incconts>)>:Unlimited>
+dtext 20 200 90 Available Secured Containers
+dtext 200 200 90 <QVAL (<def.secure_locks_limit>)? <eval ((<tag0.maxsecure>+<tag0.incconts>)-<tag0.secure>)>:Unlimited>
+dtext 20 230 90 Maximum Secure Storage
+dtext 200 230 90 <QVAL (<def.secure_locks_limit>)? <eval (<tag0.maxsecure>+<tag0.incconts>)*<ddef.max_container_items>>:Unlimited>
+dtext 20 250 90 Available Secure Storage
+dtext 200 250 90 <QVAL (<def.secure_locks_limit>)? <eval (((<tag0.maxsecure>+<tag0.incconts>)*<ddef.max_container_items>)-<tag0.storage>)>:Unlimited>
+dtext 20 280 90 Maximum Lockdowns
+dtext 200 280 90 <QVAL (<def.secure_locks_limit>)? <eval (<tag0.maxlockdowns>+<tag0.inclocks>)>:Unlimited>
+dtext 20 300 90 Available Lockdowns
+dtext 200 300 90 <QVAL (<def.secure_locks_limit>)? <eval ((<tag0.maxlockdowns>+<tag0.inclocks>)-<tag0.locked>)>:Unlimited>
+dtext 20 320 90 Vendors
+dtext 20 320 90 Vendors
+dtext 200 320 90 <QVAL (<def.vendor_control>)? <dtag0.vendors>/<dtag0.max_vendors>:<dtag0.vendors>/Unlimited>
+
+
+page 4
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.isgm>)
+	if (<link.type>==t_multi_custom)
+		dtext 57 140 90 Convert into customizable house
+		button 7 160 4005 4007 1 0 35
+		dtext 57 160 90 Customize this house
+	else
+		if (<link.baseid>==<QVAL (<def0.m_tower>&09c000000)? m_small_stone_keep:i_multi_keep>) || (<link.baseid>==<QVAL (<def0.m_tower>&09c000000)? m_castle:i_multi_castle>) || (<link.region.tag0.noredeed>)
+			dtext 57 140 992 Convert into customizable house
+			dtext 57 160 992 Customize this house
+		else
+			if <def.allow_custom>
+				button 7 140 4005 4007 1 0 53
+				dtext 57 140 90 Convert into customizable house
+			else
+				dtext 57 140 992 Convert into customizable house
+			endif
+			dtext 57 160 992 Customize this house	
+		endif
+	endif
+	button 7 200 4005 4007 1 0 24
+	dtext 57 200 90 Rename this house
+	button 7 220 4005 4007 0 14 25
+	dtext 57 220 90 Change house sign
+	if (<link.type>==t_multi_custom) || (<link.region.tag0.noredeed>==2)
+		button 7 240 4005 4007 0 12 37
+	endif
+	if (<link.type>==t_multi_custom)
+		button 7 260 4005 4007 1 0 36
+	endif
+	dtext 57 240 <QVAL (<link.type>==t_multi_custom) || (<link.region.tag0.noredeed>==2)? 90 Change house sign hanger:992 Change house sign hanger>
+	dtext 57 260 <QVAL (<link.type>==t_multi_custom)? 90 Change sign post:992 Change sign post>
+	if (<link.region.tag0.noredeed>)
+		button 7 280 4005 4007 1 0 58
+		dtext 57 280 90 Flip house sign
+		if (<link.region.tag0.noredeed>==1)	
+			button 7 300 4005 4007 1 0 59
+			dtext 57 300 90 Create house sign hanger
+		elif (<link.region.tag0.noredeed>==2)
+			button 7 300 4005 4007 1 0 59
+			dtext 57 300 90 Remove house sign hanger
+		endif	
+	else
+		dtext 57 280 992 Flip house sign
+		dtext 57 300 992 Create house sign hanger
+	endif
+	if (<link.baseid>==<QVAL (<def0.m_tower>&09c000000)? m_small_stone_keep:i_multi_keep>) || (<link.baseid>==<QVAL (<def0.m_tower>&09c000000)? m_castle:i_multi_castle>)
+		button 7 320 4005 4007 1 0 52
+		dtext 57 320 90 Place/Remove Door(s) (<eval <tag.doors>-<tag.dused>> available)
+	else
+		dtext 57 320 992 Place/Remove Door(s)  
+	endif
+else
+	dtext 57 140 992 Convert into customizable house
+	dtext 57 160 992 Customize this house
+	dtext 57 200 992 Rename this house
+	dtext 57 220 992 Change house sign
+	dtext 57 240 992 Change house sign hanger
+	dtext 57 260 992 Change sign post
+	dtext 57 280 992 Flip house sign
+	dtext 57 300 992 Create house sign hanger
+	dtext 57 320 992 Place Door(s)
+endif
+if (<def.buy_increased_list>)
+	if (<link.value> > 100000) || (<link.tag0.value> > 100000)
+		dtext 57 340 90 Add Co-Owner/Friend slots
+		button 7 340 4005 4007 0 13 74
+	else
+		dtext 57 340 992 Add Co-Owner/Friend slots
+	endif
+endif
+dtext 57 360 90 Placed trashcan? (<QVAL <tag0.trashcan>? Yes:No>)
+
+page 5
+if <def.can_decay> && <def.property_tax>
+	if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>)
+		button 7 140 4005 4007 0 16 84
+		dtext 57 140 90 Pay Property Tax
+	endif
+endif
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.isgm>)
+	button 7 160 4005 4007 1 0 27
+	dtext 57 160 90 Transfer Ownership of this house
+	button 7 180 4005 4007 0 10 30
+	dtext 57 180 90 <QVAL (<link.region.tag0.forsale>)? Take this house off the market:Put this house up for sale>
+	if !<ref1.region.tag0.noredeed>
+		button 7 200 4005 4007 1 0 28
+	endif
+	dtext 57 200 <QVAL (<link.region.tag0.noredeed>)? 992 Demolish this house:90 Demolish this house>
+else
+	dtext 57 160 992 Transfer Ownership of this house
+	dtext 57 180 992 Put this house up for sale
+	dtext 57 200 992 Demolish this house
+endif
+if (<src.isgm>)
+	dtext 140 240 90 Administrative Options
+	button 7 270 4005 4007 1 0 <QVAL <eval <ref1.tag0.decay_exempt>==1>? 88:87>
+	dtext 57 270 90 <QVAL <eval <ref1.tag0.decay_exempt>==1>? Allow decay on this property:Make this property exempt from decay>
+	if (<link.region.tag0.noredeed>)
+		dtext 57 300 90 Footprint	
+		dtext 200 300 90 <link.tag0.footprint>
+		button 7 320 4005 4007 1 0 55
+		dtext 57 320 90 Set property value & place on market
+	else
+		if !(<tag0.demolition>)
+			dtext 100 300 90 Schedule this property for demolition
+			dtext 40 320 90 Number of days until demolition (between 7 & 30)
+			gumppic 210 350 2444
+			dtextentrylimited 220 350 40 20 90 1 2
+			dtext 290 350 90 days
+		endif
+		dtext 57 350 90 <QVAL (<tag0.demolition>)? Cancel scheduled demolition:Demolish this propery in> 
+		button 7 350 4023 4025 1 0 75
+	endif
+endif
+
+page 6
+ref1=<region.tag0.sign>
+if (<link.tag0.private>)
+ 	render_list Access
+else
+	render_list Ban
+endif
+
+page 7
+render_list Coowner
+
+
+page 8
+render_list Friend
+
+
+page 9
+ref1=<region.tag0.sign>
+if (<link.tag0.private>)
+ 	render_list Access
+else
+	render_list Ban
+endif
+
+
+page 10
+dtext 150 130 90 Sell This House
+if !<link.region.tag0.forsale>
+	gumppic 130 170 2501
+	dtextentrylimited 135 170 100 20 90 0 10
+	dhtmlgump 40 230 300 200 0 0 <def.bfont_white>Please ensure that your house is empty before you put it on the market.  All lists will be wiped and all doors will be unlocked.  Your house will be open to viewing, however you will retain control over it, until it is bought.<def.bfonte>
+else
+	dtext 160 250 90 <link.dtag0.price> gp
+endif	
+dtext <QVAL (<link.region.tag0.forsale>)? 80 200 90 This house is currently for sale for:130 200 90 Enter your asking price>
+button <QVAL (<link.region.tag0.forsale>)? 180 340 4023 4025 1 0 30:70 340 4023 4025 1 0 30>
+dtext <QVAL (<link.region.tag0.forsale>)? 100 310 90 Take my house off the market:120 340 90 Put this house on the market>
+
+page 11
+dtext 150 130 90 Increase Storage
+dhtmlgump 40 150 300 120 0 0 <def.bfont_white>You may buy up to a 100% increase in storage space. The value listed for this property will be adjusted to reflect your investment.  The price for a 100% upgrade should not cost more than 50% of the property price, however you buy it.<def.bfonte>
+dhtmlgump 40 260 300 120 0 0 <def.bfont_white>The value of purchased storage will be refunded to your bankbox upon redeeding.<def.bfonte>
+if !<tag0.xtrastorage>
+	button 7 360 4023 4025 1 0 34
+	dtext 57 360 90 Add 100% for: <QVAL (<link.value>)? <eval <link.value>/2>:<eval <link.tag0.value>/2>> gp
+else
+	dtext 57 360 992 Add 100% 
+endif
+if (<eval <tag0.xtrastorage>> < 26)
+	button 7 340 4023 4025 1 0 33
+	dtext 57 340 90 Add 75% for: <QVAL (<link.value>)? <eval ((<link.value>/8)*3)>:<eval ((<link.tag0.value>/8)*3)>> gp
+else
+	dtext 57 340 992 Add 75% 
+endif
+if (<eval <tag0.xtrastorage>> < 51)
+	button 7 320 4023 4025 1 0 32
+	dtext 57 320 90 Add 50% for: <QVAL (<link.value>)? <eval <link.value>/4>:<eval <link.tag0.value>/4>> gp
+else
+	dtext 57 320 992 Add 50% 
+endif
+if (<eval <tag0.xtrastorage>> < 76)	
+	button 7 300 4023 4025 1 0 31
+	dtext 57 300 90 Add 25% for: <QVAL (<link.value>)? <eval (<link.value>/8)>:<eval (<link.tag0.value>/8)>> gp
+else
+	dtext 57 300 992 Add 25% 
+endif
+
+page 12
+local.number <uid.<src.region.tag0.sign>.dispid>
+if (<eval <fval <local.number>/2>*2>==<local.number>)
+	button 30 180 4005 4007 1 0 12968
+	tilepic 70 180 2968
+	button 150 180 4005 4007 1 0 12970
+	tilepic 190 180 2970
+	button 280 180 4005 4007 1 0 12972
+	tilepic 320 180 2972
+	button 30 280 4005 4007 1 0 12974
+	tilepic 70 280 2974
+	button 150 280 4005 4007 1 0 12976
+	tilepic 190 280 2976
+	button 280 280 4005 4007 1 0 12978
+	tilepic 320 280 2978
+else
+	button 30 180 4005 4007 1 0 12967
+	tilepic 70 180 2967
+	button 150 180 4005 4007 1 0 12969
+	tilepic 190 180 2969
+	button 280 180 4005 4007 1 0 12971
+	tilepic 320 180 2971
+	button 30 280 4005 4007 1 0 12973
+	tilepic 70 280 2973
+	button 150 280 4005 4007 1 0 12975
+	tilepic 190 280 2975
+	button 280 280 4005 4007 1 0 12977
+	tilepic 320 280 2977
+endif
+
+page 13
+dtext 150 130 90 Increase House Lists
+dtext 57 150 90 Add Friend Slot(s)
+dtext 80 170 90 <ddef.xtra_friend_price>gp each
+dtext 200 150 90 Add Co-Owner Slots(s)
+dtext 257 170 90 <ddef.xtra_co-owner_price>gp each
+if (<dtag0.max_friends> < <def.max_friends>)
+	button 7 220 4005 4007 1 0 76 //1
+	dtext 57 220 90 Add 1 for <ddef.xtra_friend_price>gp
+else
+	dtext 57 220 992 Add 1
+endif
+if (<dtag0.max_friends> <= <eval <def.max_friends>-2>)
+	button 7 240 4005 4007 1 0 77 //2
+	dtext 57 240 90 Add 2 for <eval <ddef.xtra_friend_price>*2>gp
+else
+	dtext 57 240 992 Add 2 
+endif
+if (<dtag0.max_friends> <= <eval <def.max_friends>-5>)
+	button 7 260 4005 4007 1 0 78 //5
+	dtext 57 260 90 Add 5 for <eval <ddef.xtra_friend_price>*5>gp
+else
+	dtext 57 260 992 Add 5 
+endif
+if (<dtag0.max_friends> <= <eval <def.max_friends>-10>)
+	button 7 280 4005 4007 1 0 79 //10
+	dtext 57 280 90 Add 10 for <eval <ddef.xtra_friend_price>*10>gp
+else
+	dtext 57 280 992 Add 10 
+endif
+if (<dtag0.max_coowners> < <def.max_co_owners>)
+	button 207 220 4005 4007 1 0 80 //1
+	dtext 257 220 90 Add 1 for <ddef.xtra_co-owner_price>gp
+else
+	dtext 257 220 992 Add 1 
+endif
+if (<dtag0.max_coowners> <= <eval <def.max_co_owners>-2>)
+	button 207 240 4005 4007 1 0 81 //2
+	dtext 257 240 90 Add 2 for <eval <ddef.xtra_co-owner_price>*2>gp
+else
+	dtext 257 240 992 Add 2 
+endif
+if (<dtag0.max_coowners> <= <eval <def.max_co_owners>-5>)
+	button 207 260 4005 4007 1 0 82 //5
+	dtext 257 260 90 Add 5 for <eval <ddef.xtra_co-owner_price>*5>gp
+else
+	dtext 257 260 992 Add 5 	
+endif
+dtext 57 320 90 <eval <def.max_friends>-<dtag0.max_friends>> Available
+dtext 257 320 90 <eval <def.max_co_owners>-<dtag0.max_coowners>> Available
+
+page 14
+//sign change
+render_signs
+if <def.allow_sign_color>
+	button 310 340 4005 4007 0 15 83
+	dtext 340 340 90 Colorize
+endif
+
+page 15
+//sign colorizer
+ref1=<region.tag0.sign>
+dtext 120 140 90 Choose the color for your sign
+button 300 250 4017 4019 1 0 86
+dtext 340 250 90 Reset
+local.x=40
+local.y=190
+for 1 30
+	if (<local.y> > 351)
+		local.y 190
+		local.x +=50
+	endif
+		buttontileart <local.x> <local.y> 07588 07588 1 0 <eval <dLOCAL._FOR>+5000> <ref1.DISPID> <def.sign_color_<dlocal._for>> -10 -5
+		local.y += 30
+end
+
+page 16
+//Property tax
+ref2=<region.tag0.sign>
+ref2=<ref2.link>
+ref2=<ref2.more1>
+	if !(strmatch(*Britannic Realtors*,<uid.<ref2>.name>))
+		if <serv.list.<ref2.account>_houses.count>  
+			dtext 300 140 992 houses <serv.list.<ref2.account>_houses.count> 
+		endif
+	endif
+if (!<src.isgm>)
+	if (<ref1.tag0.decay_exempt>==1)
+		dtext 20 180 90 This property has been made exempt from decay
+		dtext 20 200 90 As such you have no Property Tax to pay.
+		dtext 20 220 90 This exemption is reflected on the main page of this menu
+		dtext 20 260 90 If this house is put for sale or moved the exemption will be lost.
+	else
+		local.daysleft <eval (((<ref1.timer>/60)/60)/24)>
+		local.days <eval (<ddef.can_decay>-<dlocal.daysleft>)>
+		local.value <eval (<link.tag0.value>+<link.value>+<tag0.boughtstorage>+<tag0.construction>+<tag0.xtra_coowners>+<tag0.xtra_friends>)>
+		if <def.estate_tax>
+			if <serv.list.<ref2.account>_houses.count>
+				if (<serv.list.<ref2.account>_houses.count> > <ddef.estate_tax>)
+					dtext 100 210 32 Estate Tax applies for <eval <serv.list.<ref2.account>_houses.count>-<ddef.estate_tax>> house(s)
+					dtext 180 280 32 PLUS
+					if (<ddef.estate_calc>==1)
+						dtext 60 300 90 Additional <qval <region.region.tag0.maintenance_override>? <region.region.dtag0.maintenance_override>:<ddef.estate_rate>>%  of house value (flat rate)
+						if <region.region.tag0.maintenance_override>
+							local.rate=<eval <region.region.dtag0.maintenance_override>*2>
+							local.maint=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+						else
+							local.rate=<eval <ddef.property_tax>+<ddef.estate_rate>>
+							local.maint=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+						endif
+					elif (<ddef.estate_calc>==2)
+						dtext 110 300 90 Additional <qval <region.region.tag0.maintenance_override>? <region.region.dtag0.maintenance_override>:<ddef.estate_rate>> %  house value
+						dtext 80 320 90 for each house over standard allowance (<eval <serv.list.<ref2.account>_houses.count> - <ddef.estate_tax>>)
+						local.overage= <eval <serv.list.<ref2.account>_houses.count>-<ddef.estate_tax>>
+						if <region.region.tag0.maintenance_override>
+							local.rate=<eval <region.region.dtag0.maintenance_override>*<dlocal.overage>>
+							local.rate =<eval <local.rate>+<region.region.dtag0.maintenance_override>>
+							local.maint=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+						else
+							local.rate=<eval <ddef.estate_rate>*<dlocal.overage>>
+							local.rate <eval <local.rate>+def.property_tax>>
+							local.maint=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+						endif
+					endif
+				else
+					if <region.region.tag0.maintenance_override>
+						local.maint=<MULDIV <dlocal.value>,<region.region.tag0.maintenance_override>,100>
+					else
+						local.maint=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+					endif
+				endif
+			endif
+		else
+			if <region.region.tag0.maintenance_override>
+				local.maint=<MULDIV <dlocal.value>,<region.region.tag0.maintenance_override>,100>
+			else
+				local.maint=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+			endif
+		endif
+		local.maintenance= <eval <local.maint>/30>
+		local.maintpay = <eval (<dlocal.maintenance>*<dlocal.days>)>
+		dtext 70 160 90 Reset your house's decay timer to <ddef.can_decay> days
+		dtext 60 180 90 Property Tax may be paid whenever any is due
+		dtext 60 240 90 The price of your Property Tax per <ddef.can_decay> days 
+		dtext 60 260 90 is <qval <region.region.tag0.maintenance_override>? <region.region.dtag0.maintenance_override>:<ddef.property_tax>> % of <qval <region.region.tag0.maintenance_override>? house value [<region.region.name> rate]:house value>
+			
+		if <eval <local.daysleft> < (<def.can_decay>-1)>
+			if <def.can_decay> && <def.property_tax>
+				button 100 340 4005 4007 1 18 85
+				dtext 140 340 90 Pay <dlocal.maintpay>gp to add <dlocal.days> days
+			endif
+		else
+			dtext 80 340 90 No Property Tax is due on this building.
+		endif
+	endif
+else
+	dtext 140 230 90 Staff Override
+	dtext 140 340 90 Reset decay timer to <ddef.can_decay> days
+	button 100 340 4005 4007 1 18 85
+endif
+
+
+[DIALOG d_house_menu button]
+on=0,88
+ref1=<src.region.tag.sign>
+	if (<argn>==6)
+			src.ctag0.list=access
+			sdialog d_house_menu 6 
+	elif (<argn>==9)
+			src.ctag0.list=coowner
+			sdialog d_house_menu 7
+	elif (<argn>==11)
+			src.ctag0.list=friend
+			sdialog d_house_menu 8 
+	elif (<argn>==12)
+			src.ctag0.list=access
+			sdialog d_house_menu 6 
+	elif (<argn>==13)
+			src.ctag0.list=ban
+			sdialog d_house_menu 6 
+	elif (<argn>==14) //grant access
+			targetf, f_add_list access
+	elif (<argn>==15)//ban
+			targetf, f_add_list ban
+	elif (<argn>==17) //add coowner
+			targetf, f_add_list coowner
+	elif (<argn>==18) //clear coowner
+			src.ctag0.list=coowner
+			src.dialog d_clear_list 
+	elif (<argn>==19) //add friend
+			targetf, f_add_list friend
+	elif (<argn>==20) //clear friend
+			src.ctag0.list=friend
+			src.dialog d_clear_list 
+	elif (<argn>==21) //clear access
+			src.ctag0.list=access
+			src.dialog d_clear_list 
+	elif (<argn>==22) //clear bans
+			src.ctag0.list=ban
+			src.dialog d_clear_list 
+	elif (<argn>==23) //private/public toggle
+			if (<ref1.link.tag0.private>)
+				ref1.link.tag0.private=
+				ref1.resendtooltip
+				if <def.wipe_switch_lists>
+					if <serv.list.house._<ref1.link>_access.count>
+						serv.list.house._<ref1.link>_access.clear
+					endif
+				endif
+				src.sysmessage @,,1 This property is now to the public (shop setting), only those on the banned list may not enter.
+				src.sysmessage @,,1 You should recode any doors you do not wish the general public to be able to open.
+			else
+				ref1.link.tag0.private=1
+				ref1.resendtooltip
+				if <def.wipe_switch_lists>
+					if <serv.list.house._<ref1.link>_ban.count>
+						serv.list.house._<ref1.link>_ban.clear
+					endif
+				endif
+				src.sysmessage @,,1 This propery is now private & may only be accessed by co-owners/friends & those on the access list
+			endif
+			dialog d_house_menu 
+	elif (<argn>==24)//rename house
+			src.dialog d_rename_house
+	//elif (<argn>==25) // -------------------------- reserved change sign page
+	elif (<argn>==26)//recode doors
+			src.dialog d_secure
+			return 1
+	elif (<argn>==27)//transfer ownership
+			ref1=<src.region.tag0.sign>
+			if (<ref1.tag0.demolition>)
+				src.sysmessage @32,,1 This house is scheduled for demolition and cannot be traded.
+				return 1
+			endif
+			targetf, f_transfer_house
+			src.sysmessage @,,1 To whom do you wish to transfer full ownership of this property?
+			return 1
+	elif (<argn>==28)//demolish
+			src.dialog d_demolish
+			src.sysmessage @,,1 Selecting Demolish will destroy any items left in your house.
+			src.sysmessage @,,1 Select Redeed to send items in your house to your bank.
+			src.sysmessage @,,1 Person specific chests will be returned to their owner regardless.
+			return 1
+	elif (<argn>==29)// eject
+			targetf, f_eject
+			return 1
+ 	elif (<argn>==30)// price/take off market
+			ref1=<src.region.tag0.sign>
+			if (<ref1.tag0.demolition>)
+				src.sysmessage @32,,1 This house is scheduled for demolition and cannot be sold.
+				return 1
+			endif
+			if (<ref1.region.tag0.forsale>)
+				ref1.region.tag0.forsale=
+				ref1.link.tag0.price=	
+				src.sysmessage @,,1 You have taken this house off the market
+				src.sysmessage @,,1 Don't forget to reset the house settings to your preferences.
+				resendtooltip
+				return 1
+			else
+				if (<ref1.tag0.lockdowns>) || (<ref1.tag0.secure>)
+					src.sysmessage @,,1 You still have lockdowns/secure containers within the house
+					return 1
+				else
+					if (<isnum <argtxt[0]>>) && (<eval <argtxt[0]>> > 0)
+						ref1.link.tag0.price=<argtxt[0]>
+						ref1.region.tag0.forsale=1
+						ref1.link.f_open_house
+						ref1.link.tag0.private=
+						serv.list.house_<ref1.link>_friend.clear
+						serv.list.house_<ref1.link>_coowner.clear
+						serv.list.house_<ref1.link>_access.clear
+						serv.list.house_<ref1.link>_ban.clear
+						src.sysmessage @,,1 Your house is now on the market for <ref1.link.dtag0.price> gp
+						if (<def.can_decay>)
+							ref1.tag0.decay_exempt=	
+							ref1.attr |= 02
+						endif
+						resendtooltip
+						return 1
+					else
+						src.sysmessage @32,,1 Only positive numeric values are valid.
+						return 1
+					endif
+				endif
+			endif
+	elif (<argn>==31) // add 25% storage
+			local.value=<QVAL (<ref1.link.value>)? <eval (<ref1.link.value>/8)>:<eval (<ref1.link.tag0.value>8)>>
+			call f_buy_storage <local.value>
+			return 1
+	elif (<argn>==32) //add 50% storage
+			local.value=<QVAL (<ref1.link.value>)? <eval <ref1.link.value>/4>:<eval <ref1.link.tag0.value>/4>>
+			call f_buy_storage <local.value>
+			return 1
+	elif (<argn>==33) // add 75% storage
+			local.value=<QVAL (<ref1.link.value>)? <eval ((<ref1.link.value>/8)*3)>:<eval ((<ref1.link.tag0.value>/8)*3)>>
+			call f_buy_storage <local.value>
+			return 1
+	elif (<argn>==34) //add 100% storage
+			local.value=<QVAL (<ref1.link.value>)? <eval <ref1.link.value>/2>:<eval <ref1.link.tag0.value>/2>>
+			call f_buy_storage <local.value>
+			return 1
+	elif (<argn>==35) //custom builder
+			ref1=<src.region.tag0.sign>
+			if (<ref1.tag0.demolition>)
+				src.sysmessage @32,,1 This house is scheduled for demolition and cannot be customized.
+				return 1
+			endif
+			if (<src.region.uid> != <region.uid>)
+				return 2
+			elif (<src.housedesign>)
+				src.sysmessage @32,,1 You are already designing <QVAL (<src.housedesign.uid> == <link.uid>)? this:another> building.
+				return 1
+			elif !(<src.isevent.e_house_customize>)
+				src.events +e_house_customize
+			endif
+			link.customize
+			return 1 
+	elif (<argn>==36) //sign post menu
+			src.dialog d_sign_post
+			return 1
+	elif (<argn>==50) //guild declaration
+			ref1=<src.region.tag0.sign>
+			if (<ref1.tag0.is_guild>)
+				ref1.tag0.is_guild=
+				resendtooltip
+				src.sysmessage @,,1 This building is no longer a guildhouse.
+				return 1
+			else
+				src.targetf, f_declare_guild	
+				src.sysmessage @,,1 Target your guildstone 
+				return 1
+			endif
+	elif (<argn>==52) //door menu
+			src.dialog d_door_menu	
+			return 1
+	elif (<argn>==53)// convert
+			ref1=<src.region.tag0.sign>
+			if (<ref1.tag0.demolition>)
+				src.sysmessage @32,,1 This house is scheduled for demolition and cannot be converted.
+				return 1
+			endif
+			ref1.link.f_swap
+	//elif (<argn>==54)      //  ------------------------------------ unused
+	elif (<argn>==55) //admin, value and market
+			src.dialog d_static_pricing
+			return 1
+	//elif (<argn>==57) // ----------------------------------------reserved authorise vendor
+	elif (<argn>==58) //flip sign
+			ref1.flip
+	elif (<argn>==59) //create/remove hanger
+			if (<src.region.tag0.noredeed>==1)
+				serv.newitem 0b98
+				new.attr=04010
+
+				new.timer= -1
+				new.p=<uid.<src.region.tag0.sign>.p>
+				src.region.tag0.hanger=<new.uid>
+				src.region.tag0.noredeed=2
+			else
+				ref3=<src.region.tag0.hanger>
+				ref3.remove
+				src.region.tag0.hanger=
+				src.region.tag0.noredeed=1
+			endif
+	elif (<argn>==75) //schedule demolition GM only
+			if !(<ref1.tag0.demolition>)
+				if (<ref1.region.tag0.forsale>)
+					ref1.region.tag.forsale=
+					ref1.link.price=
+					src.sysmessage @,,1 Property has been removed from housing market.
+				endif
+				if (<isnum <argtxt[1]>>)
+					if (<eval <argtxt[1]>> < 31)
+						if (<eval <argtxt[1]>> > 6)
+							ref1=<src.region.tag0.sign>
+							ref1.tag0.demolition=<eval <argtxt[1]>>
+							ref1.timer=60*60*24*<eval <argtxt[1]>>
+							src.sysmessage @,,1 You have scheduled this house to be demolished in <eval <ref1.tag0.demolition>> days.
+							resendtooltip
+							return 1
+						else
+							src.sysmessage @,,1 The minimum notice period before demolition can occur is 7 days.
+							return 1
+						endif
+					else
+						src.sysmessage @,,1 Demolition must occur within 30 days
+						return 1
+					endif
+				else
+					src.sysmessage @32,,1 Invalid entry, days must be numeric & < 30
+					return 1
+				endif
+			else
+				ref1.tag.demolition=
+				resendtooltip
+				src.sysmessage @,,1 The scheduled demolition has been cancelled.
+			endif
+	elif (<argn>==76)
+			call f_addlist_friend 1
+			return 1
+	elif (<argn>==77)
+			call f_addlist_friend 2
+			return 1
+	elif (<argn>==78)
+			call f_addlist_friend 5
+			return 1
+	elif (<argn>==79)
+			call f_addlist_friend 10
+			return 1
+	elif (<argn>==80)
+			call f_addlist_coowner 1
+			return 1
+	elif (<argn>==81)
+			call f_addlist_coowner 2
+			return 1
+	elif (<argn>==82)
+			call f_addlist_coowner 5
+			return 1
+	// 83 = sign colorizer
+	// 84 = property tax
+	elif (<argn>==85)
+
+			local.daysleft <eval (((<ref1.timer>/60)/60)/24)>
+			local.days <eval (<ddef.can_decay>-<dlocal.daysleft>)>
+			local.value <eval (<link.tag0.value>+<link.value>+<tag0.boughtstorage>+<tag0.construction>+<tag0.xtra_coowners>+<tag0.xtra_friends>)>
+			ref2=<ref1.link.more1>
+			if !<src.isgm> 
+				if <def.estate_tax>
+					if <serv.list.<ref2.account>_houses.count>
+						if (<serv.list.<ref2.account>_houses.count> > <ddef.estate_tax>)
+							if (<ddef.estate_calc>==1)
+								if <region.region.tag0.maintenance_override>
+									local.rate=<eval <region.region.dtag0.maintenance_override>*2>
+									local.maintenance=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+								else
+									local.rate=<eval <ddef.property_tax>+<ddef.estate_rate>>
+									local.maintenance=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+								endif
+							elif (<ddef.estate_calc>==2)
+								local.overage= <eval <serv.list.<ref2.account>_houses.count>-<ddef.estate_tax>>
+								if <region.region.tag0.maintenance_override>
+									local.rate=<eval <region.region.dtag0.maintenance_override>*<dlocal.overage>>
+									local.rate =<eval <local.rate>+<region.region.dtag0.maintenance_override>>
+									local.maintenance=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+								else
+									local.rate=<eval <ddef.estate_rate>*<dlocal.overage>>
+									local.rate <eval <local.rate>+def.property_tax>>
+									local.maintenance=<MULDIV <dlocal.value>,<dlocal.rate>,100>
+								endif
+							endif
+						else
+							if <region.region.tag0.maintenance_override>
+								local.maintenance=<MULDIV <dlocal.value>,<region.region.tag0.maintenance_override>,100>
+							else
+								local.maintenance=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+							endif
+						endif
+					else
+						if <region.region.tag0.maintenance_override>
+							local.maintenance=<MULDIV <dlocal.value>,<region.region.tag0.maintenance_override>,100>
+						else
+							local.maintenance=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+						endif
+					endif
+				else
+					if <region.region.tag0.maintenance_override>
+						local.maintenance=<MULDIV <dlocal.value>,<region.region.tag0.maintenance_override>,100>
+					else
+						local.maintenance=<MULDIV <dlocal.value>,<ddef.property_tax>,100>
+					endif
+				endif
+				local.maintenance= <eval <local.maintenance>/30>
+				local.maintpay = <eval (<dlocal.maintenance>*<dlocal.days>)>
+				ref1=<src.region.tag0.sign>
+				if (<eval (((<ref1.timer>/60)/60)/24)> < <ddef.can_decay>)
+					if (<src.gold> >= <dlocal.maintpay>) 
+						src.gold -= <dlocal.maintpay>
+						ref1.timer += <eval ((((<dlocal.days>-1)*60)*60)*24)>	
+						src.sysmessage @,,1 <dlocal.maintpay>gp has been paid to cover <dlocal.days> days.
+						src.sysmessage @,,1 Your property tax is now paid for the next <ddef.can_decay> days.
+					else
+						src.sysmessage @32,,1 You lack the funds to pay the property tax
+						return 1
+					endif
+				else
+					src.sysmessage @32,,1 You cannot pay more property tax yet
+					return 1
+				endif	
+			else
+				ref1=<src.region.tag0.sign>
+				ref1.timer=<eval (((<ddef.can_decay>*24) *60) *60)>
+				ref1=<ref1.link.more1>
+				serv.log <src.name> used staff refresh override on a house owned by <ref1.name> (account: <ref1.account.name>)
+				src.sysmessage @,,1 Property refreshed.
+			endif
+		
+	elif (<argn>==86)
+			ref1.color=00	
+			return 1
+	elif (<argn>==87) //exempt
+		ref1.tag0.decay_exempt = 1 
+		ref1.attr &~ 02 
+	elif (<argn>==88) //normal
+		ref1.tag.decay_exempt=
+		ref1.attr |= 02
+		ref1.timer=60*60*24*<def.can_decay>
+	endif
+
+on=100,299 // rmv person from (x) list 
+local.list <src.ctag0.list>
+local.button <eval <argn>-100>
+ref1=<region.tag0.sign>
+if <serv.list.house_<ref1.link>_<local.list>.count>
+	if (<serv.list.house_<ref1.link>_<local.list>.<dlocal.button>>==<src.uid>)
+		src.sysmessage @,,1 You have removed yourself from the <local.list> list.
+		if (<ref1.link.tag0.private>)
+			src.go <uid.<ref1.region.tag0.sign>.p>
+			src.sysmessage @32,,1 This is private property, you no longer have permission to enter.
+		endif
+	else
+		src.sysmessage @,,1 <uid.<serv.list.house_<ref1.link>_<local.list>.<dlocal.button>>.name> has been removed from the <src.ctag0.list> list.
+	endif
+	if (<serv.list.house_<ref1.link>_<local.list>.count> < 2 )
+		serv.list.house_<ref1.link>_<local.list>.clear
+	else
+		serv.list.house_<ref1.link>_<local.list>.<dlocal.button>.remove
+	endif
+endif
+
+// sign dispid
+on=2965,3140
+ref1=<src.region.tag0.sign>
+ref1.dispid=<hval <argn>>
+ref1.update
+return 1
+
+//sign hanger
+on=12967,12978
+foritems 3
+	if (<baseid>==0b98) || (<baseid>==0b97) || (<baseid>==0b9a) || (<baseid>==0b99) || (<baseid>==0b9c) || (<baseid>==0ba2) ||(<baseid>==0ba0) || (<baseid>==0b9e) || (<baseid>==0b9b) || (<baseid>==0ba1) || (<baseid>==0b9f) || (<baseid>==0b9d)
+	ref1=<uid>
+		ref1.dispid=<hval <argn>-10000>
+		ref1.update
+	endif
+endfor
+
+// sign coloring
+on=5000,9000
+ref1=<src.region.tag0.sign>
+	ref1.color=<def.sign_color_<eval <argn>-5000>>
+
+//-------------------------------------------------------------------------------End main menu--------------------------------------------------------------------//
+
+
+[DIALOG d_demolish]
+100,100
+ref1=<src.region.tag0.sign>
+resizepic 0 0 2620 240 220 
+checkertrans 5 5 230 210
+dtext 70 10 32 !!! WARNING !!!
+dtext 30 30 90 You are about to demolish
+dtext 30 50 90 this property.
+dtext 30 70 90 Do you wish to proceed?
+button 7 100 4017 4018 1 0 0
+dtext 47 100 90 Abort
+button 7 130 4005 4007 1 0 1
+dtext 47 130 90 Demolish & Destroy Contents
+if ((<uid.<src.region.uid>.type>==t_multi_custom) && <def.redeed_custom>) || (<def.redeed_fee> && (<uid.<src.region.uid>.type>==t_multi))
+	if !<src.isgm>
+		local.total=<eval <ref1.link.value>+<ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+		local.refund=<eval <ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+		local.redeedfee <muldiv <dlocal.total>,<ddef.redeed_fee>,100>
+		if (<dlocal.refund> > <dlocal.redeedfee>)
+			local.refund -= <dlocal.redeedfee>
+			dtext 47 180 367 <dlocal.refund>gp Refund
+		else
+			local.redeedfee -= <dlocal.refund>
+			dtext 47 180 32 <dlocal.redeedfee>gp Charge
+		endif
+	else
+		dtext 47 180 367 FREE FOR GM
+	endif	
+	dtext 47 160 90 Redeed & Bank Contents	
+	button 7 160 4005 4007 1 0 2
+elif (<uid.<src.region.uid>.type>==t_multi)
+	button 7 160 4005 4007 1 0 2
+	dtext 47 160 90 Redeed & Bank Contents
+	local.refund=<eval <ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+	dtext 47 180 367 <qval (0 < <dlocal.refund>)? <dlocal.refund>gp Refund: > 
+else
+	dtext 47 160 992 Redeed & Bank Contents
+endif
+
+
+[DIALOG d_demolish button]
+on=0
+src.sysmessage @,,1 Aborted
+ON=1 // demolish
+ref1=<region.tag0.sign>
+ref2=<ref1.link.more1>
+if (<ref1.tag0.is_guild>)
+	src.sysmessage @32,,1 This house is a guild house.
+	src.sysmessage @32,,1 You must remove the guild declaration and move the guildstone before you can demolish the building
+	return 1
+endif
+f_return_secure
+local.total=<eval <ref1.link.value>+<ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+ref2.gold += <dlocal.total>
+ref2.sysmessage @,,1 You have been refunded <dlocal.total>gp for this property.
+if <serv.list.<ref2.account>_houses.count> 
+	if (<serv.list.<ref2.account>_houses.count> < 2)
+		serv.list.<ref2.account>_houses.clear
+	else
+		serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+	endif
+endif
+ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+serv.list.house_<ref1.link>_coowner.clear
+serv.list.house_<ref1.link>_friend.clear
+serv.list.house_<ref1.link>_access.clear
+serv.list.house_<ref1.link>_ban.clear
+ref1.link.f_empty
+ref1.link.remove
+region.allclients.update
+
+on=2 //redeed
+ref1=<region.tag0.sign>
+ref2=<ref1.link.more1>
+if (<ref1.tag0.is_guild>)
+	src.sysmessage @32,,1 This house is a guild house.
+	src.sysmessage @32,,1 You must remove the guild declaration and move the guildstone before you can redeed the building
+	return 1
+endif
+if ((<uid.<src.region.uid>.type>==t_multi_custom) && <def.redeed_custom>) || (<def.redeed_fee> && (<uid.<src.region.uid>.type>==t_multi))
+	if <src.isgm>
+		f_redeed
+	else
+		local.total=<eval <ref1.link.value>+<ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+		local.redeedfee <muldiv <dlocal.total>,<ddef.redeed_fee>,100>
+		local.refund = <eval <ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+		if (<dlocal.refund> > <dlocal.redeedfee>)
+			ref2.sysmessage @,,1 You spent <dlocal.refund>gp for upgrades on this property
+			local.refund -= <dlocal.redeedfee>
+			ref2.gold += <dlocal.refund>
+			ref2.sysmessage @,,1 Your redeed fee of <dlocal.redeedfee> was paid from money
+			ref2.sysmessage @,,1 You have been refunded <dlocal.refund>
+			f_redeed
+		else
+			local.redeedfee -= <dlocal.refund>
+			if (<ref2.gold> < <dlocal.redeedfee>)
+				src.sysmessage @32,,1 you lack the funds to redeed this property
+				return 1
+			else
+				ref2.gold -= <dlocal.redeedfee>
+				ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+				ref2.sysmessage @,,1 <dlocal.redeedfee> gold has been deducted from your balance to pay for this redeed.
+				f_redeed
+			endif
+		endif
+	endif
+else 
+	local.refund = <eval <ref1.tag0.boughtstorage>+<ref1.tag0.construction>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>>
+	if (<dlocal.refund> > 0)	
+		ref2.gold += <dlocal.refund>	
+		ref2.sysmessage @,,1 You have been refunded <dlocal.refund>gp for upgrades you made to this property
+	endif
+	f_redeed
+endif
+region.allclients.update
+
+[FUNCTION f_redeed]
+f_return_secure
+f_bank_items
+ref1=<region.tag0.sign>
+if (<def0.m_tower>&09c000000)
+	serv.newitem i_deed_<STRSUB 2 50 <ref1.link.baseid>>
+else
+	serv.newitem i_deed_<STRSUB 8 50 <ref1.link.baseid>>
+endif
+new.p=<src.p>
+new.bounce 
+ref2=<ref1.link>
+ref2=<ref2.more1>
+serv.list.house_<ref1.link>_coowner.clear
+serv.list.house_<ref1.link>_friend.clear
+serv.list.house_<ref1.link>_access.clear
+serv.list.house_<ref1.link>_ban.clear
+if <serv.list.<ref2.account>_houses.count> 
+	if (<serv.list.<ref2.account>_houses.count> < 2)
+		serv.list.<ref2.account>_houses.clear
+	else
+		serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+	endif
+endif
+ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+ref1.link.remove	
+return 1
+
+
+[DIALOG d_house_forsale]
+10,10
+page 0
+resizepic 0 0 2620 400 118 
+checkertrans 5 5 390 108
+resizepic 0 123 2620 400 267
+checkertrans 5 128 390 257
+resizepic 0 395 2620 400 60
+checkertrans 5 400 390 50
+gumppic 7 8 100
+dtext 50 50 0 FOR SALE
+dtext 200 40 90 List Price <link.dtag.price> gp
+dtext 57 140 90 Owner:
+dtext 150 140 90 <uid.<link.more1>.name> 
+dtext 20 160 90 This house is for sale by owner
+button 57 180 4005 4007 1 0 1
+dtext 107 180 90 Buy this house for <link.dtag.price> gp
+dtext 20 200 90 Maximum Co-Owners  
+dtext 250 200 90 <dtag.max_coowners>
+dtext 20 220 90 Maximum Friends
+dtext 250 220 90 <dtag.max_friends>
+dtext 20 240 90 Maximum Lockdowns
+dtext 250 240 90 <QVAL (<def.secure_locks_limit>)? <eval (<tag.maxlockdowns>+<tag0.inclocks>)>:Unlimited>
+dtext 20 260 90 Maximum Secure Containers
+dtext 250 260 90 <QVAL (<def.secure_locks_limit>)? <eval (<tag0.maxsecure>+<tag0.incconts>)>:Unlimited>
+
+if <def.can_decay>
+	if !(<link.region.tag0.noredeed>)
+		dtext 20 280 90 This house <QVAL (<tag0.demolition>)? will be demolished:will decay> in <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+	else
+		if (<timer> != -1)
+			dtext 20 280 90 This house repossessed in <QVAL (<eval <timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <timer>/86400> days>
+		endif
+	endif
+endif
+dtext 20 300 90 House Value
+dtext 150 300 90 <QVAL (<link.region.tag0.noredeed>)? <eval <link.tag0.value>+<ref1.tag0.boughtstorage>>:<eval <link.value>+<tag0.boughtstorage>+<tag0.construction>+<tag0.xtra_coowners>+<tag0.xtra_friends>>> gp
+dtext 20 340 90 Number of visits this house has had:
+dtext 300 340 90 <dmore2>
+
+[DIALOG d_house_forsale button]
+on=1
+ref1=<region.tag0.sign>
+local.total=<eval <ref1.link.tag0.price>>
+if !(<src.isgm>)
+	if <serv.list.<src.account>_houses.count>
+		if <def.account_house_limit>
+			if (<serv.list.<src.account>_houses.count> < <def.account_house_limit>)
+				if (<src.gold> >= <dlocal.total>) 
+					src.gold -= <dlocal.total>
+					ref2=<ref1.link.more1>
+					if (strmatch(*Britannic Realtors*, <uid.<ref2>.name>)
+						serv.list.<src.account>_houses.add <ref1.link>
+						ref2.remove
+						if <def.can_decay>
+							ref1.timer=60*60*24*<def.can_decay>
+						endif
+					else
+						if (<ref2>.isplayer)
+						serv.list.<src.account>_houses.add <ref1.link>
+							if <serv.list.<ref2.account>_houses.count> 
+								if (<serv.list.<ref2.account>_houses.count> < 2)
+									serv.list.<ref2.account>_houses.clear
+								else	
+									serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+								endif
+							endif
+							ref2.gold += <dlocal.total>
+							if <ref2.isonline>
+								ref2.sysmessage @,,1 Your house has been sold, <dlocal.total> gp has been deposited in your bank box.
+								ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+							endif
+						endif
+					endif
+					ref1=<region.tag0.sign>
+					src.sysmessage @,,1 You are now the owner of this property.
+					src.sysmessage @,,1 This house is currently set to public (shop setting)
+					src.sysmessage @,,1 Do not forget to change the settings to your preferences.
+					src.sysmessage @,,1 The number of houses you own is now <serv.list.<src.account>_houses.count>
+					ref1.region.tag0.forsale=
+					ref1.link.tag0.price=
+					ref1.more1=<src.uid>
+					ref1.link.more1=<src.uid>
+					ref1.link.name=<tag0.oname>
+					ref1.region.name=<tag0.oname>
+					ref1.name=<tag0.oname>
+					ref1.resendtooltip
+				else
+					src.sysmessage @32,,1 You do not have the funds to purchase this property
+					return 1
+				endif
+			else
+				src.sysmessage @32,,1 You already own the maximum number of houses permitable.
+				return 1
+			endif 
+		else
+			if (<src.gold> >= <dlocal.total>) 
+				src.gold -= <dlocal.total>
+				ref2=<ref1.link.more1>
+				if (strmatch(*Britannic Realtors*, <uid.<ref2>.name>)
+					serv.list.<src.account>_houses.add <ref1.link>
+					ref2.remove
+					if <def.can_decay>
+						ref1.timer=60*60*24*<def.can_decay>
+					endif
+				else
+					if (<ref2>.isplayer)
+						serv.list.<src.account>_houses.add <ref1.link>
+						if <serv.list.<ref2.account>_houses.count> 
+							if (<serv.list.<ref2.account>_houses.count> < 2)
+								serv.list.<ref2.account>_houses.clear
+							else	
+								serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+							endif
+						endif
+						ref2.gold += <dlocal.total>
+						if <ref2.isonline>
+							ref2.sysmessage @,,1 Your house has been sold, <dlocal.total> gp has been deposited in your bank box.
+							ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+						endif
+					endif
+				endif
+				ref1=<region.tag0.sign>
+				src.sysmessage @,,1 You are now the owner of this property.
+				src.sysmessage @,,1 This house is currently set to public (shop setting)
+				src.sysmessage @,,1 Do not forget to change the settings to your preferences.
+				src.sysmessage @,,1 The number of houses you own is now <serv.list.<src.account>_houses.count>
+				ref1.region.tag0.forsale=
+				ref1.link.tag0.price=
+				ref1.more1=<src.uid>
+				ref1.link.more1=<src.uid>
+				ref1.link.name=<tag0.oname>
+				ref1.region.name=<tag0.oname>
+				ref1.name=<tag0.oname>
+				ref1.resendtooltip
+			else
+				src.sysmessage @32,,1 You do not have the funds to purchase this property
+				return 1
+			endif
+		endif
+	else
+		if (<src.gold> >= <dlocal.total>) 
+			src.gold -= <dlocal.total>
+			ref2=<ref1.link.more1>
+			if (strmatch(*Britannic Realtors*, <uid.<ref2>.name>)
+				serv.list.<src.account>_houses.add <ref1.link>
+				ref2.remove
+				if <def.can_decay>
+					ref1.timer=60*60*24*<def.can_decay>
+				endif
+			else
+				if (<ref2>.isplayer)
+				serv.list.<src.account>_houses.add <ref1.link>
+				if <serv.list.<ref2.account>_houses.count> 
+					if (<serv.list.<ref2.account>_houses.count> < 2)
+						serv.list.<ref2.account>_houses.clear
+					else	
+						serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+					endif
+				endif
+				ref2.gold +=<dlocal.total>
+				if <ref2.isonline>
+					ref2.sysmessage @,,1 Your house has been sold, <dlocal.total> gp has been deposited in your bank box.
+					ref2.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<ref2.account>_houses.count>? <serv.list.<ref2.account>_houses.count>:0>
+				endif
+				endif
+			endif
+			ref1=<region.tag0.sign>
+			src.sysmessage @,,1 You are now the owner of this property.
+			src.sysmessage @,,1 This house is currently set to public (shop setting)
+			src.sysmessage @,,1 Do not forget to change the settings to your preferences.
+			src.sysmessage @,,1 The number of houses you own is now <serv.list.<src.account>_houses.count>
+			ref1.region.tag0.forsale=
+			ref1.link.tag0.price=
+			ref1.more1=<src.uid>
+			ref1.link.more1=<src.uid>
+			ref1.link.name=<tag0.oname>
+			ref1.region.name=<tag0.oname>
+			ref1.name=<tag0.oname>
+			ref1.resendtooltip
+		else
+			src.sysmessage @32,,1 You do not have the funds to purchase this property
+			return 1
+		endif
+	endif
+endif
+
+
+
+
+[DIALOG d_house_visitor]
+100,100
+gumppic  27 27 100 
+dhtmlgump 50 50 100 100 0 0 <def.center><name><def.centere>
+if <tag0.is_guild>
+	dtext 85 25 90 [<uid.<tag0.is_guild>.abbrev>]
+endif
+
+[DIALOG d_rename_house]
+100,100
+resizepic 0 0 2620 200 200 
+checkertrans 5 5 190 190
+gumppic 27 27 100
+dtextentrylimited 50 40 95 90 0 1 60 
+button 107 140 4017 4018 1 0 0
+dtext 147 140 90 Abort
+button 7 140 4005 4007 1 0 1
+dtext 47 140 90 Confirm
+
+[DIALOG d_rename_house BUTTON]
+ON=0
+src.sysmessage @,,1 House renaming cancelled.
+return 1
+ON=1
+ref1=<src.region.tag.sign>
+ref1.name=<argtxt[1]>
+ref1.link.region.name=<argtxt[1]>
+return 1
+
+[DIALOG d_clear_list]
+100,100
+ref1=<src.region.tag.sign>
+resizepic 0 0 2620 200 200 
+checkertrans 5 5 190 190
+dtext 50 10 32 !!! WARNING !!!
+dtext 10 30 90 You are about to clear
+dtext 10 50 90 your <src.ctag0.list> list
+dtext 10 90 90 Do you wish to proceed?
+button 107 140 4017 4018 1 0 0
+dtext 147 140 90 Abort
+if !(strcmpi("<src.ctag0.list>","COOWNER"))
+	button 7 140 4005 4007 1 0 1
+elif !(strcmpi("<src.ctag0.list>","FRIEND"))
+	button 7 140 4005 4007 1 0 2
+elif !(strcmpi("<src.ctag0.list>","ACCESS"))
+	button 7 140 4005 4007 1 0 3
+elif !(strcmpi("<src.ctag0.list>","BAN"))
+	button 7 140 4005 4007 1 0 4
+endif
+dtext 47 140 90 Confirm
+
+[DIALOG d_clear_list button]
+
+ON=0
+src.sysmessage @,,1 Aborted
+src.ctag.list=
+ON=1,4
+ref1=<region.tag0.sign>
+if (<argn>==1)//co-owner
+	serv.list.house_<ref1.link>_coowner.clear
+	src.sysmessage @,,1 Coowner list has been cleared
+	return 1
+elif (<argn>==2)//friend
+	serv.list.house_<ref1.link>_friend.clear
+	src.sysmessage @,,1 Friend list has been cleared
+	return 1
+elif (<argn>==3)//access
+	serv.list.house_<ref1.link>_access.clear
+	src.sysmessage @,,1 Access list has been cleared
+	return 1
+elif (<argn>==4)//bans
+	serv.list.house_<ref1.link>_ban.clear
+	src.sysmessage @,,1 Ban list has been cleared
+	return 1
+endif
+
+[DEFNAME signs]
+sign_1 9
+sign_2 29
+sign_3 54
+sign_4 90
+sign_5 147
+sign_6 169
+sign_7 177
+sign_8 204
+sign_9 251
+sign_10 257
+sign_11 263
+sign_12 298
+sign_13 347
+sign_14 424
+sign_15 441
+sign_16 466
+sign_17 514
+sign_18 600
+sign_19 601
+sign_20 602
+sign_21 603
+sign_22 660
+sign_23 666
+sign_24 672
+sign_25 898
+sign_26 970
+sign_27 974
+sign_28 982
+
+[DIALOG d_sign_post]
+0,0
+page 0
+resizepic 0 0 2620 600 620
+checkertrans 5 5 590 610
+local.y=10
+for 1 28
+	if (<local._for> < 6)
+		local.btn=7
+		local.pic=57
+	elif (<local._for> < 11)
+		local.btn=107
+		local.pic=157		
+	elif (<local._for> < 16)
+		local.btn=207
+		local.pic=257		
+	elif (<local._for> < 21)
+		local.btn=307
+		local.pic=357
+	elif (<local._for> < 26)
+		local.btn=407
+		local.pic=457
+	else	
+		local.btn=507
+		local.pic=557
+	endif
+	if (<local._for>==6) || (<local._for>==11) || (<local._for>==16) || (<local._for>==21) || (<local._for>==26)
+		local.y=10
+	endif
+	button <local.btn> <local.y> 4005 4007 1 0 <def.sign_<dlocal._for>>
+	tilepic <local.pic> <local.y> <def.sign_<dlocal._for>>
+	local.y += 125
+endfor
+button 510 520 4017 4019 1 0 0
+dtext 550 520 90 Cancel
+
+[DIALOG d_sign_post button]
+on=0
+dialogclose
+
+on=1,1000
+ref1=<src.region.tag0.sign>
+foritems 2
+	if (<baseid>==i_wall_wood) && (<link>==<ref1.link>)
+		ref1=<uid>
+		ref1.dispid=<argn>
+		ref1.update
+	endif
+endfor
+
+[DIALOG d_secure]
+100,100
+ref1=<src.region.tag.sign>
+resizepic 0 0 2620 280 250 
+checkertrans 5 5 270 240
+dtext 100 10 90 <QVAL (<src.ctag0.cont>)? Secure Containers:Door Recoding>
+dtext 47 50 90 Restrict to Owner/Co-owners
+dtext 47 80 90 Restrict to Owner/Co-owners/friends
+dtext 47 140 <QVAL (<ref1.tag0.is_guild>)? 90 Restrict to Guild members:992 Restrict to Guild members>
+dtext 47 110 90 Restrict to Unique UID
+button 7 50 4005 4007 1 0 <QVAL (<src.ctag0.cont>)? 6:1>
+button 7 80 4005 4007 1 0 <QVAL (<src.ctag0.cont>)? 7:2>
+button 7 110 4005 4007 1 0 <QVAL (<src.ctag0.cont>)? 8:3>
+button 7 140 4005 4007 1 0 <QVAL (<src.ctag0.cont>)? 9:4>
+if !(<src.ctag0.cont>)
+	dtext 47 170 90 Reset
+	button 7 170 4005 4007 1 0 5
+endif
+button 7 210 4017 4019 1 0 0
+dtext 47 210 90 Exit
+
+[DIALOG d_secure button]
+ON=0
+dialogclose
+on=1,9
+	if (<argn>==1)//door restrict 1
+			src.targetf, f_restrict 1
+			src.sysmessage @,,1 Target the door you wish to make Owner/Co-owner only
+			return 1
+	elif (<argn>==2)//door restrict 2
+			src.targetf, f_restrict 2
+			src.sysmessage @,,1 Target the door you wish to make Owner/Co-owner/Friend only
+			return 1
+	elif (<argn>==3)//door uid only
+			src.targetf, f_uidonly
+			src.sysmessage @,,1 Who are you making a unique access door for?
+			return 1
+	elif (<argn>==4)//door guild only
+			src.targetf, f_guild
+			src.sysmessage @,,1 Target the door you wish to make Guild access only
+			return 1
+	elif (<argn>==5)//door reset
+			src.targetf, f_reset
+			src.sysmessage @,,1 Target the door you wish to reset.
+			return 1
+	elif (<argn>==6)//cont owner/co-owner
+			ref4=<src.ctag0.cont>
+			ref4.events +t_coowner
+			ref4.resendtooltip
+			src.sysmessage @,,1 Only the Owner & Co-owners may now open this <ref4.name>
+			src.ctag0.cont=
+			return 1
+	elif (<argn>==7)//cont owner/co-owner/friend
+			ref4=<src.ctag0.cont>
+			ref4.events +t_friend
+			ref4.resendtooltip
+			src.sysmessage @,,1 Only the Owner, Co-owners & Friends of the house may now open this <ref4.name>
+			src.ctag0.cont=
+			return 1
+	elif (<argn>==8)//cont uid only
+			targetf, f_uidonly_cont 
+			src.sysmessage @,,1 For whom are you making this unique access <uid.<src.ctag0.cont>.name>?
+			//src.ctag0.cont=
+			return 1
+	elif (<argn>==9)//cont guild
+			ref4=<src.ctag0.cont>
+			ref4.events +t_guild
+			ref4.resendtooltip
+			local.guildbox=<ref4>
+			ref1=<src.region.tag0.sign>
+			src.sysmessage @,,1 Only <uid.<ref1.tag0.is_guild>.abbrev> guild members may now open this <uid.<local.guildbox>.name>.
+			src.ctag0.cont=
+			return 1
+	endif
+
+[FUNCTION f_buy_storage]
+ref1=<src.region.tag0.sign>
+if (<ref1.tag0.demolition>)
+	src.sysmessage @32,,1 This house is scheduled for demolition and cannot be upgraded.
+	return 1
+endif
+if (<src.gold> >= <dlocal.value>)
+	src.gold -= <dlocal.value>
+	ref1.tag0.boughtstorage += <dlocal.value>
+	if (<dlocal.value>==<QVAL (<ref1.link.value>)? <eval (<ref1.link.value>/8)>:<eval (<ref1.link.tag0.value>8)>>)
+		local.storage=25
+	elif (<dlocal.value>==<QVAL (<ref1.link.value>)? <eval <ref1.link.value>/4>:<eval <ref1.link.tag0.value>/4>>)
+		local.storage=50
+	elif (<dlocal.value>==<QVAL (<ref1.link.value>)? <eval ((<ref1.link.value>/8)*3)>:<eval ((<ref1.link.tag0.value>/8)*3)>>)
+		local.storage=75
+	else
+		local.storage=100
+	endif
+	ref1.tag0.xtrastorage += <dlocal.storage>
+	src.sysmessage @,,1 <dlocal.value> gp has been deducted from your bank to pay for this upgrade.
+else
+	src.sysmessage @32,,1 You do not have the funds to pay for this storage upgrade.
+	return 1
+endif
+
+[function f_bank_items]
+ref1=<uid.<region.tag0.sign>.link>
+serv.newitem i_crate_lg
+new.name=Moving Crate
+local.uid=<new.uid>
+local.1=<strarg <streat <streat <ref1.multiregion>>>>
+local.2=<strarg <streat <streat <streat <ref1.multiregion>>>>>
+If (<dlocal.1> > <dlocal.2>)
+	local.radius = <local.1>
+else
+	local.radius = <local.2>
+endif
+foritems <dlocal.radius>
+	ref2=<uid>
+	if !(STRCMPI(<REF2.region.tag0.sign>,<REF1.region.tag0.sign>))
+		if !(strmatch(<ref2>,*i_trashcan*)
+			ref2.remove
+		endif
+		if (<isevent.t_coowner>) || (<isevent.t_friend>) || (<isevent.t_guild>)  
+			ref2.move 0,0,-20
+			ref2.attr=<attr> &~ attr_move_never
+			local.secures = <eval <local.secures>+1>
+			ref2.events -t_coowner
+			ref2.events -t_friend
+			ref2.events -t_guild
+			ref2.cont=<local.uid>
+		endif
+		ref1.f_return_secure
+		if (<isevent.t_locked>)
+			ref2.move 0,0,-20
+			ref2.events -t_locked
+			ref2.attr =<attr> &~ attr_move_never
+			ref2.cont=<local.uid>
+			local.lockcount= <eval <local.lockcount>+1>
+		endif
+		if !(<link.uid>)  && !(<uid>==<ref1.uid>)
+			ref2.move 0,0,-20
+			ref2.cont=<local.uid>
+		endif
+	endif
+
+endfor
+ref4 <local.uid>
+if (<uid.<local.uid>.rescount> > 0) 
+	ref4.cont=<src.findlayer.29> 
+else
+	ref4.remove //no items inside? no chest!
+endif
+forclients 18
+	resend
+endfor
+if (<eval <local.lockcount>> > 0)
+	src.sysmessage @,,1 <eval <local.lockcount>> items have been unlocked, placed in a moving crate and sent to your bank.
+endif
+if (<eval <local.secures>> > 0)
+	src.sysmessage @,,1 <eval <local.secures>> secure chests have been deactivated, placed in a moving crate and sent to your bank.
+endif
+if (<eval <local.returns>> >0)
+	src.sysmessage @,,1 <eval <local.returns>> person specific secure chests have been returned to their owners banks.
+endif
+return 0
+
+[FUNCTION f_return_secure]
+ref1=<uid.<region.tag0.sign>.link>
+local.1=<strarg <streat <streat <ref1.multiregion>>>>
+local.2=<strarg <streat <streat <streat <ref1.multiregion>>>>>
+If (<dlocal.1> > <dlocal.2>)
+	local.radius = <local.1>
+else
+	local.radius = <local.2>
+endif
+foritems <dlocal.radius>
+       REF2=<uid> //the items checked
+       if !(STRCMPI(<REF2.region.tag0.sign>,<REF1.region.tag0.sign>))
+		if (<isevent.t_uidonly>)
+			ref2.move 0,0,-20
+			ref2.attr=<attr> &~ attr_move_never
+			if (<uid.<tag0.uidonly>>==<src.uid>)
+				local.secures = <eval <local.secures>+1>
+			else
+				local.returns = <eval <local.returns>+1>
+			endif
+			ref2.events -t_uidonly
+			ref2.cont= <uid.<tag0.uidonly>.findlayer.29>
+			src.sysmessage @,,1 <uid.<tag0.uidonly>.name>'s secure chest has been sent to their bank
+			ref7=<tag0.uidonly>
+			if <ref7.isonline>
+				ref7.sysmessage @,,1 A secure chest has been returned to your bank
+			endif
+			ref2.tag0.uidonly=
+		endif
+	endif
+endfor
+region.allclients.update
+return 0
+
+[FUNCTION f_add_list]
+local.list=<args>
+ref1=<region.tag0.sign>
+ref2 = <argo>
+if <ref2.isplayer>
+	if (<ref2>==<src>)
+		src.sysmessage @32,,1 You cannot add yourself to the <local.list> list.
+		return 1
+	endif
+	if (<ref2.is_owner <ref1>>)
+		src.sysmessage @32,,1 <ref2.name> is the owner of this property
+		return 1
+	elif (<ref2.is_coowner <ref1>>)
+		src.sysmessage @32,,1 <ref2.name> is a co-owner of this property.
+		src.sysmessage @32,,1 remove them from this list before adding them to another.
+		return 1
+	elif (<ref2.is_friend <ref1>>)
+		src.sysmessage @32,,1 <ref2.name> is a friend of this property.
+		src.sysmessage @32,,1 remove them from this list before adding them to another.
+		return 1
+	elif (<ref2.is_access <ref1>>)
+		src.sysmessage @32,,1 <ref2.name> is on the access list.
+		src.sysmessage @32,,1 remove them from this list before adding them to another.
+		return 1
+	elif (<ref2.is_ban <ref1>>)
+		src.sysmessage @32,,1 <ref2.name> is on the bans list.
+		src.sysmessage @32,,1 remove them from this list before adding them to another.
+		return 1
+	else
+		if <serv.list.house_<ref1.link>_<local.list>.count>
+			if (strmatch(*ban*,<local.list>) || (strmatch(*access*,<local.list>)
+				if (<serv.list.house_<ref1.link>_<local.list>.count> <= 10)
+					serv.list.house_<ref1.link>_<local.list>.add <ref2.uid>
+					if (strmatch(*ban*,<local.list>)
+						src.sysmessage @32,,1 <ref2.name> has been banned from the property
+						ref2.sysmessage @32,,1 You have been banned from this property
+						ref2.go <ref1.p>
+						return 1
+					elif (strmatch(*access*,<local.list>)
+						src.sysmessage @367,,1 <ref2.name> has been granted access to the property
+						ref2.sysmessage @367,,1 You have been granted access to the property
+						return 1
+					endif
+				else
+					src.sysmessage @32,,1 Your <local.list> is full. 
+					src.sysmessage @32,,1 Remove someone from the list and try again.
+					return 1
+				endif
+			else
+				if (<serv.list.house_<ref1.link>_<local.list>.count> < <ref1.dtag0.max_<local.list>s>)
+					serv.list.house_<ref1.link>_<local.list>.add <ref2.uid>
+					src.sysmessage @,,1 <ref2.name> has been added as a <local.list> for this property
+					ref2.sysmessage @,,1 You have been made a <local.list> for this property	
+					return 1
+				else
+					src.sysmessage @32,,1 You already have the maximum number of <local.list>s permitted for this property.
+					src.sysmessage @32,,1 Remove someone from the list and try again
+					return 1
+				endif
+			endif
+		else
+			if (strmatch(*ban*,<local.list>) || (strmatch(*access*,<local.list>)
+				serv.list.house_<ref1.link>_<local.list>.add <ref2.uid>
+				if (strmatch(*ban*,<local.list>)
+					src.sysmessage @32,,1 <ref2.name> has been banned from the property
+					ref2.sysmessage @32,,1 You have been banned from this property
+					return 1
+				elif (strmatch(*access*,<local.list>)
+					src.sysmessage @367,,1 <ref2.name> has been granted access to the property
+					ref2.sysmessage @367,,1 You have been granted access to the property
+					return 1
+				endif
+			else
+				serv.list.house_<ref1.link>_<local.list>.add <ref2.uid>
+				src.sysmessage @,,1 <ref2.name> has been added as a <local.list> for this property
+				ref2.sysmessage @,,1 You have been made a <local.list> for this property	
+				return 1
+			endif
+		endif
+	endif
+endif
+
+[FUNCTION f_addlist_friend]
+ref1=<src.region.tag0.sign>
+if (<ref1.tag0.demolition>)
+	src.sysmessage @32,,1 This house is scheduled for demolition and cannot be upgraded.
+	return 1
+endif
+local.value=<eval <args>*<def.xtra_friend_price>>
+if (<src.gold> >= <dlocal.value>) 
+	src.gold -= <dlocal.value>
+	ref1.tag0.xtra_friends = <dlocal.value>
+	ref1.tag.max_friends += <args>
+	src.sysmessage @,,1 <args> friend slot(s) have been added to your house list for <dlocal.value> gp.
+else
+	src.sysmessage @32,,1 You lack the funds to add extra friend slots.
+	return 1
+endif
+
+[FUNCTION f_addlist_coowner]
+ref1=<src.region.tag0.sign>
+if (<ref1.tag0.demolition>)
+	src.sysmessage @32,,1 This house is scheduled for demolition and cannot be upgraded.
+	return 1
+endif
+local.value=<eval <args>*<def.xtra_co-owner_price>>
+if (<src.gold> >= <dlocal.value>) 
+	src.gold -= <dlocal.value>
+	ref1.tag0.xtra_coowners = <dlocal.value>
+	ref1.tag.max_coowners += <args>
+	src.sysmessage @,,1 <args> co-owner slot(s) have been added to your house list for <dlocal.value> gp.
+else
+	src.sysmessage @32,,1 You lack the funds to add extra co-owner slots.
+	return 1
+endif
+
+[FUNCTION f_eject]
+ref1=<src.region.tag0.sign>
+ref2=<argo.region.tag0.sign>
+if <argo.isplayer>
+	if !<argo.isgm>
+		if (strmatch(<ref1>,<ref2>))
+			if (<argo>==<src>)
+				src.sysmessage @32,,1 You cannot eject yourself from this property.
+				return 1
+			endif
+			if (<argo.is_owner>) || (<argo.is_coowner>) || (<argo.is_friend>)
+				src.sysmessage @32,,1 You cannot eject this person
+			else
+				argo.go <uid.<ref1.region.tag0.sign>.p>
+			endif
+		else
+			src.sysmessage @32,,1 That person is not in your house
+			return 1
+		endif
+	else
+	src.sysmessage @32,,1 You cannot eject staff from your house
+	return 1
+	endif
+endif
+
+[FUNCTION f_transfer_house]
+ref1=<src.region.tag.sign>
+ref2=<argo>
+if (<ref2.isplayer>) 
+	if (<ref2.is_ban>)
+		src.sysmessage @32,,1 <ref2.name> is currently banned from this property, you must unban the before you can transfer the property to them.
+		return 1
+	endif
+	if (<ref2.uid>==<ref1.link.more1>)
+		src.sysmessage @32,,1 You already own this property
+		return 1
+	endif
+		if <serv.list.<ref2.account>_houses.count>
+			if <def.account_house_limit>
+				if (<serv.list.<ref2.account>_houses.count> < <ddef0.account_house_limit>) 
+							if <serv.list.<src.account>_houses.count> 
+								if (<serv.list.<src.account>_houses.count> < 2)
+									serv.list.<src.account>_houses.clear
+								else	
+									serv.list.<src.account>_houses.<serv.list.<src.account>_houses.findelem <ref1.link>>.remove
+								endif
+							endif
+					serv.list.<ref2.account>_houses.add <ref1.link>
+					ref1.link.more1=<ref2>
+					src.sysmessage @,,1 You transfer the property to <ref2.name>
+					src.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<src.account>_houses.count>? <serv.list.<src.account>_houses.count>:0>
+					ref2.sysmessage @,,1 <src.name> has transferred ownership of this property to you.
+					ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+					ref2.list_shuffle
+					resendtooltip 1
+					return 1
+				else
+					src.sysmessage @32,,1 <ref2.name> already owns the maximum number of houses permitable.
+					ref2.sysmessage @32,,1 You already own the maximum number of houses permitable.
+					return 1
+				endif
+			else
+				if <serv.list.<src.account>_houses.count> 
+					if (<serv.list.<src.account>_houses.count> < 2)
+						serv.list.<src.account>_houses.clear
+					else	
+						serv.list.<src.account>_houses.<serv.list.<src.account>_houses.findelem <ref1.link>>.remove
+					endif
+				endif
+				serv.list.<ref2.account>_houses.add <ref1.link>
+				ref1.link.more1=<ref2>
+				src.sysmessage @,,1 You transfer the property to <ref2.name>
+				src.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<src.account>_houses.count>? <serv.list.<src.account>_houses.count>:0>
+				ref2.sysmessage @,,1 <src.name> has transferred ownership of this property to you.
+				ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+				ref2.list_shuffle
+				resendtooltip 1
+				return 1
+			endif
+		else
+			if <serv.list.<src.account>_houses.count> 
+				if (<serv.list.<src.account>_houses.count> < 2)
+					serv.list.<src.account>_houses.clear
+				else	
+					serv.list.<src.account>_houses.<serv.list.<src.account>_houses.findelem <ref1.link>>.remove
+				endif
+			endif
+			serv.list.<ref2.account>_houses.add <ref1.link>
+			ref1.link.more1=<ref2>
+			ref1.more1=<ref1.link.more1>
+			src.sysmessage @,,1 You transfer the property to <ref2.name>
+			src.sysmessage @,,1 The number of houses you own is now <qval <serv.list.<src.account>_houses.count>? <serv.list.<src.account>_houses.count>:0> 
+			ref2.sysmessage @,,1 <src.name> has transferred ownership of this property to you.
+			ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+			ref2.list_shuffle <ref1>
+			resendtooltip 1
+			return 1
+		endif
+endif
+
+[FUNCTION list_shuffle]
+ref1=<args>
+ref2=<uid>
+if <ref2.is_coowner> 
+	if (<serv.list.house_<ref1.link>_coowner.count> < 2)
+		serv.list.house_<ref1.link>_coowner.clear 
+	else
+		serv.list.house_<ref1.link>_coowner.<serv.list.house_<ref1.link>_coowner.findelem <ref2>>.remove
+	endif
+elif <ref2.is_friend> 
+	if (<serv.list.house_<ref1.link>_friend.count> < 2)
+		serv.list.house_<ref1.link>_friend.clear 
+	else
+		serv.list.house_<ref1.link>_friend.<serv.list.house_<ref1.link>_friend.findelem <ref2>>.remove
+	endif
+elif <ref2.is_access> 	
+	if (<serv.list.house_<ref1.link>_access.count> < 2)
+		serv.list.house_<ref1.link>_access.clear 
+	else
+		serv.list.house_<ref1.link>_access.<serv.list.house_<ref1.link>_access.findelem <ref2>>.remove
+	endif
+endif
+	
+
+[FUNCTION is_owner]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif
+if (<ref1.link.more1>==<uid>)
+	return 1
+endif
+return 0
+
+[FUNCTION acc_is_owner]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif
+local.acc = <src.account.name> 
+for <serv.account.<local.acc>.chars>  
+	if (<serv.account.<local.acc>.char.<eval <local._for>-1>.is_owner <ref1>>)
+		return 1     
+	endif 
+endfor 
+return 0
+
+[FUNCTION is_coowner]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif 
+if <serv.list.house_<ref1.link>_coowner.count>
+	if <serv.list.house_<ref1.link>_coowner.findelem <uid>> != -1
+		return 1
+	endif
+endif
+return 0
+
+[FUNCTION is_friend]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif
+if <serv.list.house_<ref1.link>_friend.count>
+	if <serv.list.house_<ref1.link>_friend.findelem <uid>> != -1
+		return 1
+	endif
+endif
+return 0
+
+[FUNCTION is_access]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif
+if <serv.list.house_<ref1.link>_access.count>
+	if <serv.list.house_<ref1.link>_access.findelem <uid>> != -1
+		return 1
+	endif
+endif
+return 0
+
+[FUNCTION is_ban]
+if <args>
+	ref1=<args>
+else
+	ref1=<region.tag0.sign>
+endif
+if <serv.list.house_<ref1.link>_ban.count>
+	if <serv.list.house_<ref1.link>_ban.findelem <uid>> != -1
+		return 1
+	endif
+endif
+return 0
+
+
+[FUNCTION co_f_calc]	
+local.srx=<eval (<argv[2]>) *2>
+local.sry=<eval (<argv[3]>) *2>
+local.size=<eval <local.srx>* <local.sry>>
+tag.max_coowners=<eval (<local.size>/40)>
+if (<dtag.max_coowners> > <def.max_co_owners>)
+	tag.max_coowners=<def.max_co_owners>
+endif
+tag.max_friends=<eval (<local.size>/20)>
+if (<dtag.max_friends> > <def.max_friends>)
+	tag.max_friends=<def.max_friends>
+endif
+if <def.conservative_vendors>
+	tag0.max_vendors=<eval (<tag.max_coowners>+<tag.max_friends>+2)/2>
+else
+	tag0.max_vendors=<eval <tag.max_coowners>+<tag.max_friends>+2>
+endif
+
+[FUNCTION lockdown_calc]
+local.mrx=<eval (<argv[2]>) *2>
+local.mry=<eval (<argv[3]>) *2>
+local.space=<eval <local.mrx>* <local.mry>>
+tag.maxlockdowns=<eval <local.space>*4>
+if (<dtag.maxlockdowns> < <def.min_lockdowns>)
+	tag.maxlockdowns=<def.min_lockdowns>
+elif (<dtag.maxlockdowns> > <def.max_lockdowns>)
+	tag.maxlockdowns=<def.max_lockdowns>
+endif
+tag.maxsecure=<eval (<local.space>/20)>
+if (<dtag.maxsecure> < <def.min_secure>)
+	tag.maxsecure=<def.min_secure>)
+elif (<dtag.maxsecure> > <def.max_secure>)
+	tag.maxsecure=<def.max_secure>
+endif
+
+
+[FUNCTION f_open_house]
+foritems <eval (<strarg <streat <streat <multiregion>>>>+<strarg <streat <streat <streat <multiregion>>>>>)>
+	local.sign=<region.tag0.sign>
+	if (<type>==t_door) && (<link>==<uid.<local.sign>.link>) 
+		ref1=<uid>
+		if <ref1.tag0.restricted>
+			ref1.tag0.restricted=
+		endif
+		if <ref1.tag0.uidonly>
+			ref1.tag0.uidonly=
+		endif
+		if <ref1.tag0.guild>
+			ref1.tag0.guild=
+		endif
+	elif (<type>==t_door_locked) && (<link>==<uid.<local.sign>.link>) 
+		ref1=<uid>
+		ref1.type=t_door
+		if <ref1.tag0.restricted>
+			ref1.tag0.restricted=
+		endif
+		if <ref1.tag0.uidonly>
+			ref1.tag0.uidonly=
+		endif
+		if <ref1.tag0.guild>
+			ref1.tag0.guild=
+		endif
+	endif
+endfor
+
+serv.list.house_<ref1.link>_coowner.clear
+serv.list.house_<ref1.link>_friend.clear
+serv.list.house_<ref1.link>_access.clear
+serv.list.house_<ref1.link>_ban.clear
+
+
+[FUNCTION f_remove_keys]
+ref1=<args>
+FORINSTANCES i_key_copper
+	if (<link>==<ref1>)
+		remove
+	endif
+ENDFOR
+
+[FUNCTION f_door_setup]
+foritems <eval <strarg <streat <streat <multiregion>>>>+<strarg <streat <streat <streat <multiregion>>>>>>
+	if (<type>==t_door_locked)
+		ref5=<uid>
+		ref5.type=t_door
+	endif
+endfor
+return 0
+
+[FUNCTION f_empty]
+REF1=<region.tag0.sign>
+REF1=<ref1.link>
+local.1=<strarg <streat <streat <ref1.multiregion>>>>
+local.2=<strarg <streat <streat <streat <ref1.multiregion>>>>>
+If (<dlocal.1> > <dlocal.2>)
+	local.radius = <local.1>
+else
+	local.radius = <local.2>
+endif
+foritems <dlocal.radius>
+	ref2=<uid>
+	if !(STRCMPI(<REF2.region.tag0.sign>,<REF1.region.tag0.sign>))
+		if !(strmatch(<ref2>,*i_trashcan*)
+			ref2.remove
+		endif
+		if (<isevent.t_coowner>) || (<isevent.t_friend>) || (<isevent.t_guild>)  
+			ref2.move 0,0,-20
+			ref2.attr=<attr> &~ attr_move_never
+			local.secures = <eval <local.secures>+1>
+			ref2.events -t_coowner
+			ref2.events -t_friend
+			ref2.events -t_guild
+			ref2.remove
+		endif
+		ref1.f_return_secure
+		if (<isevent.t_locked>)
+			ref2.z=<eval <p.terrain.z> +-10>
+			ref2.events -t_locked
+			ref2.attr =<attr> &~ attr_move_never
+			ref2.remove
+			local.lockcount= <eval <local.lockcount>+1>
+		endif
+		if !(<link.uid>)  && !(<uid>==<ref1.uid>)
+			ref2.z=<eval <p.terrain.z> +-10> 
+			ref2.remove
+		endif
+	endif
+endfor
+
+
+[ITEMDEF i_trashcan] 
+NAME=trashcan 
+ID=i_barrel_open 
+TYPE=t_container 
+
+ON=@CREATE 
+COLOR=0835 
+
+ON=@Dropon_Self
+ref6=<argo> 
+src.sound=011e
+ref6.remove 
+return 1  
+
+[TYPEDEF t_door]
+ON=@DClick
+ref1=<region.tag0.sign>
+if !(<link>==04fffffff) 
+	if <def.can_decay> 
+		if (<ref1.tag0.decay_exempt>)
+			ref1.timer=-1
+		else
+			if !<def.property_tax>
+				if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)>
+					if !(<ref1.tag0.demolition>)
+						ref1.timer=60*60*24*<def.can_decay>
+					else
+						src.sysmessage @32,,1 This house is improperly placed and has been scheduled for demolition in  <QVAL (<eval <ref1.timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <ref1.timer>/86400> days.>
+						src.sysmessage @32,,1 Unless you redeed it yourself before that time the house and all items within will be lost without refund.
+					endif
+				endif
+			else
+				if (<ref1.tag0.demolition>)
+					src.sysmessage @32,,1 This house is improperly placed and has been scheduled for demolition in  <QVAL (<eval <ref1.timer>/86400> < 1)? <eval (<timer>%86400)/3600> hours and <eval ((<timer>%86400)%3600)/60> minutes.:<eval <ref1.timer>/86400> days.>
+					src.sysmessage @32,,1 Unless you redeed it yourself before that time the house and all items within will be lost without refund.
+				endif
+			endif
+		endif
+	endif
+	if !(<src.isgm>)
+		ref1=<region.tag0.sign>
+		if !(<ref1.link.tag0.private>)
+			if (<src.is_ban>)
+				src.sysmessage @32,,1 This door is locked.
+				return 1
+			elif (<tag0.uidonly>)
+				if (<tag0.uidonly>==<src.uid>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked.
+					return 1	
+				endif
+			elif (<tag0.guild>)
+				if (<tag0.guild>==<src.guild>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked.
+					return 1	
+				endif
+			elif (<tag0.is_guild>)
+				if (<ref1.tag0.is_guild>==<src.guild>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked.
+					return 1
+				endif
+			elif (<tag0.restricted>)
+				if (<tag0.restricted>==1) 
+					if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>)
+						return 0
+					else
+						src.sysmessage @32,,1 This door is locked.
+						return 1
+					endif
+				elif (<tag0.restricted>==2) 	
+					if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>) || (<src.is_friend <ref1>>)
+						return 0
+					else
+						src.sysmessage @32,,1 This door is locked.
+						return 1
+					endif
+				endif
+			else
+				return 0
+			endif
+		else
+			if (<tag0.uidonly>)
+				if (<tag0.uidonly>==<src.uid>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked.
+					return 1	
+				endif
+			elif (<tag0.guild>)
+				if (<tag0.guild>==<src.guild>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked.
+					return 1	
+				endif
+			elif (<tag0.is_guild>)
+				if (<ref1.tag0.is_guild>)
+					if (<ref1.tag0.is_guild>==<src.guild>)
+						return 0
+					else
+						src.sysmessage @32,,1 This door is locked.
+						return 1
+					endif
+				endif
+			elif (<tag0.restricted>) 
+				if (<tag0.restricted>==1)  
+					if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>)
+						return 0
+					else
+						src.sysmessage @32,,1 This door is locked.
+						return 1
+					endif
+				elif (<tag0.restricted>==2) 	
+					if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>) || (<src.is_friend <ref1>>)
+						return 0
+					else
+						src.sysmessage @32,,1 This door is locked.
+						return 1
+					endif
+				endif
+			else
+				if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>) || (<src.is_friend <ref1>>) || (<src.is_access <ref1>>)
+					return 0
+				else
+					src.sysmessage @32,,1 This door is locked
+					return 1
+				endif
+			endif
+		endif	
+	endif
+endif
+
+ON=@Click	
+	if (<tag0.guild>)
+		message [<uid.<tag0.guild>.abbrev>] Guild Members Only.
+		return 1
+	elif (<tag0.uidonly>)
+		message Private
+		message <uid.<tag0.uidonly>.name>
+		return 1
+	elif (<tag0.restricted>)
+		message Restricted Access
+		return 1
+	endif
+			
+ON=@ClientToolTip
+	if (<tag0.guild>)
+		src.addcliloc 1042971, [<uid.<tag0.guild>.abbrev>] Guild Members Only
+		return 1
+	elif (<tag0.uidonly>)
+		src.addcliloc 1070722, Private
+		src.addcliloc 1042971, <uid.<tag.uidonly>.name> Only
+		return 1
+	elif (<tag0.restricted>)
+		if (<tag0.restricted>==1)
+			src.addcliloc 1042971, Restricted Access
+			src.addcliloc 1070722, Owner & Co-owners Only
+			return 1
+		elif (<tag0.restricted>==2)
+			src.addcliloc 1042971, Restricted Access
+			src.addcliloc 1070722, Owner Co-owners & Friends Only
+			return 1
+		endif
+	endif
+
+[FUNCTION f_restrict]
+ref7=<argo>
+if (<ref7.ischar>) || (<ref7.topobj.ischar>)
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+if (<ref7.tag0.uidonly>) || (<ref7.tag0.guild>)
+	src.sysmessage @,,1 You must reset this door before recoding.
+	return 1
+endif
+if (<ref7.type>==t_door) || (<ref7.type>==t_door_locked)
+	if(<ref7.region.uid>==<src.region.uid>))
+		ref7.tag0.restricted=<args>
+		ref7.resendtooltip
+		if (<args>==1)
+			src.sysmessage @,,1 Only the owner & co-owners can open this door.
+		elif (<args>==2)
+			src.sysmessage @,,1 Only the owner, co-owners & friends of the house can open this door.
+		endif
+	endif
+else
+	src.sysmessage @32,,1 That is not a door
+endif
+src.dialog d_secure
+
+[FUNCTION f_guild]
+ref1=<src.region.tag0.sign>
+local.guild=<ref1.tag0.is_guild>
+ref7=<argo>
+if (<ref7.ischar>) || (<ref7.topobj.ischar>)
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+if (<ref7.tag0.uidonly>) || (<ref7.tag0.restricted>)
+	src.sysmessage @,,1 You must reset this door before recoding.
+	return 1
+endif
+if (<ref7.type>==t_door) || (<ref7.type>==t_door_locked) 
+	if (<ref7.region.uid>==<src.region.uid>)
+		ref7.tag0.guild=<local.guild>
+		ref7.resendtooltip
+		src.sysmessage @,,1 Only guild members may now open this door.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 That is not a door
+endif
+src.dialog d_secure
+
+[FUNCTION f_uidonly]
+if <argo.isplayer>
+	src.ctag0.key=<argo>
+	targetf, f_uidonly_door
+	src.sysmessage @,,1 Target the door.
+endif
+
+[FUNCTION f_uidonly_door]
+ref7=<argo>
+if (<ref7.ischar>) || (<ref7.topobj.ischar>)
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+if (<ref7.tag0.restricted>) || (<ref7.tag0.guild>)
+	src.sysmessage @,,1 You must reset this door before recoding.
+	return 1
+endif
+if (<ref7.type>==t_door) || (<ref7.type>==t_door_locked) 
+	if (<ref7.region.uid>==<src.region.uid>)
+		ref7.tag0.uidonly=<src.ctag0.key>
+		ref7.resendtooltip
+		src.sysmessage @,,1 Door coded, only <uid.<src.ctag0.key>.name> can open this door
+	endif
+else
+	src.sysmessage @32,,1 That is not a door	
+endif
+src.ctag0.key=
+src.dialog d_secure
+
+[FUNCTION f_reset]	
+ref7=<argo>
+if (<ref7.ischar>) || (<ref7.topobj.ischar>)
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+//if (<ref7.type>!=t_door) || (<ref7.type>!=t_door_locked)
+//	src.sysmessage @32,,1 That is not allowed
+//	return 1
+//endif
+if (<ref7.type>==t_door_locked)
+	ref7.type=t_door
+endif
+if (<ref7.type>==t_door) || (<ref7.type>==t_door_locked)
+	if (<ref7.region.uid>==<src.region.uid>)
+		ref7.tag0.restricted=
+		ref7.tag0.uidonly=
+		ref7.tag0.guild=
+		ref7.resendtooltip
+		src.sysmessage @,,1 Door Reset
+		src.sysmessage @,,1 Warning, If your house is set to public, anyone will be able to open this door.
+	endif
+else
+	src.sysmessage @32,,1 That is not a door
+endif
+src.dialog d_secure
+
+[FUNCTION f_declare_guild]
+ref1=<src.region.tag0.sign>
+if (<argo.ischar>) || (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+if (<argo.type>!=t_stone_guild)	
+	src.sysmessage @32,,1 That is not allowed
+	return 1
+endif
+if (<argo.type>==t_stone_guild) && (<argo.region.uid>==<src.region.uid>)
+	ref1.tag0.is_guild=<argo.uid>
+	ref1.resendtooltip
+	src.sysmessage @,,1 All <uid.<argo.uid>.name> guild members now have access to this building.
+	src.sysmessage @,,1 Don't forget to set your door codes if areas are/need to be restricted.
+endif
+
+[SPEECH spk_player]
+ON=*lock this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_lock
+	src.sysmessage @,,1 What do you wish to lockdown?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*unlock this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_lock
+	src.sysmessage @,,1 What do you wish to release?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*secure this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_secure
+	src.sysmessage @,,1 What do you wish to secure?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*unsecure this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_secure
+	src.sysmessage @,,1 What do you wish to release?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*move north*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_moven
+	src.sysmessage @,,1 What do you wish to move?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*move south*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_moves
+	src.sysmessage @,,1 What do you wish to move?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*move east*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_movee
+	src.sysmessage @,,1 What do you wish to move?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*move west*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_movew
+	src.sysmessage @,,1 What do you wish to move?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*raise this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_raise
+	src.sysmessage @,,1 What do you wish to raise?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*lower this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_lower
+	src.sysmessage @,,1 What do you wish to lower?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*flip this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_flip
+	src.sysmessage @,,1 What do you wish to flip?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*release this*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_release
+	src.sysmessage @,,1 What do you wish to release?
+	return 1
+else
+	src.sysmessage @32,,1 You must be in your house to do that.
+	return 1
+endif
+
+ON=*bank*
+if !<src.isgm>
+	if <def.can_bank>
+		if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.is_friend>) || (<src.isgm>)
+			src.bankself
+			src.sysmessage You have <src.bankbalance> gold in your Bank Box
+		else
+			return 0
+		endif
+	endif
+else
+	src.bankself
+	return 0
+endif
+
+ON=*eject*
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.is_friend>) || (<src.isgm>) 
+	src.targetf, f_eject
+else
+	return 0
+endif
+
+ON=Ban Person
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	src.targetf, f_add_list ban
+else
+	return 0
+endif
+
+ON=Place trashcan
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	ref1=<src.region.tag0.sign>
+	if (<ref1.tag0.trashcan>)
+		src.sysmessage @32,,1 You already have a trashcan.
+		return 1
+	else
+		serv.newitem i_trashcan
+		new.p=<src.p>
+		new.attr=attr_move_never
+		ref1.tag0.trashcan=<new.uid>
+	endif
+else
+	return 0
+endif
+
+
+ON=Remove trashcan
+if <QVAL <def.account_ownership>? (<src.acc_is_owner>):(<src.is_owner>)> || (<src.is_coowner>) || (<src.isgm>)
+	ref1=<src.region.tag0.sign>
+	if (<ref1.tag0.trashcan>)
+		try uid.<ref1.tag0.trashcan>.remove 
+		ref1.tag.trashcan=
+	else
+		src.sysmessage @32,,1 You have no trashcan to remove.
+		return 1
+	endif
+else
+	return 0
+endif
+
+
+ON=*house commands*
+src.sdialog d_house_commands
+
+
+[DIALOG d_house_commands]
+0,0
+page 0
+resizepic 27 21 2620 445 44 
+checkertrans 32 26 435 34
+button 438 28 4017 4018 1 0 0
+
+dtext 170 35 90 HOUSE VERBAL COMMANDS
+
+resizepic 27 71 2620 445 394 
+checkertrans 32 76 435 384
+
+dtext 60 80 90 COMMAND:
+dtext 60 110 90 Lock This
+dtext 60 130 90 Unlock This
+dtext 60 150 90 Release This
+dtext 60 170 90 Secure This
+dtext 60 190 90 Unsecure This
+dtext 60 210 90 Raise This
+dtext 60 230 90 Lower This
+dtext 60 250 90 Flip This 
+dtext 60 270 90 Move North
+dtext 60 290 90 Move South
+dtext 60 310 90 Move East
+dtext 60 330 90 Move West
+dtext 60 350 90 Ban
+dtext 60 370 90 Eject
+dtext 60 390 90 Place Trashcan
+dtext 60 410 90 Remove Trashcan
+
+dtext 180 80 90 DESCRIPTION:
+dtext 180 110 90 Locks an item down
+dtext 180 130 90 Unlocks an item
+dtext 180 150 90 Releases an item
+dtext 180 170 90 Adds security to containers
+dtext 180 190 90 Removes security from containers
+dtext 180 210 90 Raises targeted item up
+dtext 180 230 90 Lowers targeted item down
+dtext 180 250 90 Flips targeted item.
+dtext 180 270 90 Moves targeted item north
+dtext 180 290 90 Moves targeted item south
+dtext 180 310 90 Moves targeted item east
+dtext 180 330 90 Moves targeted item west
+dtext 180 350 90 Bans a player from your house
+dtext 180 370 90 Removes a player from your house
+dtext 180 390 90 Places a trashcan where you are standing
+dtext 180 410 90 Removes a trashcan
+
+if <def.can_bank>
+dtext 60 430 90 Bank
+dtext 180 430 90 Opens your bank box
+endif
+
+[DIALOG d_house_commands button]
+
+
+
+[FUNCTION f_release]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<argo.region.tag0.sign>==<src.region.tag0.sign>)
+	if (<argo.type>=t_container) || (<argo.type>=t_container_locked) || (<argo.type>=t_chest_locked)
+		if (<argo.attr> & attr_move_never)
+			ref8=<argo>
+			ref8.attr &= ~attr_move_never
+			ref8.message [Released]
+			ref8.events -t_coowner
+			ref8.events -t_friend
+			ref8.events -t_uidonly
+			ref8.events -t_guild
+			ref8.resendtooltip
+			if <def.secure_locks_limit>
+				ref8.tag0.uidonly=
+			endif
+			src.sysmessage @,,1 This <ref8.name> is now unsecured, anyone may access or move it.
+			if <def.secure_locks_limit>
+				ref1=<src.region.tag0.sign>
+				ref1.tag.secure=<eval <ref1.tag0.secure>-1> 
+				ref1.tag0.storage=<eval <ref1.tag0.storage>-<argo.rescount>>
+			endif
+			return 1
+		else	
+			src.sysmessage @32,,1 This <argo.name> was not designated as a secure container.
+			return 1
+		endif
+	else
+		if (<argo.attr> & attr_move_never)
+			ref8=<argo>
+			ref8.attr &= ~attr_move_never
+			ref8.message [Released]
+			ref8.events -t_locked
+			ref8.resendtooltip
+			if <def.secure_locks_limit>
+				ref1=<src.region.tag0.sign>
+				ref1.tag.locked=<eval <ref1.tag0.locked>-1> 
+			endif
+			src.sysmessage @,,1 This <ref8.name> has been unlocked and may now be moved.
+			return 1
+		else
+			src.sysmessage @32,,1 This <argo.name> is not locked down.
+			return 1
+		endif
+	endif
+endif
+
+[FUNCTION f_lock]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<argo.region.tag0.sign>==<src.region.tag0.sign>)
+	if (<argo.type>=t_container) || (<argo.type>=t_container_locked) || (<argo.type>=t_chest_locked)
+		src.sysmessage @32,,1 You must use secure for containers.
+		return 1
+	else
+		if (<argo.attr> & attr_move_never)
+			ref8=<argo>
+			//ref8 &= ~attr_lockeddown
+			ref8.attr &= ~attr_move_never
+			ref8.message [Released]
+			ref8.events -t_locked
+			//ref8.lockeddown 0
+			ref8.resendtooltip
+			if <def.secure_locks_limit>
+				ref1=<src.region.tag0.sign>
+				ref1.tag.locked=<eval <ref1.tag0.locked>-1> 
+			endif
+			return 1
+		else
+			ref1=<src.region.tag0.sign>
+			if (<eval <ref1.tag.locked>> < <eval (<ref1.tag0.maxlockdowns>+<ref1.tag0.inclocks>)>)
+				ref8=<argo>
+				//ref8.attr |= attr_lockeddown
+				ref8.attr |= attr_move_never
+				ref8.message [Locked]
+				ref8.events +t_locked
+				//ref8.lockeddown 1
+				ref8.resendtooltip
+				if <def.secure_locks_limit>
+					ref1=<region.tag0.sign>
+					ref1.tag.locked=<eval <ref1.tag0.locked>+1> 
+				endif
+				return 1
+			else
+				src.sysmessage @32,,1 You have no more lockdown slots available.
+				return 1
+			endif
+		endif
+	endif
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+[FUNCTION f_secure]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<argo.region.tag0.sign>==<src.region.tag0.sign>) 
+	if (<argo.type>==t_container) || (<argo.type>==t_container_locked) || (<argo.type>=t_chest_locked)
+		if (<argo.attr> & attr_move_never)
+			ref8=<argo>
+			//ref8.attr &= ~attr_secure
+			ref8.attr &= ~attr_move_never
+			ref8.message [Released]
+			ref8.events -t_coowner
+			ref8.events -t_friend
+			ref8.events -t_uidonly
+			ref8.events -t_guild
+			//ref8.secure 0
+			ref8.resendtooltip
+			ref8.tag0.uidonly=
+			src.sysmessage @,,1 This <ref8.name> is now unsecured, anyone may access or move it.
+			if <def.secure_locks_limit>
+				ref1=<src.region.tag0.sign>
+				ref1.tag.secure=<eval <ref1.tag0.secure>-1> 
+				ref1.tag0.storage=<eval <ref1.tag0.storage>-<argo.rescount>>
+			endif
+			return 1
+		else
+			ref1=<src.region.tag0.sign>
+			if (<eval <ref1.tag.secure>> < <eval (<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)>)
+				if (<argo.rescount> < <eval (((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*<ddef.max_container_items>)-<ref1.tag0.storage>)>)
+					ref8=<argo>
+					//ref8.attr |= attr_secure
+					ref8.attr |= attr_move_never
+					ref8.message [Secured]
+					ref8.resendtooltip
+					//ref8.secure 1
+					if <def.secure_locks_limit>
+						ref1=<region.tag0.sign>
+						ref1.tag0.secure=<eval <ref1.tag0.secure>+1>
+						ref1.tag0.storage=<eval <ref1.tag0.storage>+<argo.rescount>>
+					endif
+					src.ctag0.cont=<argo.uid>
+					src.dialog d_secure 
+					src.sysmessage @,,1 Who do you wish to have access to this <argo.name>.
+				else
+					src.sysmessage @32,,1 You cannot secure this <argo.name> it contains <argo.rescount> items, you only have <eval (((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*100)-<ref1.tag0.storage>)> secure storage slots left.
+					return 1
+				endif
+			else
+				src.sysmessage @32,,1 You have no more secure container slots available.
+				return 1
+			endif
+		endif
+	else
+		src.sysmessage @32,,1 You must use lockdowns for non containers.		
+		return 1
+	endif
+endif
+
+[FUNCTION f_moven]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>) 
+	ref8=<argo>
+	if (<ref8.region.uid> == <src.region.uid>)
+		ref8.move 0,-1,0
+		ref8.update
+		return 1
+	else
+		src.sysmessage @32,,1 You cannot move this any further.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+[FUNCTION f_moves]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>) 
+	ref8=<argo>
+	if (<ref8.region.uid> == <src.region.uid>)
+		ref8.move 0,1,0
+		ref8.update
+		return 1
+	else
+		src.sysmessage @32,,1 You cannot move this any further.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+[FUNCTION f_movee]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>) 
+	ref8=<argo>
+	if (<ref8.region.uid> == <src.region.uid>)
+		ref8.move 1,0,0
+		ref8.update
+		return 1
+	else
+		src.sysmessage @32,,1 You cannot move this any further.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+[FUNCTION f_movew]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>) 
+	ref8=<argo>
+	if (<ref8.region.uid> == <src.region.uid>)
+		ref8.move -1,,0
+		ref8.update
+		return 1
+	else
+		src.sysmessage @32,,1 You cannot move this any further.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+[FUNCTION f_raise]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>)
+    ref8=<argo>
+        IF <ref8.Z> < <SRC.Z>+17 
+                    ref8.Z=<ref8.Z>+1
+                    RETURN 1
+                ELSE
+                    SRC.MESSAGE @32,,1 You cannot lift this any higher.
+                    RETURN 1
+        ENDIF
+else
+    src.sysmessage @32,,1 That's not in your house!
+    return 1
+endif
+
+[FUNCTION f_lower]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>) 
+    ref8=<argo>
+        IF <ref8.Z> > <SRC.Z>
+                    ref8.Z=<ref8.Z>+-1
+                    RETURN 1
+                ELSE
+                    SRC.MESSAGE @32,,1 You cannot put this into the ground.
+                    RETURN 1
+        ENDIF
+else
+    src.sysmessage @32,,1 That's not in your house!
+    return 1
+endif
+
+[FUNCTION f_flip]
+ref1=<src.region.tag0.sign>
+if (<argo.uid>==<src.uid>) || (<argo.isplayer>) 
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+elif (<argo.link>==<ref1.link>)
+	src.sysmessage @32,,1 You cannot release that.
+	return 1
+endif
+if (<argo.topobj.ischar>)
+	src.sysmessage @32,,1 That would be hillarious... but I am afraid we can't allow it.
+	return 1
+endif
+if (<ref1.region.tag0.sign>==<argo.region.tag0.sign>)
+	ref8=<argo>
+	ref8.flip
+	return 1
+else
+	src.sysmessage @32,,1 Nice try, but that's NOT in your house!
+	return 1
+endif
+
+
+[EVENTS e_house_player_events]
+ON=@ItemDClick
+	if (<act.defname>==<def.vendor_deed_id>) // || (<act.defname>==i_vendor_rental_contract)
+		ref1=<region.tag0.sign>
+		ref1.link.regionchk
+		if !<def.house_list_vendors>
+			if <QVAL <def.account_ownership>? (<acc_is_owner>):(<is_owner>)>
+				if <ref1.link.tag0.private>
+					src.sysmessage @32,,1 You must set your building to public before you can place vendors here.
+					return 1
+				else 
+					if <def.vendor_control>
+						ref1=<region.tag0.sign>
+						if (<ref1.dtag0.vendors> < <ref1.dtag0.max_vendors>)
+							ref1.tag0.vendors += 1
+							return 0
+						else
+							sysmessage @32,,1 You have no available vendor slots
+							sysmessage @32,,1 You must remove an existing vendor before you can place a new one.
+							return 1
+						endif
+					else
+						return 0
+					endif
+				endif
+			else
+				sysmessage @32,,1 Only the home owner may place vendors here.
+				return 1
+			endif
+		else
+			if <QVAL <def.account_ownership>? (<acc_is_owner>):(<is_owner>)> || (<is_coowner>) || (<is_friend>)
+				if <ref1.link.tag0.private>
+					src.sysmessage @32,,1 You must set your building to public before you can place vendors here.
+					return 1
+				else 		
+					if <def.vendor_control>
+						ref1=<region.tag0.sign>
+						if (<ref1.dtag0.vendors> < <ref1.dtag0.max_vendors>)
+							ref1.tag0.vendors += 1
+							return 0
+						else
+							sysmessage @32,,1 You have no available vendor slots
+							sysmessage @32,,1 You must remove an existing vendor before you can place a new one.
+							return 1
+						endif
+					else
+						return 0
+					endif
+				endif
+			else
+				sysmessage @32,,1 Only people on the home lists may place a vendor here.
+				return 1
+			endif
+	endif
+
+ON=@ContextMenuRequest
+if <uid>==<src> && <region.tag0.sign>
+	src.addcontextentry 101,3006207
+endif
+
+ON=@ContextMenuSelect
+if <argn>==101
+	src.go <uid.<region.tag0.sign>.p>
+endif
+
+
+[DIALOG d_door_menu]
+100,100
+page 0
+ref1=<src.region.tag0.sign>
+resizepic 0 123 2620 400 267
+checkertrans 5 128 390 257
+dhtmlgump 20 135 370 40 0 0 <def.bfont_white>Stand where you wish to place the door, then press the button that matches the orientation of the door you require.
+gumppic 30 180 05780
+gumppic 75 180 05781
+gumppic 95 300 05782
+gumppic 135 300 05783
+gumppic 255 300 05784
+gumppic 295 300 05785 
+gumppic 320 180 05786
+gumppic 360 180 05787
+tilepic 15 200 0679 //door 1
+tilepic 55 200 067b //door 2
+tilepic 95 200 0675 //door 3
+tilepic 135 200 0677 //door 4
+tilepic 220 200 067d //door 5
+tilepic 260 200 067f //door 6
+tilepic 300 200 0681 //door 7
+tilepic 340 200 0683 //door 8
+button 10 340 4023 4025 1 0 1657
+button 50 340 4023 4025 1 0 1659
+button 90 340 4023 4025 1 0 1653
+button 130 340 4023 4025 1 0 1655
+button 240 340 4023 4025 1 0 1661
+button 280 340 4023 4025 1 0 1663
+button 320 340 4023 4025 1 0 1665
+button 360 340 4023 4025 1 0 1667
+button 190 200 4017 4018 1 0 0
+dtext 185 220 90 Cancel
+button 190 260 4020 4022 1 0 1
+dtext 180 280 90 Remove
+dtext 190 300 90 Door
+dtext 180 340 90 <eval <ref1.tag0.dused>>/<eval <ref1.dtag0.doors>>
+
+[DIALOG d_door_menu button]
+on=1
+src.targetf, f_remove_door
+src.sysmessage @,,1 Target the door to remove
+src.sysmessage @,,1 It is not advised to remove your front doors...
+return 1
+
+on=1653,1667
+ref1=<src.region.tag0.sign>
+if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)>
+	if (<ref1.dtag0.dused> < <ref1.dtag0.doors>)
+		serv.newitem <hval <argn>>
+		new.p <src.p>
+		new.attr=attr_move_never
+		new.link=<ref1.link>
+		ref1.tag0.dused = <eval <ref1.tag0.dused>+1>
+	else
+		src.sysmessage @32,,1 You have no more doors available.
+		return 1
+	endif
+else
+	src.sysmessage @32,,1 You may only create doors within your house.
+	return 1
+endif
+src.dialog d_door_menu
+
+[FUNCTION f_remove_door]
+ref1=<src.region.tag0.sign>
+if (<argo.link>==<ref1.link>) && <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)>
+	ref1.tag0.dused = <eval <ref1.tag0.dused>-1>
+	ref9=<argo>
+	ref9.remove
+	src.sysmessage @,,1 You have removed the door.
+	return 1
+else
+	src.sysmessage @32,,1 You cannot remove that door.
+	return 1
+endif
+dialog d_door_menu
+
+//----------------------------------------------------------------------------Begin MrSugarCube-------------------------------------------------------------------//
+//Custom House design system	
+[EVENTS e_house_customize]
+ON=@SkillStart
+	IF !(<HOUSEDESIGN>)
+		RETURN 2
+	ENDIF
+	SYSMESSAGE @32,,1 You cannot do this whilst designing a house.
+	RETURN 1
+
+ON=@SkillUseQuick
+	IF !(<HOUSEDESIGN>)
+		RETURN 2
+	ENDIF
+	RETURN 1
+
+ON=@HouseDesignCommit
+	IF (<ISGM>)
+		SYSMESSAGE @,,1 Your new house design has been committed.
+		RETURN 2
+	ENDIF
+	LOCAL.OLDCOST = <EVAL (<ARGN1> * 500)>
+	LOCAL.NEWCOST = <EVAL (<ARGN2> * 500)>
+	LOCAL.CURCOST = <EVAL (<LOCAL.NEWCOST> - <LOCAL.OLDCOST>)>
+	IF (<GOLD> < <LOCAL.CURCOST>)
+		SYSMESSAGE @32,,1 You cannot afford this house design.
+		RETURN 1
+	ENDIF
+	ref1=<src.region.tag0.sign>
+	ref1.tag0.construction=<eval <local.newcost>-<ref1.link.value>>
+	SYSMESSAGE @,,1 Your new house design has been committed.
+	IF (<LOCAL.CURCOST> == 0)
+		SYSMESSAGE @,,1 As the new design costs the same as the previous one, no gold has been taken out of your account.
+	ELSEIF (<LOCAL.CURCOST> < 0)
+		LOCAL.CURCOST = <EVAL (0 - <LOCAL.CURCOST>)>
+		GOLD += <LOCAL.CURCOST>
+		SYSMESSAGE @,,1 As the new design is cheaper than the previous one, <dLOCAL.CURCOST> gold has been returned to you.
+	ELSE
+		GOLD -= <LOCAL.CURCOST>
+		SYSMESSAGE @,,1 <dLOCAL.CURCOST> gold has been taken out of your account to pay for the construction.
+	ENDIF
+	RETURN 2
+
+ON=@HouseDesignExit
+	SYSMESSAGE @,,1 You have left house design mode.
+	timerf 1,f_fixpc
+	RETURN 2
+
+[FUNCTION f_fixpc]
+p=<uid.<src.region.tag0.sign>.p>
+update
+
+//-------------------------------------------------------------------------------End Mr SugarCube----------------------------------------------------------------//
+
+[DIALOG d_static_pricing]
+100,100
+page 0
+ref1=<region.tag0.sign>
+resizepic 0 123 2620 400 267
+checkertrans 5 128 390 257
+dtext 140 140 90 Static Building Pricing 
+dtext 100 180 90 Building footprint <ref1.link.tag0.footprint> 
+gumppic 130 220 2501
+dtextentrylimited 135 220 100 20 90 0 10
+dtext 120 240 90 Enter this property's value
+button 180 300 4023 4025 1 0 1
+dtext 120 330 90 Put this house on the market
+
+[DIALOG d_static_pricing button]
+on=1
+ref1=<region.tag0.sign>
+ref1.link.tag0.value=<argtxt[0]>
+ref1.link.tag0.price=<argtxt[0]>
+ref1.region.tag0.forsale=1
+ref1.link.tag0.private=
+ref1.timer=1	
+
+[FUNCTION f_uidonly_cont]
+if <argo.isplayer>
+	ref8=<src.ctag0.cont>
+	ref8.tag0.uidonly=<argo.uid>
+	ref8.events +t_uidonly
+	ref8.resendtooltip
+	src.sysmessage @,,1 Only <uid.<argo.uid>.name> may now open this <uid.<src.ctag0.cont>.name>.
+	src.ctag0.cont=
+	return 1
+endif
+
+[TYPEDEF t_uidonly]
+ON=@Click
+	message @,,1 <uid.<tag0.uidonly>.name>'s chest
+ON=@DClick
+	if !<src.isgm>
+		if (<src.uid>==<tag0.uidonly>)
+			return 0
+		else
+			src.sysmessage @32,,1 This <name> belongs to <uid.<tag0.uidonly>.name> you cannot open it.
+			return 1
+		endif
+	endif
+
+ON=@Dropon_Self
+	if (<rescount> < <def.max_container_items>) 
+		ref1=<src.region.tag0.sign>
+		if (<ref1.tag0.storage> < <eval ((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*<def.max_container_items>)>)
+			ref1.tag.storage=<eval <ref1.tag0.storage>+1>
+		else
+			src.sysmessage @32,,1 You have reached your maximum storage capacity for this property.
+			return 1
+		endif
+	else
+		src.sysmessage @32,,1 This <name> is full
+		return 1
+	endif
+
+ON=@PickUp_Self
+	ref1=<src.region.tag0.sign>
+	ref1.tag.storage=<eval <ref1.tag0.storage>-1>
+
+ON=@ClientToolTip
+	src.addcliloc 1042971,<uid.<tag0.uidonly>.name>'s
+	src.addcliloc 501644 
+
+[TYPEDEF t_coowner]
+ON=@Click
+	message @,,1 Owner & Co-owner Storage
+ON=@DClick
+ref1=<region.tag0.sign>
+	if !<src.isgm>
+		if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>)
+			return 0
+		else
+			src.sysmessage @32,,1 Only the owner & co-owners can open this <name>.
+			return 1
+		endif
+	endif
+
+ON=@Dropon_Self
+ref1=<region.tag0.sign>
+	if (<rescount> < <def.max_container_items>) 
+		if (<ref1.tag0.storage> < <eval ((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*<def.max_container_items>)>)
+			ref1.tag.storage=<eval <ref1.tag0.storage>+1>
+		else
+			src.sysmessage @32,,1 You have reached your maximum storage capacity for this property.
+			return 1
+		endif
+	else
+		src.sysmessage @32,,1 This <name> is full
+		return 1
+	endif
+
+ON=@PickUp_Self
+	ref1=<src.region.tag0.sign>
+	ref1.tag.storage=<eval <ref1.tag0.storage>-1>
+
+ON=@ClientToolTip
+	src.addcliloc 1042971,Owner & Co-owners Only
+	src.addcliloc 501644 
+
+[TYPEDEF t_friend]
+On=@Click
+	message @,,1 Owner, Co-owner & Friend's Chest
+ON=@DClick
+ref1= <region.tag0.sign>
+	if !<src.isgm>
+		if <QVAL <def.account_ownership>? (<src.acc_is_owner <ref1>>):(<src.is_owner <ref1>>)> || (<src.is_coowner <ref1>>) || (<src.is_friend <ref1>>)
+			return 0
+		else
+			src.sysmessage @32,,1 Only The owner, co-owners & friends of the house can open this <name>.
+			return 1
+		endif
+	endif
+
+ON=@Dropon_Self
+ref1=<src.region.tag0.sign>
+	if (<rescount> < <def.max_container_items>) 
+		if (<ref1.tag0.storage> < <eval ((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*<def.max_container_items>)>)
+			ref1.tag.storage=<eval <ref1.tag0.storage>+1>
+		else
+			src.sysmessage @32,,1 You have reached your maximum storage capacity for this property.
+			return 1
+		endif
+	else
+		src.sysmessage @32,,1 This <name> is full
+		return 1
+	endif
+
+ON=@PickUp_Self
+	ref1=<src.region.tag0.sign>
+	ref1.tag.storage=<eval <ref1.tag0.storage>-1>
+
+ON=@ClientToolTip
+	src.addcliloc 1042971,Owner, Co-Owners & Friends Only
+	src.addcliloc 501644 
+
+[TYPEDEF t_guild]
+ON=@Click
+	ref1=<src.region.tag0.sign>
+	message @,,1 <uid.<ref1.tag0.is_guild>.abbrev> guild chest
+ON=@DClick
+	if !<src.isgm>
+		ref1=<src.region.tag0.sign>	
+			if (<src.guild>=!<ref1.tag0.is_guild>)
+				src.sysmessage @32,,1 Only <uid.<ref1.tag0.is_guild>.abbrev> guild members can open this <name>.
+				return 1
+			else
+				return 0
+			endif
+	endif
+
+ON=@Dropon_Self
+ref1=<src.region.tag0.sign>
+	if (<rescount> < <def.max_container_items>) 
+		if (<ref1.tag0.storage> < <eval ((<ref1.tag0.maxsecure>+<ref1.tag0.incconts>)*<def.max_container_items>)>)
+			ref1.tag.storage=<eval <ref1.tag0.storage>+1>
+		else
+			src.sysmessage @32,,1 You have reached your maximum storage capacity for this property.
+			return 1
+		endif
+	else
+		src.sysmessage @32,,1 This <name> is full
+		return 1
+	endif
+
+ON=@PickUp_Self
+	ref1=<src.region.tag0.sign>
+	ref1.tag.storage=<eval <ref1.tag0.storage>-1>
+
+ON=@ClientToolTip
+ref1=<region.tag0.sign>
+	src.addcliloc 1042971,[<uid.<ref1.tag0.is_guild>.abbrev>]
+	src.addcliloc 501644 
+
+[TYPEDEF t_locked]
+ON=@ClientToolTip
+src.addcliloc 501643
+
+[EVENTS e_no_usage]
+ON=@DClick
+	src.sysmessage @32,,1 You cannot use that where it is.
+	return 1
+
+
+[FUNCTION f_swap]
+ref1=<region.tag0.sign>
+ref2=<ref1.link.more1>
+if (<ref1.link.baseid>==<QVAL (<def0.m_tower>&09c000000))? m_tower:i_multi_tower>
+	local.xy=16x14
+else
+	local.topx=<strarg <ref1.link.multiregion>> 
+	local.topy=<strarg <streat <ref1.link.multiregion>>>
+	local.bottomx= <strarg <streat <streat <ref1.link.multiregion>>>> 
+	local.bottomy= <strarg <streat <streat <streat <ref1.link.multiregion>>>>>
+	local.x <eval (<local.bottomx>-<local.topx>)+1> 
+	local.y <eval <local.bottomy>-<local.topy>>
+	local.xy <dlocal.x>x<dlocal.y>
+endif
+forchars <eval (((<strarg <streat <streat <ref1.link.multiregion>>>>+<strarg <streat <streat <streat <ref1.link.multiregion>>>>>)/2)+2)>
+	if (<region.tag0.sign>==<ref1>)
+		if (strmatch(<obody>,<def.vendor_body_male>)) || (strmatch(<obody>,<def.vendor_body_female>))
+			src.sysmessage @32,,1 Warning! There are vendors in the building.
+			src.sysmessage @32,,1 To continue, remove them and select convert again.
+			return 1
+		endif
+	endif
+endfor
+if (<eval <ref1.link.value>+<tag0.boughtstorage>+<tag0.xtra_coowners>+<tag0.xtra_friends>> < <serv.multidef.<QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>foundation_<local.xy>.value>)
+	local.extra=<serv.multidef.<<QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>foundation_<local.xy>>.value>-<eval (<link.value>+<tag0.boughtstorage>+<tag0.xtra_coowners>+<tag0.xtra_friends>)>>
+	if (<ref2.gold> >= <dlocal.extra>) 
+		ref2.gold -= <dlocal.extra>
+		ref2.sysmessage @,,1 <dlocal.extra> gp has been deducted from your bank for this conversion.
+		f_bank_items
+		local.p=<ref1.link.p>
+		if <serv.list.<ref2.account>_houses.count> 
+			if (<serv.list.<ref2.account>_houses.count> < 2)
+				serv.list.<ref2.account>_houses.clear
+			else	
+				serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+			endif
+		endif
+		ref1.link.remove
+		src.newitem <QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>foundation_<local.xy>
+		new.more1 <src>
+		new.p <local.p>
+		new.multicreate 
+		new.region.tag0.convert=1
+		serv.list.<src.account>_houses.add <new>
+		ref2.sysmessage @,,1 You MUST Double Click your house sign to ensure correct initialisation
+		ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+	else
+		src.sysmessage @32,,1 You lack the funds to convert this house.
+		return 1
+	endif
+else
+	local.total=<eval ((<ref1.link.value>+<ref1.tag0.boughtstorage>+<ref1.tag0.xtra_coowners>+<ref1.tag0.xtra_friends>)-<serv.multidef.<QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>foundation_<local.xy>.value>)>
+	ref2.gold += <dlocal.total>
+	ref2.sysmessage @,,1 You have been refunded the difference of <dlocal.total>gp for this conversion.
+	f_bank_items
+	local.p=<ref1.link.p>
+	if <serv.list.<ref2.account>_houses.count> 
+		if (<serv.list.<ref2.account>_houses.count> < 2)
+			serv.list.<ref2.account>_houses.clear
+		else	
+			serv.list.<ref2.account>_houses.<serv.list.<ref2.account>_houses.findelem <ref1.link>>.remove
+		endif
+	endif
+	ref1.link.remove
+	src.newitem <QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>foundation_<local.xy>
+	new.more1 <ref2>
+	new.p <local.p>
+	new.multicreate
+	new.region.tag0.convert=1
+	serv.list.<ref2.account>_houses.add <new>
+	ref2.sysmessage @,,1 You MUST Double Click your house sign to ensure correct initialisation
+	ref2.sysmessage @,,1 The number of houses you own is now <serv.list.<ref2.account>_houses.count>
+endif
+
+[ITEMDEF i_vendor_recover_deed]
+ID=i_deed
+TYPE=t_script
+NAME=Vendor Recovery Ticket
+
+ON=@DCLICK
+LINK.P=<SRC.P>
+
+
+
+[function regionchk]
+ref1=<region.tag0.sign>
+REF1=<ref1.link>
+local.1=<strarg <streat <streat <ref1.multiregion>>>>
+local.2=<strarg <streat <streat <streat <ref1.multiregion>>>>>
+If (<dlocal.1> > <dlocal.2>)
+	local.radius = <local.1>
+else
+	local.radius = <local.2>
+endif
+forchars <dlocal.radius>
+		ref2=<uid>
+		if (<ref2.obody>==<def.vendor_obody_male>) || (<ref2.obody>==<def.vendor_obody_female>) 
+			local.vendcount += 1
+		endif
+endfor
+uid.<ref1.tag0.sign>.tag0.vendors <dlocal.vendcount>
+
+[function visitor_count]
+if !<src.isgm>
+	uid.<src.region.tag0.sign>.more2 +=1
+
+endif
+
+
+[TYPEDEF t_deed]
+ON=@Targon_Ground
+ref2 = <uid>
+if (strmatch(*<serv.itemdef.<ref2>.more>*, <QVAL (<def0.m_tower>&09c000000)? m_:i_multi_>))
+	args <serv.itemdef.<more>.multiregion>
+	If (<dargv[2]> > <dargv[3]>)
+		local.radius = <argv[2]>
+	else
+		local.radius = <argv[3]>
+	endif
+	if (strmatch(*<def0.m_tower>&09c000000)? m_:i_multi_>*,<serv.itemdef.<more>.defname>))
+		newitem i_multi_checker
+		new.p <src.targp>
+		if <serv.map(<new.p>).isneartype t_multi,<eval <local.radius>+6>,1> 
+	 		src.sysmessage @32,,1 You cannot build this close to another house, try moving away.
+	       		new.remove
+	       		return 1
+		endif
+	new.remove
+	endif
+endif
+ 
+[ITEMDEF i_multi_checker]
+Name = Multi Checker
+ID = i_memory
+TYPE = t_script
+		
+[function rate]
+src.sysmessage @,,1 The maintenance rate for houses in this area is <qval <region.region.tag0.maintenance_override>? <region.region.dtag0.maintenance_override>:<ddef.property_tax>>% of the house's value.
+
+[function all_house_timer_reset]
+local.p <src.p>
+for 0 254
+	if (<serv.maplist.<dlocal._for>>)
+		src.p=0,0,0,<dlocal._for>
+		serv.log processing map <dlocal._for>
+  		src.f_house_timer_activate
+ 	endif
+endfor
+src.p <local.p>
+
+[function f_house_timer_activate]
+foritems 7168
+	if (<type>==t_multi)
+		ref1 <region.tag0.sign>
+		ref1.timer=60*60*24*<def.can_decay>
+	endif
+endfor
+
+[EOF]
