@@ -429,7 +429,5 @@ create_spawner shipwright,,,,,,4564,2298,-2,2,5,10,-1,1,1,1,0,0,0,0,0
 create_spawner fisherman,,,,,,4547,2376,-2,2,5,10,-1,1,1,1,0,0,0,0,0
 create_spawner waiter,,,,,,4540,2306,-1,2,5,10,-1,4,1,1,0,0,0,0,0
 create_spawner fisherman,,,,,,4554,2389,-2,2,5,10,-1,1,1,1,0,0,0,0,0
-create_spawner treasurelevel1h,,,,,,4534,2349,-2,2,5,10,-1,0,1,1,0,0,0,0,0
-create_spawner treasurelevel1h,,,,,,4535,2349,-2,2,5,10,-1,0,1,1,0,0,0,0,0
 
 [EOF]

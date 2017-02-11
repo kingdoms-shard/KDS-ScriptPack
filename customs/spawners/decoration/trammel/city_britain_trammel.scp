@@ -8102,7 +8102,7 @@ new.color=0D//
 new.attr=attr_static //
 new.p=1390 1603 30 1//
 //bale of cotton//
-serv.newitem=0DF9// 
+serv.newitem=0DF9//
 new.color=03//
 new.attr=attr_static //
 new.p=1329 1587 72 1//
@@ -8220,7 +8220,7 @@ serv.newitem=0E1D//
 new.attr=attr_static //
 new.p=1342 1588 76 1//
 //ball of yarn//
-serv.newitem=0E1F// 
+serv.newitem=0E1F//
 new.color=03//
 new.attr=attr_static //
 new.p=1328 1590 76 1//
@@ -12724,11 +12724,11 @@ NEW.NAME=Gung Farmer's Bridge//
 new.attr=attr_static //
 new.p=1396 1756 -5 1//
 //Trash Can near Britain bankTrashChest//
-serv.newitem=0E41//
-NEW.Name=Please Keep The Streets Clean, Place All Unwanted Items Into This Trash Can And They Will Be Removed At Once.//
-NEW.COLOR=408//
-new.attr=attr_static //
-new.p=1425 1701 3 1//
+//serv.newitem=0E41//
+//NEW.Name=Please Keep The Streets Clean, Place All Unwanted Items Into This Trash Can And They Will Be Removed At Once.//
+//NEW.COLOR=408//
+//new.attr=attr_static //
+//new.p=1425 1701 3 1//
 //
 //Arcane Circle near Britain bankArcaneCircleAddon//
 //serv.newitem=307F//
@@ -12798,5 +12798,5 @@ new.p=1398 1741 1 1//
 SERV.NEWITEM=1881//
 new.attr=attr_static //
 new.p=1395 1738 0 1//
-		
-[EOF]		
+
+[EOF]

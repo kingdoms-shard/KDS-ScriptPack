@@ -1,5 +1,5 @@
 //****************************************************************************
-// SPHERE by : Menasoft ©1997-2014
+// SPHERE by : Menasoft ï¿½1997-2014
 // www.sphereserver.net
 // All SPHERE script files and formats are copyright Menasoft & Partners.
 // This file may be freely edited for personal use, but may not be distributed
@@ -68,12 +68,27 @@ RESOURCES=1.0 mr_grass
 // Resources for fishing skill //
 /////////////////////////////////
 
+[FUNCTION f_water_mob_spawn]
+IF (<eval RAND(100)> < 10)
+	DORAND 3
+		SERV.NEWNPC c_sea_serpent
+		SERV.NEWNPC c_slime
+		SERV.NEWNPC c_elem_water
+	ENDDO
+	NEW.UPDATEX
+	NEW.ANIM 12
+	NEW.ATTACK <SRC>
+ENDIF
+
 [REGIONRESOURCE mr_fish1]
 AMOUNT=9,30        // This many...
 REAP=i_fish_big_1  // ...of this item...
 REAPAMOUNT=1,3
 SKILL=1.0,100.0    // ...can be harvested if the player has this much skill.
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	call f_water_mob_spawn
 
 [REGIONRESOURCE mr_fish2]
 AMOUNT=9,30
@@ -82,6 +97,9 @@ REAPAMOUNT=1,3
 SKILL=1.0,100.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	call f_water_mob_spawn
+
 [REGIONRESOURCE mr_fish3]
 AMOUNT=9,30
 REAP=i_fish_big_3
@@ -89,12 +107,18 @@ REAPAMOUNT=1,3
 SKILL=1.0,100.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	call f_water_mob_spawn
+
 [REGIONRESOURCE mr_fish4]
 AMOUNT=9,30
 REAP=i_fish_big_4
 REAPAMOUNT=1,3
 SKILL=1.0,100.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	call f_water_mob_spawn
 
 [REGIONTYPE r_default_water t_water]
 RESOURCES=60.0 mr_nothing  // Most of the time fishing produces nothing.
@@ -119,12 +143,27 @@ SRC.SOUND={025 1 026 1 027 1 010 1 011 1 012 1 013 1}
 // Resources for lumberjacking skill //
 ///////////////////////////////////////
 
+[FUNCTION f_tree_mob_spawn]
+IF (<eval RAND(100)> <= 10)
+	DORAND 3
+		SERV.NEWNPC c_reaper
+		SERV.NEWNPC c_pixie
+		SERV.NEWNPC c_ent
+	ENDDO
+	NEW.UPDATEX
+	NEW.ANIM 12
+	NEW.ATTACK <SRC>
+ENDIF
+
 [REGIONRESOURCE mr_tree]
 AMOUNT=9,30
 REAP=i_log
 REAPAMOUNT=1,3
 SKILL=1.0,80.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	call f_tree_mob_spawn
 
 [REGIONTYPE r_default_tree t_tree]
 // All trees produce wood by default.
@@ -135,12 +174,31 @@ RESOURCES=40.0 mr_tree
 // Resources for mining skill //
 ////////////////////////////////
 
+[FUNCTION f_earth_mob_spawn]
+IF (<eval RAND(100)> < 10)
+	DORAND 3
+		SERV.NEWNPC c_elem_earth
+		SERV.NEWNPC c_elem_granite
+		SERV.NEWNPC <local.mob>
+	ENDDO
+	NEW.UPDATEX
+	NEW.ANIM 12
+	NEW.ATTACK <SRC>
+ENDIF
+
 [REGIONRESOURCE mr_iron]
 AMOUNT=9,30
 REAP=i_ore_iron
 REAPAMOUNT=1,3
 SKILL=1.0,30.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_rusty]
 AMOUNT=8,21
@@ -149,12 +207,26 @@ REAPAMOUNT=1,3
 SKILL=1.0,30.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_bronze]
 AMOUNT=4,12
 REAP=i_ore_bronze
 REAPAMOUNT=1,3
 SKILL=1.0,30.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_old_copper]
 AMOUNT=7,18
@@ -163,12 +235,26 @@ REAPAMOUNT=1,3
 SKILL=1.0,30.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_dull_copper]
 AMOUNT=5,25
 REAP=i_ore_dull_copper
 REAPAMOUNT=1,3
 SKILL=1.0,30.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_shadow]
 AMOUNT=5,16
@@ -177,12 +263,26 @@ REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_copper]
 AMOUNT=5,20
 REAP=i_ore_copper
 REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_gold]
 AMOUNT=3,10
@@ -191,12 +291,26 @@ REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_rose]
 AMOUNT=3,9
 REAP=i_ore_rose
 REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_agapite]
 AMOUNT=3,8
@@ -205,12 +319,26 @@ REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_bloodrock]
 AMOUNT=3,6
 REAP=i_ore_bloodrock
 REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_silver]
 AMOUNT=1,2
@@ -219,12 +347,26 @@ REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_verite]
 AMOUNT=2,6
 REAP=i_ore_verite
 REAPAMOUNT=1,3
 SKILL=30.0,60.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_Valorite]
 AMOUNT=2,4
@@ -233,6 +375,13 @@ REAPAMOUNT=1,3
 SKILL=60.0,110.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_mytheril]
 AMOUNT=2,3
 REAP=i_ore_mytheril
@@ -240,12 +389,26 @@ REAPAMOUNT=1,3
 SKILL=60.0,110.0
 REGEN=60*60*10
 
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
+
 [REGIONRESOURCE mr_blackrock]
 AMOUNT=1,3
 REAP=i_ore_blackrock
 REAPAMOUNT=1,3
 SKILL=60.0,110.0
 REGEN=60*60*10
+
+ON=@RESOURCEFOUND
+	ref1=<argo>
+	local.more1=<ref1.more1>
+	local.mob= <strsub 3 4 <local.more1>>
+	local.mob= c_elem_<local.mob>
+	call f_earth_mob_spawn
 
 [REGIONRESOURCE mr_diamond]
 AMOUNT=1,4

@@ -91,6 +91,12 @@ scripts/sphere_template_loot.scp
 scripts/sphere_template_vend.scp
 
 // Customs //
+scripts/customs/
+scripts/customs/functions/
+scripts/customs/events/
+scripts/customs/systems/
+
+// Spawner //
 scripts/customs/spawners/
 scripts/customs/spawners/npcs/
 scripts/customs/spawners/npcs/felucca/

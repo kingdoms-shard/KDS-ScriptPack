@@ -1,0 +1,145 @@
+// Improved Stables - Mordaunt
+//
+// Pets are stored on the player not the stable NPC so dead/removed NPCs don't result in lost pets.
+// 
+// WARNING! switching storage_type will prevent players from accessing the other list, so chose if you want character stables or
+// account based stables and stick to it. 
+//
+// Open Jobanimal.scp and replace the ON=*Retrieve* & ON=*Stable* triggers with these:
+//
+//ON=*Retrieve*
+//	IF <NPC>==BRAIN_ANIMAL_TRAINER
+//		SRC.DIALOG d_stable
+//	ENDIF
+//
+//ON=*Stable*
+//	IF <NPC>==BRAIN_ANIMAL_TRAINER
+//		SRC.TARGETF f_stable
+//	ENDIF
+//
+//
+// Cleanup:  In sphere_serv.triggers.scp:
+// 
+// [FUNCTION f_onchar_delete]
+// f_char_clean
+//
+// [FUNCTION f_onaccount_delete]
+// f_account_clean
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[DEFNAME settings]
+storage_type    0	// 0 = character stable 1= account stable (all characters on the account can access)
+stable_limit	30	// Maximum # of animals that can be stabled per character/account		
+
+[FUNCTION f_stable]
+ref1=<src>
+ref2=<argo>
+	if (<ref2.isplayer>) || (<ref2.body>==c_man) || (<ref2.body>==c_woman)
+		src.sysmessage @32,,1 You cannot do that
+		return 1
+	endif
+	if (<ref2.flags> &statf_conjured)
+		src.sysmessage @32,,1 You cannot stable conjured creatures.
+		return 1
+	endif
+	if <serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count>
+		if (<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count> < <def.stable_limit>)
+			if !(<ref2.ismypet>)
+				src.sysmessage @32,,1 <ref2.name> is not your pet.
+				return 1
+			endif
+			ref2.f_custom_shrink
+			return 1
+		else
+			src.sysmessage @32,,1 Your stable is full
+			return 1
+		endif
+	else
+		if !(<ref2.ismypet>)
+			src.sysmessage @32,,1 <ref2.name> is not your pet.
+			return 1
+		endif
+		ref2.f_custom_shrink
+	endif
+	
+[function f_custom_shrink]
+ref1=<src>
+ref2=<uid>
+ref2.shrink 
+ref3 <hval <ref2.actarg1>&~030000000>
+ref3.cont <ref1.findlayer.layer_pack>
+ref3.attr 040a4
+if <serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count>
+	if (<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.findelem <ref3>> == -1)
+		serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.add <ref3>
+		return 1
+	endif
+else
+	serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.add <ref3>
+	return 1
+endif
+
+
+[DIALOG d_stable]
+0,0
+Page 0
+ref1 <src>
+gumppictiled 0 0 410 412 0a40  
+checkertrans 1 1 408 410
+dtext 180 20 90 Mystic Stables
+dtext 120 55 90 <serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count> pets stabled (<ddef.stable_limit> max <qval <def.storage_type>? per account: >)
+dtext 30 80 90 Retrieve
+dtext 230 80 90 Name
+
+Page 1
+	if <serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count>
+		for 0 <eval (<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count> -1)>
+			if (<local._for> >=5) && (<eval (<local._for> % 5 == 0)
+				button 368 12 0fa5 0fa7 0 <eval ((<local._for> / 5) + 1)>
+        			dtext 305 12 <def.font_general> Next Page
+        			page <eval ((<local._for> / 5) + 1)>
+        			button 12 12 0fae 0fb0 0 <eval (<local._for> / 5))>
+        			dtext 42 12 <def.font_general> Previous Page
+        		endif
+			local.color <uid.<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.<dlocal._for>>.color>
+			local.id <uid.<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.<dlocal._for>>.id>
+			button 40 <eval (120+ (<local._for> % 5) * 60)> 4005 4007 1 0 <eval <local._for>+1>
+			tilepichue 100 <eval (120+ (<local._for> % 5) * 60)> <local.id> <dlocal.color>
+			dtext 200 <eval (120+ (<local._for> % 5) * 60)> 90 <uid.<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.<dlocal._for>>.name>
+	endfor
+	else
+		dtext 100 200 90 You have no animals stabled
+	endif
+
+[DIALOG d_stable BUTTON]
+ON=1,999// return
+ref1 <uid>
+		ref2 = <uid.<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.<eval (<argn>-1)>>>
+		ref2.attr 04020
+		ref2.cont <ref1.findlayer.layer_pack>
+		dclick <ref2>
+		if (<serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.count> < 2)
+			serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.clear
+		else
+			serv.list.<qval <def.storage_type>? <ref1.account>:<ref1>>_stabled.<eval (<argn>-1)>.remove
+		endif
+
+[FUNCTION f_char_clean]
+for 0 <serv.list.<src>_stabled.count>
+	forinstances t_figurine
+		if (<uid> == <serv.list.<src>_stabled.<dlocal._for>>)
+			remove
+		endif
+	endfor
+endfor
+serv.list.<src>_stabled.clear
+
+[FUNCTION f_account_clean]
+for 0 <serv.list.<args>_stabled.count>
+	forinstances t_figurine
+		if (<uid> == <serv.list.<args>_stabled.<dlocal._for>)
+			remove
+		endif
+	endfor
+endfor
+serv.list.<args>_stabled.clear

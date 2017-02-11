@@ -11,11 +11,11 @@ artist				{c_ARTIST 1 c_ARTIST_F 1}
 baker				{c_baker 1 c_baker_f 1}
 banker				{c_banker 1 c_banker_f 1}
 bard				{c_BARD 1 c_BARD_F 1}
-bardguildmaster 		{c_BARD 1 c_BARD_F 1} 
+bardguildmaster 		{c_guild_bard 1 c_guild_bard_f 1}
 barkeeper			{c_tavernkeeper 1 c_tavernkeeper_f 1}
 beekeeper			{c_beekeeper 1 c_beekeeper_f 1}
 blacksmith			{c_blacksmith 1 c_blacksmith_f 1}
-blacksmithguildmaster		{c_guild_blacksmith 1 c_guild_blacksmith_f 1}
+blacksmithguildmaster		{c_guild_miner 1 c_guild_miner_f 1}
 boatpainter			{c_BOATPAINTER 1 c_BOATPAINTER_F 1}
 bodysculptor			{c_BODY_SCULPTOR 1 c_BODY_SCULPTOR_F 1}
 bowyer				{c_bowyer 1 c_bowyer_f 1}
@@ -34,7 +34,7 @@ fisherman			{c_fisher 1 c_fisher_f 1}
 furtrader			{c_furtrader 1 c_furtrader_f 1}
 harbormaster			{c_harbormaster 1 c_harbormaster_f 1}
 healer				{c_healer 1 c_healer_f 1}
-healerguildmaster		{c_GUILD_HEALER 1 c_GUILD_HEALER_F 1}
+healerguildmaster		{c_guild_healer 1 c_guild_healer_f 1}
 Herbalist			{c_herbalist 1 c_herbalist_f 1}
 hirebard			{c_peasant 1 c_peasant_f 1}
 hirefighter			{c_peasant 1 c_peasant_f 1}
@@ -43,7 +43,7 @@ hiresailor			{c_peasant 1 c_peasant_f 1}
 innkeeper			{c_innkeeper 1 c_innkeeper_f 1}
 jeweler				{c_jeweler 1 c_jeweler_f 1}
 Mage				{c_mageshop 1 c_mageshop_f 1}
-mageguildmaster			{c_GUILD_ARCANE 1 c_GUILD_ARCANE_F 1}
+mageguildmaster			{c_guild_arcane 1 c_guild_arcane_f 1}
 mapmaker			{c_mapmaker 1 c_mapmaker_f 1}
 merchant			{c_merchant 1 c_merchant_f 1}
 merchantguildmaster		{c_GUILD_MERCHANT 1 c_GUILD_MERCHANT_F 1}
@@ -58,7 +58,7 @@ realestatebroker		{c_architect 1 c_architect_f 1}
 scribe				{c_scribe 1 c_scribe_f 1}
 shipwright			{c_shipwright 1 c_shipwright_f 1}
 tailor				{c_tailor 1 c_tailor_f 1}
-tailorguildmaster		{c_GUILD_CLOTHIER 1 c_GUILD_CLOTHIER_F 1}
+tailorguildmaster		{c_guild_clothier 1 c_guild_clothier_f 1}
 tanner				{c_tanner 1 c_tanner_f 1}
 tavernkeeper			{c_tavernkeeper 1 c_tavernkeeper_f 1}
 thiefguildmaster		{c_GUILD_THIEF 1 c_GUILD_THIEF_F 1}
@@ -70,9 +70,7 @@ wanderinghealer			{c_HEAL_WANDER 1 c_HEAL_WANDER_F 1}
 warriorguildmaster		{c_GUILD_WARRIOR 1 c_GUILD_WARRIOR_F 1}
 weaponsmith			{c_WEAPONSMITH_BLADE 1 c_WEAPONSMITH_BLADE_F 1 c_WEAPONSMITH_BLUNT 1 c_WEAPONSMITH_BLUNT_F 1}
 weaver				{c_weaver 1 c_weaver_f 1}
-weaverguildmaster		{c_weaver_guildmaster 1 c_weaver_guildmaster_f 1}
 rat				{c_rat}
-treasurelevel1h 		{i_locked_chest_1}
 
 [DEFNAME MONSTERS_SPAWNER]
 Spectre		{c_spectre}
@@ -237,7 +235,7 @@ Skeletalmage 	{c_skeleton_mage}
 
 [DEFNAME HythlothDungeon]
 Imp		{c_imp}
-Firegargoyle	{c_gargoyle_fire}	
+Firegargoyle	{c_gargoyle_fire}
 Gargoyle	{c_gargoyle}
 Stonegargoyle	{c_gargoyle_stone}
 
@@ -319,8 +317,8 @@ HireSailor		{c_sailor 1 c_sailor_f 1}// no hire npcs using base ones.
 HireThief		{c_thief 1 c_thief_f 1}// no hire npcs using base ones.
 HirePaladin		{c_paladin 1 c_paladin_f 1}// no hire npcs using base ones.
 Escortablemage		{c_mage 1 c_mage_f 1}// no hire npcs using base ones.
-Seekerofadventure	{c_noble 1 c_noble_f 1}// no hire npcs using base ones. 
-Noble			{c_noble 1 c_noble_f 1}	
+Seekerofadventure	{c_noble 1 c_noble_f 1}// no hire npcs using base ones.
+Noble			{c_noble 1 c_noble_f 1}
 olaeni			{c_bird 1 c_bird_crow 1 C_BIRD_MAGPIE 1 C_BIRD_TROPICAL 1 C_BIRD_JUNGLE 1 c_bird_raven 1}//not present using birds instead lol! ;D
 bolaevin		{c_bird 1 c_bird_crow 1 C_BIRD_MAGPIE 1 C_BIRD_TROPICAL 1 C_BIRD_JUNGLE 1 c_bird_raven 1} //not present using birds instead lol! ;D
 athialon		{c_bird 1 c_bird_crow 1 C_BIRD_MAGPIE 1 C_BIRD_TROPICAL 1 C_BIRD_JUNGLE 1 c_bird_raven 1}//not present using birds instead lol! ;D
@@ -457,15 +455,15 @@ CuSidhe				{c_cu_sidhe}
 DryadA				{c_dryad}
 Satyr				{c_satyr}
 LadyLissith			{c_lady_lissith}
-LadySabrix			{c_lady_sabrix}		
-Irk				{c_irk}			
-Swoop				{c_swoop}		
-Gnaw				{c_gnaw}		
-spite				{c_spite}		
-guile				{c_guile}		
-Malefic				{c_spider_malefic} 	
-Virulent			{c_spider_virulent} 	
-silk				{c_spider_silk} 	
+LadySabrix			{c_lady_sabrix}
+Irk				{c_irk}
+Swoop				{c_swoop}
+Gnaw				{c_gnaw}
+spite				{c_spite}
+guile				{c_guile}
+Malefic				{c_spider_malefic}
+Virulent			{c_spider_virulent}
+silk				{c_spider_silk}
 giantblackwidow			{c_spider_dread}	//no black widow using dread spider
 keeperofchivalry		{c_paladin}		//no keeper of chivalry using paladin
 holymage			{c_mage 1 c_mage_f 1}	//no holy mage using mage
@@ -506,7 +504,7 @@ Crystalelemental		{c_crystal_elemental}
 Dryad				{c_dryad}
 
 merchant		{c_provis 1 c_provis_f 1}
-actor			{c_actor 1 c_actor_f 1}		
+actor			{c_actor 1 c_actor_f 1}
 thief			{c_thief 1 c_thief_f 1}
 leatherworker		{c_tanner 1 c_tanner_f}
 miner			{c_miner 1 c_miner_f 1}
@@ -546,7 +544,7 @@ hiryu				{c_hiryu}
 raiju				{c_rai_ju}
 
 [DEFNAME TerMerSpawns]		//none of this exists, create it
-AcidElementalRenowned		{c_rat}		
+AcidElementalRenowned		{c_rat}
 AcidSlug			{c_rat}
 AncientLichRenowned		{c_rat}
 Barreraak			{c_rat}

@@ -1,0 +1,363 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// Death Menu v2.3 Mordaunt
+//
+// This system allows players to choose to resurrect immediately at the nearest town/shrine
+// or wait for assistance from other players.
+// I'm sure there's probably an easier/shorter and neater way to do this without all the
+// defnames and such, but this is my first new (kinda) script in over a year so I'm a tad rusty
+//
+// IMPORTANT - Since shrines do not appear to be defined in Tokuno they will not appear unless added
+// to defname section for this script
+//
+// Installation: Set event e_death_menu under an all players event on the @death trigger
+// 		For Dungeon of Rock (Islhenar) to work, dungeon needs to be renamed in
+//		sphere_map2.scp to Rock Dungeon to avoid confusion.
+//
+//		Under an all player function add the following:
+//
+// If you do not wish to add this event, make sure you add the below triggers to which ever player event you are putting it under.
+// 		[EVENTS e_death_menu]
+//		ON=@Death
+//			if !(<isgm>)
+//				TIMERF 3, f_closest //timer allows for death screen change
+//			endif
+//
+//		ON=@Login //This section to allow for those killed on logout who HAVE NOT used menu
+//			if (<flags>&statf_dead) && !(<isgm>)
+//				f_closest
+//			endif
+//
+// New in 2.2:	Brand new gump, felt the old one was looking tired
+//		Added resurrect on the spot option, limited to once per day
+//		Added timer to reopen gump in 60 secs if player not resurrected after opting to wait
+//
+// Fixed in 2.3:Moonglow co-ords corrected
+//		extra > under loging event removed
+/////////////////////////////////////////////////////////////////////////////////////////
+
+[defname locations]
+//MAPS
+map0 Trammel
+map1 Fellucia
+map2 Ilshenar
+map3 Malas
+map4 Tokuno Islands
+
+//TOWNS
+//Towns for trammel AND fellucia
+dest1_0 1495,1629,10 Britain
+dest1_1 1383,3815,0 Jhelom
+dest1_2 3714,2220,20 Magincia
+dest1_3 4442,1172,0 Moonglow
+dest1_4 3646,2587,0 Occlo
+dest1_5 3010,3371,15 Serpent's Hold
+dest1_6 632,2233,0 Skara Brae
+dest1_7 1867,2780,0 Trinsic
+dest1_8 2899,676,0 Vesper
+dest1_9 546,992,0 Yew
+dest1_10 2275,1210,0 Cove
+dest1_11 2706,2163,0 Buccaneer's Den
+dest1_12 2466,544,0 Minoc
+dest1_13 3732,1279,0 Nujel'm
+
+//Ilshenar towns
+dest2_0 1201,1133,-25,2 Lake Shire
+
+//Malas towns
+dest3_0 1013,510,-70,3 Luna
+dest3_1 1964,1350,-87,3 Umbra
+
+//Tokuno TOwns
+dest4_0 791,1293,25,4 Zento
+
+//SHRINES
+//Shrines for trammel AND fellucia
+shrine1_0 2491,3926,0 Valor
+shrine1_1 4213,563,42 Honesty
+shrine1_2 1298,634,16 Justice
+shrine1_3 1601,2492,5 Spirituality
+shrine1_4 1730,3527,3 Honor
+shrine1_5 4273,3700,0 Humility
+shrine1_6 1857,867,-1 Compassion
+shrine1_7 1455,855,0 Chaos
+shrine1_8 3354,290,4 Sacrifice
+
+//Ilshenar Shrines
+shrine2_0 529,212,-42,2 Valor
+shrine2_1 1748,236,58,2 Chaos
+shrine2_2 2283,1288,-30,2 sacrifice
+shrine2_3 724,1356,-61,2 Honesty
+shrine2_4 1216,468,-13,2 Compassion
+shrine2_5 1528,1341,-3,2 Spirituality
+shrine2_6 287,1019,0,2 Humility
+shrine2_7 748,731,-29,2 Honor
+shrine2_8 987,1002,-36,2 Justice
+
+
+//Dungeon fudge section
+//Since dugeons are off to one side of the map they will always show the same closest town/shrine
+//These defs are to allow a fudge to use the dungeon entrance as the point of reference.
+//Dungeons contain flags 0880 any extra dungeons MUST be placed in this list
+//Co-ord MUST be set to just OUTSIDE entrance
+//For loop under closest function will need increasing for any added dungeons
+
+//DUNGEONS
+//Start of Trammel & Fellucia
+dungeon_chk0 Destard 1176,2636,0
+dungeon_chk1 Wrong 2041,217,14
+dungeon_chk2 Despise 1298,1082,0
+dungeon_chk3 Deceit 4059,485,0
+dungeon_chk4 Shame 515,1564,0
+dungeon_chk5 Hythloth 4723,3822,0
+dungeon_chk6 Covetous 2499,919
+dungeon_chk7 Wind 1465,989,0
+dungeon_chk8 Fire
+dungeon_chk9 Ice
+dungeon_chk10 Terathan keep
+dungeon_chk11 Ophidian lair
+
+//Start of Ilshenar
+dungeon_chk12 Rock 1786,572,68//rock dungeon //In sphere_map2.scp is named dungeon of rock, needs changing to work
+dungeon_chk13 Spider 1418,915,-19 //spider cave
+dungeon_chk14 Spectre 1363,1033,-8, //spectre dungeon
+dungeon_chk15 Blood 1747,1227,-1 //Blood DUngeon
+dungeon_chk16 Ratman 1031,1154,-24 //Ratman cave
+dungeon_chk17 Ankh 576,1138,-100, //Ankh Dungeon
+dungeon_chk18 Wisp 651,1302,-58 //Wisp Dungeon
+dungeon_chk19 Cyclops 907,1361,-21 //Cyclops dungeon
+dungeon_chk20 Sorcerer's 542,461,-58 //Sorcerer's dungeon
+dungeon_chk21 Ancient 940,503,-30 //Ancient lair
+dungeon_chk22 Exodus 850,778,-80 //Exodus dungeon
+
+//Start of Malas
+dungeon_chk23 Doom 2366,1268,-85 //Doom & Doom Gauntlet
+dungeon_chk24 Labyrinth 1732,974,-75 //Labyrinth
+dungeon_chk25 Bedlam 2068,1372,-75 //Bedlam
+
+//Tokuno
+//Does not at the present time require a dungeon fudge
+
+[EVENTS e_death_menu]
+ON=@Death
+	if !(<isgm>)
+		TIMERF 3, f_closest //timer allows for death screen change
+	endif
+
+ON=@Login //This section to allow for those killed on logout who HAVE NOT used menu
+	if (<flags>&statf_dead) && !(<isgm>)
+		f_closest
+	endif
+
+//Calculation section
+[FUNCTION f_closest]
+if !(<src.flags>&02)
+	tag.desttown=
+	tag.sdestshrine=
+	tag0.deathposx=
+	tag0.deathposy=
+	return 1
+else
+	if !(<tag0.deathposx>) && !(<tag0.deathposy>)
+		if (<region.flags> & 0800)
+			FOR 0 22
+				if !(STRCMP("<strarg <region.name>>","<strarg <def.dungeon_chk<eval <local._for>>>>"))
+					tag0.deathposx = <strarg <streat <def.dungeon_chk<eval <local._for>>>>>
+					tag0.deathposy = <strarg <streat <streat <def.dungeon_chk<eval <local._for>>>>>>
+				endif
+			ENDFOR
+		else
+			tag0.deathposx = <strarg <p>>
+			tag0.deathposy = <strarg <streat <p>>>
+		endif
+	endif
+	if (<p.m> < 2)
+		closest_town
+		closest_shrine
+	else
+		closest_town_xtra
+		closest_shrine_xtra
+	endif
+endif
+
+dialog d_death_menu
+
+[FUNCTION closest_town]
+local.dest = -1
+FOR 0 13
+	if <eval <tag0.deathposx>> > <strarg <def.dest1_<eval <local._for>>>>
+		local.qx=<eval <tag0.deathposx>> - <strarg <def.dest1_<eval <local._for>>>>
+	else
+		local.qx=<strarg <def.dest1_<eval <local._for>>>> - <eval <tag0.deathposx>>
+	endif
+	if <eval <tag0.deathposy>> > <strarg <streat <def.dest1_<eval <local._for>>>>>
+		local.qy=<eval <tag0.deathposy>> - <strarg <streat <def.dest1_<eval <local._for>>>>>
+	else
+		local.qy=<strarg <streat <def.dest1_<eval <local._for>>>>> - <eval <tag0.deathposy>>
+	endif
+//Square the distances for accuracy - Remember high school mathematic (A(squared) + B(squared) = C(squared))
+//There is no real need to find the squareroot of the result, unless you are outputting the result, which we arn't
+	local.qx *= <local.qx>
+	local.qy *= <local.qy>
+	If (<local.dest>== -1)
+		local.dest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.desttown = <def.dest1_<eval <local._for>>>
+	elif <eval <eval <local.qx>> + <eval <local.qy>>> < <eval <local.dest>>
+		local.dest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.desttown = <def.dest1_<eval <local._for>>>
+	endif
+ENDFOR
+tag.desttown = <local.desttown>
+
+
+[FUNCTION closest_town_xtra]
+local.dest = -1
+FOR 0 2
+	if <eval <tag0.deathposx>> > <strarg <def.dest<p.m>_<eval <local._for>>>>
+		local.qx=<eval <tag0.deathposx>> - <strarg <def.dest<p.m>_<eval <local._for>>>>
+	else
+		local.qx=<strarg <def.dest<p.m>_<eval <local._for>>>> - <eval <tag0.deathposx>>
+	endif
+	if <eval <tag0.deathposy>> > <strarg <streat <def.dest<p.m>_<eval <local._for>>>>>
+		local.qy=<eval <tag0.deathposy>> - <strarg <streat <def.dest<p.m>_<eval <local._for>>>>>
+	else
+		local.qy=<strarg <streat <def.dest<p.m>_<eval <local._for>>>>> - <eval <tag0.deathposy>>
+	endif
+  	local.qx *= <local.qx>
+	local.qy *= <local.qy>
+	If (<local.dest>== -1)
+		local.dest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.desttown = <def.dest<p.m>_<eval <local._for>>>
+	elif <eval <eval <local.qx>> + <eval <local.qy>>> < <eval <local.dest>>
+		local.dest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.desttown = <def.dest<p.m>_<eval <local._for>>>
+	endif
+ENDFOR
+tag.desttown = <local.desttown>
+
+
+[FUNCTION closest_shrine]
+local.sdest = -1
+FOR 0 7
+	if <eval <tag0.deathposx>> > <strarg <def.shrine1_<eval <local._for>>>>
+		local.qx=<eval <tag0.deathposx>> - <strarg <def.shrine1_<eval <local._for>>>>
+	else
+		local.qx=<strarg <def.shrine1_<eval <local._for>>>> - <eval <tag0.deathposx>>
+	endif
+	if <eval <tag0.deathposy>> > <strarg <streat <def.shrine1_<eval <local._for>>>>>
+		local.qy=<eval <tag0.deathposy>> - <strarg <streat <def.shrine1_<eval <local._for>>>>>
+	else
+		local.qy=<strarg <streat <def.shrine1_<eval <local._for>>>>> - <eval <tag0.deathposy>>
+	endif
+	local.qx *= <local.qx>
+	local.qy *= <local.qy>
+	If (<local.sdest>== -1)
+		local.sdest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.sdestshrine = <def.shrine1_<eval <local._for>>>
+	elif <eval <eval <local.qx>> + <eval <local.qy>>> < <eval <local.sdest>>
+		local.sdest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.sdestshrine = <def.shrine1_<eval <local._for>>>
+	endif
+ENDFOR
+tag.sdestshrine = <local.sdestshrine>
+
+[FUNCTION closest_shrine_xtra]
+local.sdest = -1
+FOR 0 7
+	if <eval <tag0.deathposx>> > <strarg <def.shrine<p.m>_<eval <local._for>>>>
+		local.qx=<eval <tag0.deathposx>> - <strarg <def.shrine<src.p.m>_<eval <local._for>>>>
+	else
+		local.qx=<strarg <def.shrine<p.m>_<eval <local._for>>>> - <eval <tag0.deathposx>>
+	endif
+	if <eval <src.tag0.deathposy>> > <strarg <streat <def.shrine<src.p.m>_<eval <local._for>>>>>
+		local.qy=<eval <tag0.deathposy>> - <strarg <streat <def.shrine<p.m>_<eval <local._for>>>>>
+	else
+		local.qy=<strarg <streat <def.shrine<p.m>_<eval <local._for>>>>> - <eval <tag0.deathposy>>
+	endif
+	local.qx *= <local.qx>
+	local.qy *= <local.qy>
+	If (<local.sdest> == -1)
+		local.sdest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.sdestshrine = <def.shrine<p.m>_<eval <local._for>>>
+	elif <eval <eval <local.qx>> + <eval <local.qy>>> < <eval <local.sdest>>
+		local.sdest = <eval <eval <local.qx>> + <eval <local.qy>>>
+		local.sdestshrine = <def.shrine<p.m>_<eval <local._for>>>
+	endif
+ENDFOR
+tag.sdestshrine = <local.sdestshrine>
+
+//Gump
+[dialog d_death_menu]
+100,100
+NOCLOSE
+page 0
+resizepic 0 123 2620 380 240
+checkertrans 5 128 370 230
+gumppic 10 150 30501
+dtext 160 130 90 YOU ARE DEAD!
+dtext 150 150 90 Do you wish to resurrect at:
+if (<p.m> < 2)
+	dtext 180 180 90 Nearest town: <streat <streat <streat <tag.desttown>>>>
+else
+	dtext 180 180 90 Nearest town: <streat <streat <streat <streat <tag.desttown>>>>>
+endif
+  button 130 180 4005 4007 1 0 1
+if (<src.p.m> < 3)
+	if (<src.p.m> < 2)
+		dtext 180 210 90 Nearest Shrine: <streat <streat <streat <tag.sdestshrine>>>>
+  	else
+		dtext 180 210 90 Nearest Shrine: <streat <streat <streat <streat <tag.sdestshrine>>>>>
+  	endif
+	button 130 210 4005 4007 1 0 2
+endif
+dtext 180 270 90 Wait for player assistance
+  button 130 270 4005 4007 1 0 3
+if (<eval (<serv.time>-<tag0.reztoken>)/10> > 86400 )
+	dtext 180 240 90 Resurrect Here (once per day)
+	button 130 240 4005 4007 1 0 4
+endif
+
+[dialog d_death_menu BUTTON]
+ON=0 4
+if !(<src.flags>&02) // prevent players from holding the menu open to use later, menu is not on a timer as it isn't practical
+	sysmessage oops! is that still open.. You can't use it if you are alive
+	dialogclose d_death_menu
+	tag.desttown=
+	tag.sdestshrine=
+	tag0.deathposx=
+	tag0.deathposy=
+	return 1
+else
+	If (<argn1>==1 )	//Town
+		go <strarg <src.tag.desttown>>,<strarg <streat <src.tag.desttown>>>,<strarg <streat <streat <src.tag.desttown>>>>,<src.p.m>
+		resurrect
+		tag.desttown=
+		tag.sdestshrine=
+		tag0.deathposx=
+		tag0.deathposy=
+	elif (<argn1>==2 )	//Shrine
+		go <strarg <src.tag.sdestshrine>>,<strarg <streat <src.tag.sdestshrine>>>,<strarg <streat <streat <src.tag.sdestshrine>>>>,<src.p.m>
+		resurrect
+		tag.desttown=
+		tag.sdestshrine=
+		tag0.deathposx=
+		tag0.deathposy=
+	elif (<argn1>==3 )	//Wait for assistance
+		//tag.desttown=
+		//tag.sdestshrine=
+		//tag0.deathposx=
+		//tag0.deathposy=
+		timerf 60, f_closest
+		return 0
+	elif (<argn1>==4)
+		resurrect
+		spelleffect
+		message You have chosen to resurrect here
+		tag.desttown=
+		tag.sdestshrine=
+		tag0.deathposx=
+		tag0.deathposy=
+		tag0.reztoken=<serv.time>
+	endif
+endif
+
+[EOF]
