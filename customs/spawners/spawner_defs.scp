@@ -64,7 +64,7 @@ tavernkeeper			{c_tavernkeeper 1 c_tavernkeeper_f 1}
 thiefguildmaster		{c_GUILD_THIEF 1 c_GUILD_THIEF_F 1}
 tinker				{c_tinker 1 c_tinker_f 1}
 tinkerguildmaster		{c_GUILD_ENGINEER 1 c_GUILD_ENGINEER_F 1}
-towncrier			{c_towncrier 1 c_towncrier_f 1}
+towncrier			{c_waiter 1 c_waitress 1}
 waiter				{c_waiter 1 c_waitress 1}
 wanderinghealer			{c_HEAL_WANDER 1 c_HEAL_WANDER_F 1}
 warriorguildmaster		{c_GUILD_WARRIOR 1 c_GUILD_WARRIOR_F 1}
