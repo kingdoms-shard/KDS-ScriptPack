@@ -12702,21 +12702,21 @@ new.p=1395 1812 0
 SERV.NEWITEM=3555
 new.attr=attr_static
 new.p=1395 1812 0
-//Gung Farmer's Bridge
+//Britain Bridge
 SERV.NEWITEM=3049
-NEW.NAME=Gung Farmer's Bridge
+NEW.NAME=Britain Bridge
 new.attr=attr_static
 new.p=1378 1756 -5
 SERV.NEWITEM=3049
-NEW.NAME=Gung Farmer's Bridge
+NEW.NAME=Britain Bridge
 new.attr=attr_static
 new.p=1378 1744 -5
 SERV.NEWITEM=3049
-NEW.NAME=Gung Farmer's Bridge
+NEW.NAME=Britain Bridge
 new.attr=attr_static
 new.p=1396 1744 -5
 SERV.NEWITEM=3049
-NEW.NAME=Gung Farmer's Bridge
+NEW.NAME=Britain Bridge
 new.attr=attr_static
 new.p=1396 1756 -5
 //Trash Can near Britain bankTrashChest
