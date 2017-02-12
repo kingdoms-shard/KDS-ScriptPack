@@ -7,12 +7,12 @@
 [function create_spawner]
 for 0 5
   if (<var0.validate_spawns>) && !(<isempty <argv<dlocal._for>>>)
-    if !(strmatch(*:*,<argv[<dlocal._for>]>) 
+    if !(strmatch(*:*,<argv[<dlocal._for>]>)
       if (!<serv.chardef.<argv<dlocal._for>>>) && (!<serv.itemdef.<argv<dlocal._for>>>)
         serv.log <argv<dlocal._for>> is not a valid chardef or itemdef, needs to be added.
       endif
     endif
-  elseif !<isempty <argv<dlocal._for>>> 
+  elseif !<isempty <argv<dlocal._for>>>
         if (strmatch(*:*,<argv<dlocal._for>>)	//check to see if more than one npc on the spawner
           local.spawn_array=<explode :,<argv<dlocal._for>>>
         endif
@@ -35,8 +35,12 @@ for 0 5
       new.p=<argv[6]>,<argv[7]>,<argv[8]>,<dvar0.map_plane>	//<argv[9]>	//p
       new.morep=<argv[10]>,<argv[11]>,<argv[12]>			//morep
       new.amount=<argv[<eval 15 + <local._for>>]>			//amount
-      new.update	
+      new.update
       new.timer=<R15,30>
+      if (<new.type> == t_normal)
+        serv.log <new.uid> not supported, removing...
+        new.remove
+      endif
   endif
 local.spawn_array=
 endfor
