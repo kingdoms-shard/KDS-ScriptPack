@@ -78,6 +78,7 @@ vesper_fel 2701,692,5,0
 haven_tram 3450,2677,26,1
 bucs_den_fel 2711,2234,0,0
 
+star_chamber 5153,1760
 
 ish_chaos 1749,236,58,2
 ish_compassion 1215,467,-13,2
@@ -158,6 +159,9 @@ IF (<def.fellucia>)
 	NEW.ATTR attr_static|attr_move_never
 	SERV.NEWITEM i_moongate_ss
 	NEW.P <def.bucs_den_fel>
+	NEW.ATTR attr_static|attr_move_never
+	SERV.NEWITEM i_moongate_ss
+	NEW.P <def.star_chamber>
 	NEW.ATTR attr_static|attr_move_never
 ENDIF
 IF (<def.ilshenar>)
