@@ -1,0 +1,434 @@
+//Version 0.2
+[COMMENT spawner_info]
+This script is meant to create the base for a system of default worldsaves, it could mean a full world spawn, a set of spawns for only one dungeon/area/whatever and/or something more complex.
+This script store/read the spawns to/from a WorldSpawner.ldb file placed in the root folder with a table inside with the name of the current region, args can be given so the final name would be <region.name>_<args>, ie: covetous_mytest
+When exporting spawns all the spawns of the current <region> will be stored.
+When importing spawns all previous spawns on this region will be removed, then the new ones will be placed and spawned immediatelly*.
+
+*If one or more of the NPCs of one spawn are in fight the new spawns will not generate any new NPCs until they stop fighting (Die, kill, get removed...)
+ and the spawn will also not dissapear until that happens (otherwise the NPCs will be removed too), new ones will have as timer a default <r<morex>,<morey>> as any normal spawn.
+
+Since this generate files with different names you can create a different set of spawns per region and apply a timer in this region to change between spawns. Example:
+We asume we are in Destard level 1 with some ogres, trolls and dragons spawned.
+.Spawner_Add ( so this will create a table named 'Destard Level 1'. )
+We remove all of the spanws and create a new set of them with skeletons, liches and ghouls and then...
+.Spawner_Add night ( this will create a table named 'Destard Level 1_night'. )
+So now we have a set of spawns for the day and another one for the night, using .Spawner_import or .Spawner_import night will switch between both of them.
+Creating one item inside the region with a timer calling the Spawner_Import function depending on the hour will automatically switch between the spawns.
+
+Spawner_WorldSpawn will read the whole database file and import ALL spawns inside, regardless of the region (this can be huge depending on what you have stored).
+
+Type .SPAWNERX to call the dialog.
+
+[defname spawner]
+spawner_fighting_delay = 1
+
+
+[function spawnerx]
+dialogclose d_spawnerx
+dialog d_spawnerx
+
+[DIALOG d_spawnerx]
+0,0
+resizepic 0 0 9200 630 437			// background border
+gumppictiled 10 10 610 417 2624		// darker background
+checkertrans 10 10 610 417			// transparency layer
+dtext 290 10 50 Spawner Menu
+if !(<LDB.connected>)
+	LDB.connect "WorldSpawner.db"
+endif
+f_spawner_region_info
+f_spawner_db_info
+f_spawner_misc
+
+[dialog d_spawnerx button]
+ON=10 // respawn all
+Spawner_WorldSpawn
+dialog d_spawnerx
+
+
+ON=11 // wipe all
+Spawner_Wipe
+dialog d_spawnerx
+
+
+ON=20 // add this region
+local.name=<qval <isempty argtxt[1]>>?<region.defname>:<region.defname>_<argtxt[1]>>
+LDB.query "SELECT name from sqlite_master WHERE name = '<local.name>'"
+if (<ldb.row.numrows>)
+	Sysmessage @33 There's already a table called '<local.name>', delete it first.
+	dialog d_spawnerx
+	return
+endif
+if (<isempty <argtxt[1]>>==0)
+	Spawner_Add <argtxt[1]>
+else
+	Spawner_Add
+endif
+dialog d_spawnerx
+
+
+ON=1000 1009 // Use this region
+local.index=<eval <argn>-1000>
+ctag.Spawner_Dialog_Import=<ctag.Spawner_Dialog_Table_<dlocal.index>>
+Spawner_Import
+ctag.Spawner_Dialog_Import
+dialog d_spawnerx
+
+
+ON=2000 2009 // delete this region
+local.index=<eval <argn>-2000>
+Spawner_Delete <ctag.Spawner_Dialog_Table_<dlocal.index>>
+dialog d_spawnerx
+
+
+[function f_spawner_misc]
+
+[function f_spawner_region_info]
+ldb.query "SELECT name FROM sqlite_master WHERE name LIKE '<region.defname>%'"
+dhtmlgump 12 30 610 55 0 0 <def.big><def.b><def.DIV_LEFT><def.BFONT_GREEN>REGION:
+dhtmlgump 30 50 250 55 0 0 <def.BFONT_WHITE>Current Region = <def.BFONT_LYELLOW><region.name><def.DIV_END>
+dhtmlgump 30 70 250 55 0 0 <def.BFONT_WHITE>Total Spawns = <def.BFONT_LYELLOW><Spawns_Count><def.DIV_END>
+dhtmlgump 30 90 250 55 0 0 <def.BFONT_WHITE>Spawned Monsters = <def.BFONT_LYELLOW><spawns_count_npcs><def.DIV_END>
+dhtmlgump 50 130 250 55 0 0 <def.BFONT_WHITE>Add this region.
+button 145 127 4005 4007 1 0 20	// use
+dtextentry 180 130 250 55 33 1 base
+if (<ldb.row.numrows>)
+	dhtmlgump 30 110 250 55 0 0 <def.BFONT_WHITE>There are <def.BFONT_LYELLOW><dldb.row.numrows><def.BFONT_WHITE> table(s) for this region.<def.DIV_END>
+	local.index=<Spawner_Dialog_Page>
+	local.max=<eval <local.index>+9>
+	local.y=70
+	for <local.index> <local.max>
+		if !(<isempty <ldb.row.<dlocal._for>.name>>)
+			dhtmlgump 370 <dlocal.y> 250 55 0 0 <def.BFONT_lgray> <ldb.row.<dlocal._for>.name>
+			ctag.Spawner_Dialog_Table_<dlocal._for>=<ldb.row.<dlocal._for>.name>
+			button 280 <dlocal.y> 4005 4007 1 0 <eval 1000+<local._for>>	// use
+			button 320 <dlocal.y> 4014 4045 1 0 <eval 2000+<local._for>>	//Remove
+			local.y +=20
+		endif
+	endfor
+else
+	dhtmlgump 30 110 250 55 0 0 <def.BFONT_WHITE>There are no tables for this region.
+endif
+
+[function f_spawner_db_info]
+ldb.query "SELECT name FROM sqlite_master"
+dhtmlgump 12 190 610 55 0 0 <def.big><def.b><def.DIV_LEFT><def.BFONT_GREEN>WORLD:
+dhtmlgump 30 210 250 55 0 0 <def.BFONT_WHITE>Current DataBase tables: <def.BFONT_LYELLOW><dldb.row.numrows>
+dhtmlgump 30 230 250 55 0 0 <def.BFONT_WHITE>Respawn all the tables.
+button 170 227 4005 4007 1 0 10	// use
+dhtmlgump 30 250 250 55 0 0 <def.BFONT_LRED>REMOVE<def.BFONT_WHITE> all the tables.
+button 170 247 4005 4007 1 0 11	// wipe
+// if (<ldb.row.numrows>)
+	// local.text=<ldb.row.0.name>
+	// if (<ldb.row.numrows>>1)
+		// for 1 <eval <ldb.row.numrows>-1>
+			// local.text=<local.text> <ldb.row.<dlocal._for>.name>
+		// endfor
+	// endif
+	// dhtmlgump 330 110 150 80 1 <qval <ldb.row.numrows> > 3 ? 1 : 0> <local.text>                       // add an html gump that show a text
+// else
+	// dtext 30 130 50 There are no tables in the database.
+// endif
+
+[function Spawner_Dialog_Page]
+if (<argn>)
+	ctag.Spawner_Dialog_Page=<argn>
+else
+	return <ctag0.Spawner_Dialog_Page>
+endif
+
+
+[Function spawns_count]
+ref1=<uid>
+local.items=0
+foritems 2000
+	if (<region.uid>==<ref1.region.uid>)
+		if (<type>==t_spawn_char)
+			local.items ++
+		endif
+	endif
+endfor
+return <dlocal.items>
+
+[function spawns_count_npcs]
+ref1=<uid>
+local.npcs=0
+forchars 2000
+	if (<region.uid>==<ref1.region.uid>)
+		if (<spawnitem>)
+			local.npcs ++
+		endif
+	endif
+endfor
+return <dlocal.npcs>
+
+
+[Function Spawns_stop]
+local.ret=0
+forinstances i_worldgem_bit
+	if (<type>==t_spawn_char)
+		timer -1
+	endif
+endfor
+
+[Function Spawns_reset]
+allchars removespawnednpc
+local.ret=0
+forinstances i_worldgem_bit
+	if (<type>==t_spawn_char)
+		timer 1
+		// timerf 0,Spawner_Tick // Using this instead of timer=1 will make spawns to reset and spawn all the npcs they have ( Amount ).
+	endif
+endfor
+
+[function removespawnednpc]
+if (<memoryfindtype.memory_ipet>) || !(<spawnitem>)
+	return 0
+endif
+if (<isplayer>)
+	return 0
+endif
+remove
+
+[function spawning]
+if (<tag0.spawner>)
+	tag.spawner=0
+else
+	tag.spawner=1
+endif
+
+[function regionspawns]
+ref1=<uid>
+local.count=0
+foritems 9999
+	if (<region.uid>==<ref1.region.uid>)
+		i.<args>
+		local.count ++
+	endif
+endfor
+sysmessage=Executed '<args>' on <dlocal.count> spawns.
+
+[function Spawner_Add]
+// 'Spawner_Add' will create a table called <region.defname> in the SQLite DataBase.
+// 'Spawner_Add day' will create a table called <region.defname>_day in the DataBase.
+// So, in example, creating a 'day' and a 'night' setup of spawns with a timer can make a region/dungeon/whatever to change its spawns during the day or the night.
+if !(<LDB.connected>)
+	LDB.connect "WorldSpawner.db"
+endif
+local.name=<qval <isempty <args>>?<region.defname>:<region.defname>_<args>>
+LDB.EXECUTE DROP TABLE IF EXISTS '<local.name>'
+ref1=<uid>
+local.count=0
+LDB.execute CREATE TABLE '<local.name>' ('spawn_id' TEXT NOT NULL,'p' TEXT, 'amount' int,'morep' TEXT)
+LDB.EXECUTE BEGIN
+forinstances i_worldgem_bit
+	if (<region.uid>==<ref1.region.uid>) && (<topobj>==<uid>)
+		LDB.QUERY INSERT INTO '<local.name>' ('spawn_id','p','amount','morep') VALUES ("<more1>","<p.x>,<p.y>,<p.z>,<map>","<amount>","<morep>")
+		local.count ++
+	endif
+endfor
+LDB.QUERY "Select amount from <local.name>"
+// if (<ldb.row.numrows>==<local.count>)	// Debugging / Informative lines.
+	// serv.log Successfully extracted <dlocal.count> spawns.
+// else
+	// serv.log Something failed (<ldb.row.numrowS> / <dlocal.count>).
+// endif
+LDB.EXECUTE COMMIT
+LDB.close
+
+[function Spawner_Delete]
+LDB.EXECUTE DROP TABLE IF EXISTS '<args>'
+
+[function Spawner_Wipe]
+if !(<LDB.connected>)
+	LDB.connect "WorldSpawner.db"
+endif
+ldb.query "SELECT name FROM sqlite_master"
+serv.b Removing <dldb.row.numrows> tables.
+if (<ldb.row.numrows>)
+	LDB.EXECUTE BEGIN
+	for <eval <ldb.row.numrows>-1> 0
+		LDB.EXECUTE DROP TABLE IF EXISTS '<ldb.row.<dlocal._for>.name>'
+	endfor
+	LDB.EXECUTE COMMIT
+	LDB.EXECUTE VACUUM
+endif
+
+[function Spawner_WorldSpawn_Add]
+serv.newnpc=c_llama
+new.p=10,10,1,0
+for 0 255
+	if (<serv.maplist.<dlocal._for>>)
+		new.map=<dlocal._for>
+		new._Spawner_WorldSpawn_Add
+	endif
+endfor
+new.remove
+
+[function _Spawner_WorldSpawn_Add]
+ref1=<uid>
+forchars 9999
+	if (<SpawnItem>)
+		ref1.p=<p>
+		ref1.Spawner_Add
+		ref1.Spawner_Clear
+	endif
+endfor
+
+[function Spawner_Import]	// Real function, not using now because CONTINUE is not working properly inside if + for + if
+// This will call back the spawns from the DB, using the same '<args>' method to retrieve the id ( 'Spawner_Import day' will retrieve <region.defname>_day ).
+// The function will also remove the current spawns in the region *
+// *) If any spawn's NPC have one active fight and 'spawner_fighting_delay=1' the new spawns will have a delay to respawn, so players don't get ambushed by surprise. Default's delay is the spawn's { morex, morey} (can be changed in Spawner_Generate function).
+LDB.close
+LDB.connect "WorldSpawner.db"
+if (<isempty <ctag.Spawner_Dialog_Import>>==0)
+	local.name=<ctag.Spawner_Dialog_Import>
+else
+	local.name=<qval <isempty <args>>?<region.defname>:<region.defname>_<args>>
+endif
+LDB.Query "SELECT * from <local.name>"
+if !(<LDB.ROW.Numrows>)
+	SysMessage=No Spawns found for region '<local.name>'
+	return
+else
+	SysMessage=Spawning '<local.name>' with a total of '<dldb.row.numrows>' Spawns.
+endif
+// serv.log Clearing spawns in <region.name>...
+local.espera=<Spawner_Clear>
+say wait=<dlocal.espera>
+// serv.log ... removed <dlocal.espera> spawns.
+serv.newnpc=c_llama
+new.cleartags // Removing any custom tags to use this char as storage.
+ref1=<new>
+local.count=0
+for 0 <eval <LDB.ROW.NumRows>-1>
+	ref1.p=<LDB.ROW.<dlocal._for>.p>
+	local.id = <LDB.ROW.<dlocal._for>.spawn_id>
+	if !(<def0.<local.id>>>0)	// Storing in a tag unexisting chardefs to avoid errors and to have a custom output of them.
+		if !(<ref1.tag0.<local.id>>)
+			ref1.tag.<local.id>=1
+			serv.log set tag <local.id>
+		endif
+		continue	// going to next loop, skipping above code.
+	endif
+	local.amount = <LDB.ROW.<dlocal._for>.amount>
+	local.morep = <LDB.ROW.<dlocal._for>.morep>
+	call Spawner_Generate <local.espera>
+	local.count ++
+endfor
+if (<ref1.tagcount>)	// outputing non existing chardefs (if any).
+	serv.log=Found <ref1.tagcount> unexisting chardefs:
+	for 0 <eval <ref1.tagcount>-1>
+		serv.log [<dlocal._for>]: <ref1.tagat.<local._for>.key>
+	endfor
+endif
+ref1.remove
+
+
+[function Spawner_WorldSpawn]
+LDB.close
+LDB.connect "WorldSpawner.db"
+LDB.QUERY "SELECT name FROM sqlite_master WHERE type='table'"
+local.tables=0
+for 0 <eval <ldb.row.numrows>-1>
+	local.table_<dlocal._for>=<ldb.row.<dlocal._for>.name>
+	local.tables ++
+endfor
+local.espera=<Spawner_Clear>
+serv.newnpc=c_llama
+new.cleartags // Removing any custom tags to use this char as storage.
+ref1=<new>
+serv.log Spawning <dlocal.tables> areas...
+for 0 <eval <local.tables>-1>
+	LDB.QUERY "SELECT * FROM <local.table_<dlocal._for>>"
+	serv.log [<eval <local._for> +1> / <local.tables>]: Spawning area '<local.table_<dlocal._for>>', found <dldb.row.numrows> spawns.
+	if !(<ldb.row.numrowS>)
+		serv.log No spawns found for this table.
+		continue
+	endif
+	ref1.p = <ldb.row.0.p>
+	local.espera = <ref1.Spawner_Clear>
+	for 0 <eval <LDB.ROW.NumRows>-1>
+		ref1.p=<LDB.ROW.<dlocal._for>.p>
+		local.id = <LDB.ROW.<dlocal._for>.spawn_id>
+		if !(<def0.<local.id>>>0)	// Storing in a tag unexisting chardefs to avoid errors and to have a custom output of them.
+			if !(<ref1.tag0.<local.id>>)
+				ref1.tag.<local.id>=<ref1.p>
+			endif
+		else
+			local.amount = <LDB.ROW.<dlocal._for>.amount>
+			local.morep = <LDB.ROW.<dlocal._for>.morep>
+			call Spawner_Generate <local.espera>
+			local.count ++
+		endif
+	endfor
+	serv.log Finished the table.
+endfor
+
+if (<ref1.tagcount>)	// outputing non existing chardefs (if any).
+	serv.log=Found <ref1.tagcount> unexisting chardefs:
+	for 0 <eval <ref1.tagcount>-1>
+		serv.log [<dlocal._for>]: <ref1.tagat.<dlocal._for>.key> (<ref1.tagat.<dlocal._for>.val>)
+	endfor
+endif
+ref1.remove
+
+[function Spawner_Clear]
+// Clearing all spawns
+ref1=<uid>
+local.count=0
+forinstances i_worldgem_bit
+	if (<region.uid>==<ref1.region.uid>) && (<topobj>==<uid>)	// Clearing spawns in the same region as the character executing the function (Only if the spawn is in the ground).
+		Spawner_Check_Fight
+		local.count ++
+	endif
+endfor
+return <dlocal.count>
+
+[function Spawner_Check_Fight]
+// Checking for fighting state in any character in the radious of the spawn.
+ref1=<uid>
+forchars (<morez>)
+	if (<ref1>==<spawnitem>)
+		if (<attacker>>0)
+			ref1.timerf 1,Spawner_Check_Fight
+			continue
+		endif
+		ref1.remove
+	endif
+endif
+
+[function Spawner_Generate]
+// Creating the spawn and setting it.
+serv.newitem=i_worldgem_bit
+new.p=<ref1.p>
+new.more=<local.id>
+new.amount=<local.amount>
+new.morep=<local.morep>
+if (<argn1>>0)
+	new.timer=<r<new.morex>,<new.morey>>
+else
+	new.Spawner_Tick
+endif
+
+[function Spawner_Tick]
+// Trigger @timer on the spawn untill its fully spawned.
+if (<more2>< <amount>)
+	timer
+	timerf 0,Spawner_Tick
+endif
+
+
+[FUNCTION WRITEFILE]
+IF !(<FILE.INUSE>)
+	FILE.MODE.CREATE=1
+	FILE.MODE.WRITEFLAG=1
+	FILE.MODE.APPEND=1
+	IF (<FILE.OPEN <STRARG <ARGS>>>)
+		FILE.WRITELINE <STREAT <ARGS>>
+		FILE.CLOSE
+	ENDIF
+ENDIF
+
+[eof]

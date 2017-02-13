@@ -1,0 +1,58 @@
+////////////////////////////////////////////////////////////////////////////////
+// Drydock Ship Redeeding  v1.2 - Mordaunt
+//
+// Redeed your ship with .drydock command (can be added to an event on the ship with a dialog or something.)
+// Any items in the ships hold(s) are sent to the owners bank & keys are removed.
+/////////////////////////////////////////////////////////////////////////////////
+
+[PLEVEL 1]
+drydock
+
+[function drydock]
+SYSMESSAGE Target the tiller
+targetf dock
+
+[function dock]
+ref1 <argo.more1>
+IF (<argo.type>==t_ship_tiller)
+	IF (<src>==<ref1.more1>) || (<src.isgm>)
+		call chk_hold <ref1>
+		call rmv_keys <ref1>
+		serv.newitem i_deed_<STRSUB 8 50 <ref1.baseid>>
+		new.bounce
+		ref1.remove
+		return 1
+	ELSE
+		SYSMESSAGE Only the captain can dock this ship
+		return 1
+	ENDIF
+ELSE
+	SYSMESSAGE That's not a ship's tiller.
+ENDIF
+
+[function rmv_keys]
+ref1 <args>
+FORINSTANCES i_key_copper
+	if (<link>==<ref1>)
+		remove
+	endif
+ENDFOR
+
+
+[function chk_hold]
+ref1 <args>
+local.1=<strarg <streat <streat <ref1.multiregion>>>>
+local.2=<strarg <streat <streat <streat <ref1.multiregion>>>>>
+If (<dlocal.1> > <dlocal.2>)
+	local.radius = <local.1>
+else
+	local.radius = <local.2>
+endif
+foritems <dlocal.radius>
+	if ((<type>==t_ship_hold_lock) || (<type>==t_ship_hold)) && <link>==<ref1>)
+		ref2 <uid>
+		forcont <ref2>
+			cont=<src.findlayer.29>
+		endfor
+	endif
+endfor
