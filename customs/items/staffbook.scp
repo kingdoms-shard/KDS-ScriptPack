@@ -1,7 +1,13 @@
 ﻿///////////////////////////////////////////////
 //By Alacanet///All maps available, GM Runebook
-///28.02.2015// 
+///28.02.2015//
 ///////////////
+[FUNCTION f_staffbook_recall]
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+src.go <args>
+
+
 [ITEMDEF i_staffbook]
 DEFNAME=i_spellbook_mystic
 ID=02d9d
@@ -10,54 +16,39 @@ TYPE=t_spellbook_mystic
 VALUE=6000
 WEIGHT=1.5
 ON=@CREATE
-ATTR=Attr_Newbie
+  ATTR=Attr_Newbie
 ON=@CLICK
-message @1283 [Newbie]
-message @1153 <name>
-return 1
+  message @1283 [Newbie]
+  message @1153 <name>
+  return 1
 ON=@DCLICK
-//if (<region.safe == 1>)
-//src.sysmessage Safe to use in the field Runebook.
-//return 1
-//endif
-//IF ( <CONT> != <SRC.FINDLAYER.21> )
-//src.SYSMESSAGE @,3,1 You can use the backpack when Runebook!
-//RETURN 1
-//ENDIF
-//IF (STRMATCH("*jail*","<region.name>"))
-//SRC.SYSMESSAGE @,3,1 You can not use Jail Runebook!
-//RETURN 1
-//ENDIF
-//IF <src.tag0.controlling>>0)
-//src.sysmessage @,3,1 Top you have to click, wait 10 seconds!
-//return 1
-//else
-//src.tag.controlling 1
-//src.timerf 10 , src.tag.controlling
-//endif
-TAG.PAGE=
-SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA
-SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA1
-SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA2
-SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL
-SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL1
-SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL2
-SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR
-SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR1
-SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR2
-SRC.DIALOGCLOSE D_STAFFBOOK_MALAS
-SRC.DIALOGCLOSE D_STAFFBOOK_MALAS1
-SRC.DIALOGCLOSE D_STAFFBOOK_MALAS2
-SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO
-SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO1
-SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO2
-SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR
-SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR1
-SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR2
-SDIALOG D_STAFFBOOK_FELLUCA
-src.sound 85
-RETURN 1
-///Fel-0///
+  if (!<src.isgm>)
+    src.sysmessage You not have plevel for use that.
+    return 1
+  endif
+  TAG.PAGE=
+  SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA
+  SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA1
+  SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA2
+  SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL
+  SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL1
+  SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL2
+  SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR
+  SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR1
+  SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR2
+  SRC.DIALOGCLOSE D_STAFFBOOK_MALAS
+  SRC.DIALOGCLOSE D_STAFFBOOK_MALAS1
+  SRC.DIALOGCLOSE D_STAFFBOOK_MALAS2
+  SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO
+  SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO1
+  SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO2
+  SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR
+  SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR1
+  SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR2
+  SDIALOG D_STAFFBOOK_FELLUCA
+  src.sound 85
+  RETURN 1
+  ///Fel-0///
 [DIALOG D_STAFFBOOK_FELLUCA]
 300,300
 PAGE 0
@@ -92,9 +83,9 @@ DTEXT 57 75 198 Trammel       	//2
 RADIO 25 95 4006 4007 0 0 3
 DTEXT 57 100 198 İlshenar       //3
 RADIO 25 120 4006 4007 0 0 4
-DTEXT 57 125 198 Malas       	//4 
+DTEXT 57 125 198 Malas       	//4
 RADIO 25 145 4006 4007 0 0 5
-DTEXT 57 150 198 Tokuno      	//5 
+DTEXT 57 150 198 Tokuno      	//5
 RADIO 25 170 4006 4007 0 0 6
 DTEXT 57 175 198 Termur      	//6
 ///Fel Page-0[2///
@@ -124,173 +115,55 @@ OnButton=5
 SDIALOG D_STAFFBOOK_TOKUNO
 OnButton=6
 SDIALOG D_STAFFBOOK_TERMUR
+
 OnButton=7
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-src.go The Heartwood
-ELSE//?
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0//?
-Sound 92
-return 1//?
-ENDIF//?
+call f_staffbook_recall The Heartwood
+
 OnButton=8
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Cove
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Cove
+
 OnButton=9
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Britain
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Britain
+
 OnButton=10
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Jhelom
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Jhelom
+
 OnButton=11
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Minoc
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Minoc
+
 OnButton=12
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Ocllo
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Ocllo
+
 OnButton=13
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Trinsic
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Trinsic
+
 OnButton=14
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Vesper
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Vesper
+
 OnButton=15
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Yew
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Yew
+
 OnButton=16
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Wind
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Wind
+
 OnButton=17
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Serpent's Hold
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Serpent's Hold
+
 OnButton=18
 SDIALOG D_STAFFBOOK_FELLUCA
-IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
-SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
-SRC.SOUND snd_spell_recall
-ELSE
-SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
-SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
-EFFECT 3,i_fx_smoke_small,30,36,0
-Sound 92
-return 1
-ENDIF
-src.go Skara Brae
-SDIALOG D_STAFFBOOK_FELLUCA
+call f_staffbook_recall Skara Brae
+
 OnButton=19
 DIALOG D_STAFFBOOK_FELLUCA1
 sound 85
@@ -331,7 +204,7 @@ dtext 40 150 0 Blighted Grove //9
 dtext 40 165 0 Paroxysmus     //10
 dtext 40 180 0 Sanctuary      //11
 ///Fel Page-1[2///
-DTEXT 230 1 1152 Felluca 3	
+DTEXT 230 1 1152 Felluca 3
 dtext 200 15 0 Covetous       //12
 dtext 200 30 0 Deceit	      //13
 dtext 200 45 0 Despise        //14
@@ -347,77 +220,101 @@ dtext 200 180 0 Orc Cave      //23
 [DIALOG D_STAFFBOOK_FELLUCA1 BUTTON]
 OnButton=0
 OnButton=1
-src.go Nujel'm
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Nujel'm
+
 OnButton=2
-src.go Moonglow
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Moonglow
+
 OnButton=3
-src.go Magincia
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Magincia
+
 OnButton=4
-src.go Buccaneer's Den
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Buccaneer's Den
+
 OnButton=5
-src.go Delucia
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Delucia
+
 OnButton=6
-src.go Papua
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Papua
+
 OnButton=7
-src.go Painted Caves
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Painted Caves
+
 OnButton=8
-src.go Prism Of Light
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Prism Of Light
+
 OnButton=9
-src.go Blighted Grove
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Blighted Grove
+
 OnButton=10
-src.go Palace Of Paroxysmus
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Palace Of Paroxysmus
+
 OnButton=11
-src.go Sanctuary
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Sanctuary
+
 OnButton=12
-src.go Covetous level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Covetous level 1
+
 OnButton=13
-src.go Deceit level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Deceit level 1
+
 OnButton=14
-src.go Despise level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Despise level 1
+
 OnButton=15
-src.go Destard level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Destard level 1
+
 OnButton=16
-src.go Hythloth level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Hythloth level 1
+
 OnButton=17
-src.go Khaldun
-SDIALOG D_STAFFBOOK_FELLUCA1 
+SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Khaldun
+
 OnButton=18
-src.go Shame level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Shame level 1
+
 OnButton=19
-src.go Wrong level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Wrong level 1
+
 OnButton=20
-src.go Terathan Keep
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Terathan Keep
+
 OnButton=21
-src.go Fire Dungeon level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Fire Dungeon level 1
+
 OnButton=22
-src.go Ice Dungeon level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Ice Dungeon level 1
+
 OnButton=23
-src.go Orc Cave level 1
 SDIALOG D_STAFFBOOK_FELLUCA1
+call f_staffbook_recall Orc Cave level 1
+
 OnButton=24
 DIALOG D_STAFFBOOK_FELLUCA2
 sound 85
+
 OnButton=25
 DIALOG D_STAFFBOOK_FELLUCA
 sound 85
@@ -471,74 +368,97 @@ dtext 200 180 0 Jhelom Cemetery 	//23
 [DIALOG D_STAFFBOOK_FELLUCA2 BUTTON]
 OnButton=0
 OnButton=1
-src.go Britain Sewers
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Britain Sewers
+
 OnButton=2
-src.go 1331,1991 //Britain Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 1331,1991 //Britain Moongate
+
 OnButton=3
-src.go 1495,3773 //Jhelom Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 1495,3773 //Jhelom Moongate
+
 OnButton=4
-src.go 2704,690 //Minoc Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 2704,690 //Minoc Moongate
+
 OnButton=5
-src.go 1832,2946,-20 //Trinsic Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 1832,2946,-20 //Trinsic Moongate
+
 OnButton=6
-src.go 775,750 //Yew Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 775,750 //Yew Moongate
+
 OnButton=7
-src.go 648,2067 //Skara Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 648,2067 //Skara Moongate
+
 OnButton=8
-src.go 4471,1282 //Moonglow Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 4471,1282 //Moonglow Moongate
+
 OnButton=9
-src.go 3566,2140,31 //Magincia Moongate
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall 3566,2140,31 //Magincia Moongate
+
 OnButton=10
-src.go Britain Graveyard
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Britain Graveyard
+
 OnButton=11
-src.go Nujel'm Cemetery
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Nujel'm Cemetery
+
 OnButton=12
-src.go Fire Temple
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Fire Temple
+
 OnButton=13
-src.go Lycaeum
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Lycaeum
+
 OnButton=14
-src.go Sea Market
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Sea Market
+
 OnButton=15
-src.go Hopper's Bog
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Hopper's Bog
+
 OnButton=16
-src.go Empath Abbey
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Empath Abbey
+
 OnButton=17
-src.go Moonglow Zoo
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Moonglow Zoo
+
 OnButton=18
-src.go Moonglow Cemetery
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Moonglow Cemetery
+
 OnButton=19
-src.go Yew Graveyard
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Yew Graveyard
+
 OnButton=20
-src.go Lord British's Castle
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Lord British's Castle
+
 OnButton=21
-src.go Cove Graveyard
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Cove Graveyard
+
 OnButton=22
-src.go Vesper Cemetery
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Vesper Cemetery
+
 OnButton=23
-src.go Jhelom Cemetery
 SDIALOG D_STAFFBOOK_FELLUCA2
+call f_staffbook_recall Jhelom Cemetery
+
 OnButton=24
 sound 85
 DIALOG D_STAFFBOOK_FELLUCA1
@@ -579,9 +499,9 @@ DTEXT 57 75 1152 Trammel       	//2
 RADIO 25 95 4006 4007 0 0 3
 DTEXT 57 100 198 İlshenar       //3
 RADIO 25 120 4006 4007 0 0 4
-DTEXT 57 125 198 Malas       	//4 
+DTEXT 57 125 198 Malas       	//4
 RADIO 25 145 4006 4007 0 0 5
-DTEXT 57 150 198 Tokuno      	//5 
+DTEXT 57 150 198 Tokuno      	//5
 RADIO 25 170 4006 4007 0 0 6
 DTEXT 57 175 198 Termur      	//6
 ///Tra Page-0[2///
@@ -751,7 +671,7 @@ OnButton=16
 src.go 5906,22,44,1//Hythloth level 1
 SDIALOG D_STAFFBOOK_TRAMMEL1
 OnButton=17
-src.go 5571,1302,2,1//Khaldun 
+src.go 5571,1302,2,1//Khaldun
 SDIALOG D_STAFFBOOK_TRAMMEL1
 OnButton=18
 src.go 5395,126,2,1//Shame level 1
@@ -935,9 +855,9 @@ DTEXT 57 75 198 Trammel       		//2
 RADIO 25 95 4006 4007 1 0 3
 DTEXT 57 100 1152 İlshenar      	//3
 RADIO 25 120 4006 4007 0 0 4
-DTEXT 57 125 198 Malas       		//4 
+DTEXT 57 125 198 Malas       		//4
 RADIO 25 145 4006 4007 0 0 5
-DTEXT 57 150 198 Tokuno      		//5 
+DTEXT 57 150 198 Tokuno      		//5
 RADIO 25 170 4006 4007 0 0 6
 DTEXT 57 175 198 Termur      		//6
 ///Ils Page-0[2///
@@ -1113,13 +1033,13 @@ OnButton=18
 src.go Shrine Of Chaos
 SDIALOG D_STAFFBOOK_ILSHENAR1
 OnButton=19
-src.go Shrine Of Sacrifice 
+src.go Shrine Of Sacrifice
 SDIALOG D_STAFFBOOK_ILSHENAR1
 OnButton=20
 src.go Shrine Of Honesty
 SDIALOG D_STAFFBOOK_ILSHENAR1
 OnButton=21
-src.go Shrine Of Compassion 
+src.go Shrine Of Compassion
 SDIALOG D_STAFFBOOK_ILSHENAR1
 OnButton=22
 src.go Shrine Of Spirituality
@@ -1186,16 +1106,16 @@ OnButton=1
 src.go Shrine Of Honor
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=2
-src.go Shrine Of Justice 
+src.go Shrine Of Justice
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=3
-src.go Pormir Harm  
+src.go Pormir Harm
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=4
-src.go Pormir Felwis  
+src.go Pormir Felwis
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=5
-src.go Cyclops Temple 
+src.go Cyclops Temple
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=6
 src.go Rat Fort
@@ -1219,37 +1139,37 @@ OnButton=12
 src.go Gypsy Camp 5
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=13
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=14
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=15
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=16
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=18
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=20
 src.go
-SDIALOG D_STAFFBOOK_ILSHENAR2 
+SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=21
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=22
 src.go
-SDIALOG D_STAFFBOOK_ILSHENAR2 
+SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=23
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_ILSHENAR2
 OnButton=24
 sound 85
@@ -1291,9 +1211,9 @@ DTEXT 57 75 198 Trammel             //2
 RADIO 25 95 4006 4007 0 0 3
 DTEXT 57 100 198 İlshenar           //3
 RADIO 25 120 4006 4007 1 0 4
-DTEXT 57 125 1152 Malas       	    //4 
+DTEXT 57 125 1152 Malas       	    //4
 RADIO 25 145 4006 4007 0 0 5
-DTEXT 57 150 198 Tokuno      	    //5 
+DTEXT 57 150 198 Tokuno      	    //5
 RADIO 25 170 4006 4007 0 0 6
 DTEXT 57 175 198 Termur      	    //6
 ///Mal Page-0[2///
@@ -1424,64 +1344,64 @@ OnButton=3
 src.go Samurai Start Location
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=4
-src.go Ninja Start Location 
+src.go Ninja Start Location
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=5
-src.go Ninja Cave  
+src.go Ninja Cave
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=6
 src.go Gypsy Camp 1
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=7
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=8
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=9
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=10
 src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=11
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=12
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=13
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=14
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=15
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=16
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=18
 src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=20
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=21
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=22
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=23
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS1
 OnButton=24
 DIALOG D_STAFFBOOK_MALAS2
@@ -1539,28 +1459,28 @@ dtext 200 180 0 		//23
 [DIALOG D_STAFFBOOK_MALAS2 BUTTON]
 OnButton=0
 OnButton=1
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=2
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=3
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=4
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=5
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=6
 src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=7
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=8
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=9
 src.go
@@ -1569,13 +1489,13 @@ OnButton=10
 src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=11
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=12
 src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=13
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=14
 src.go
@@ -1585,27 +1505,27 @@ src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=16
 src.go
-SDIALOG D_STAFFBOOK_MALAS2 
+SDIALOG D_STAFFBOOK_MALAS2
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=18
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=20
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=21
 src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=22
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=23
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_MALAS2
 OnButton=24
 sound 85
@@ -1647,9 +1567,9 @@ DTEXT 57 75 198 Trammel       	 //2
 RADIO 25 95 4006 4007 0 0 3
 DTEXT 57 100 198 İlshenar        //3
 RADIO 25 120 4006 4007 0 0 4
-DTEXT 57 125 198 Malas       	 //4 
-RADIO 25 145 4006 4007 1 0 5 
-DTEXT 57 150 1152 Tokuno      	 //5 
+DTEXT 57 125 198 Malas       	 //4
+RADIO 25 145 4006 4007 1 0 5
+DTEXT 57 150 1152 Tokuno      	 //5
 RADIO 25 170 4006 4007 0 0 6
 DTEXT 57 175 198 Termur      	 //6
 ///Tok Page-0[2///
@@ -1690,7 +1610,7 @@ src.go Hotaka Plains
 SDIALOG D_STAFFBOOK_TOKUNO
 OnButton=10
 src.go 1346,765,20,4 //Citadel Entrance
-SDIALOG D_STAFFBOOK_TOKUNO 
+SDIALOG D_STAFFBOOK_TOKUNO
 OnButton=11
 src.go 295,712,55,4//Homare-Jima Shrine
 SDIALOG D_STAFFBOOK_TOKUNO
@@ -1710,7 +1630,7 @@ OnButton=16
 src.go Samurai Start Location//samurai start point
 SDIALOG D_STAFFBOOK_TOKUNO
 OnButton=17
-src.go Ninja Start Location 
+src.go Ninja Start Location
 SDIALOG D_STAFFBOOK_TOKUNO
 OnButton=18
 src.go Ninja Cave
@@ -1784,7 +1704,7 @@ src.go 798,245,58,4//beetlescape
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=5
 src.go 320,408,32,4//bushido dojo
-SDIALOG D_STAFFBOOK_TOKUNO1 
+SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=6
 src.go 724,943,42,4//the waste makoto-jima Moongate
 SDIALOG D_STAFFBOOK_TOKUNO1
@@ -1819,22 +1739,22 @@ OnButton=16
 src.go 925,160,34,4 //İce Area Fan Dancers
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=18
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=20
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=21
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=22
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO1
 OnButton=23
 src.go
@@ -1894,73 +1814,73 @@ dtext 200 180 0 	//23
 [DIALOG D_STAFFBOOK_TOKUNO2 BUTTON]
 OnButton=0
 OnButton=1
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=2
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=3
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=4
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=5
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=6
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=7
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=8
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=9
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=10
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=11
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=12
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=13
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=14
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=15
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=16
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=18
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=20
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=21
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=22
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=23
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TOKUNO2
 OnButton=24
 sound 85
@@ -2002,9 +1922,9 @@ DTEXT 57 75 198 Trammel       	//2
 RADIO 25 95 4006 4007 0 0 3
 DTEXT 57 100 198 İlshenar       //3
 RADIO 25 120 4006 4007 0 0 4
-DTEXT 57 125 198 Malas       	//4 
+DTEXT 57 125 198 Malas       	//4
 RADIO 25 145 4006 4007 0 0 5
-DTEXT 57 150 198 Tokuno      	//5 
+DTEXT 57 150 198 Tokuno      	//5
 RADIO 25 170 4006 4007 1 0 6
 DTEXT 57 175 1152 Termur      	//6
 ///Ter Page-0[2///
@@ -2032,7 +1952,7 @@ OnButton=4
 SDIALOG D_STAFFBOOK_MALAS
 OnButton=5
 SDIALOG D_STAFFBOOK_TOKUNO
-OnButton=6 
+OnButton=6
 SDIALOG D_STAFFBOOK_TERMUR
 OnButton=7
 src.go 55,366,20,5//Termur
@@ -2041,7 +1961,7 @@ OnButton=8
 src.go Fishermans Reach
 SDIALOG D_STAFFBOOK_TERMUR
 OnButton=9
-src.go Holy City 
+src.go Holy City
 SDIALOG D_STAFFBOOK_TERMUR
 OnButton=10
 src.go Lost Settlement
@@ -2141,7 +2061,7 @@ OnButton=5
 src.go Raptor Island
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=6
-src.go Royal Park 
+src.go Royal Park
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=7
 src.go Slith Valley
@@ -2171,10 +2091,10 @@ OnButton=15
 src.go 819,668,22,5 //Buff Area
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=16
-src.go 823,392,-15,5 //Grass Area 
+src.go 823,392,-15,5 //Grass Area
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=17
-src.go 750,475,-17,5 //Linkage Area 
+src.go 750,475,-17,5 //Linkage Area
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=18
 src.go 549,659,8,5 //Stygian Cemetery
@@ -2183,7 +2103,7 @@ OnButton=19
 src.go Volcano
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=20
-src.go 410,3757,-34,5 //Spiral Area 
+src.go 410,3757,-34,5 //Spiral Area
 SDIALOG D_STAFFBOOK_TERMUR1
 OnButton=21
 src.go 1031,3660,60,5 //Spiral Cottage
@@ -2274,49 +2194,49 @@ OnButton=8
 src.go 701,2107,40,5 //Termur Orc Cave
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=9
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=10
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=11
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=12
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=13
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=14
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=15
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=16
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=17
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=18
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=19
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=20
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=21
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=22
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=23
-src.go 
+src.go
 SDIALOG D_STAFFBOOK_TERMUR2
 OnButton=24
 DIALOG D_STAFFBOOK_TERMUR1
