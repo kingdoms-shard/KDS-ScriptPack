@@ -1,0 +1,2324 @@
+﻿///////////////////////////////////////////////
+//By Alacanet///All maps available, GM Runebook
+///28.02.2015// 
+///////////////
+[ITEMDEF i_staffbook]
+DEFNAME=i_spellbook_mystic
+ID=02d9d
+NAME=Staff Runebook
+TYPE=t_spellbook_mystic
+VALUE=6000
+WEIGHT=1.5
+ON=@CREATE
+ATTR=Attr_Newbie
+ON=@CLICK
+message @1283 [Newbie]
+message @1153 <name>
+return 1
+ON=@DCLICK
+//if (<region.safe == 1>)
+//src.sysmessage Safe to use in the field Runebook.
+//return 1
+//endif
+//IF ( <CONT> != <SRC.FINDLAYER.21> )
+//src.SYSMESSAGE @,3,1 You can use the backpack when Runebook!
+//RETURN 1
+//ENDIF
+//IF (STRMATCH("*jail*","<region.name>"))
+//SRC.SYSMESSAGE @,3,1 You can not use Jail Runebook!
+//RETURN 1
+//ENDIF
+//IF <src.tag0.controlling>>0)
+//src.sysmessage @,3,1 Top you have to click, wait 10 seconds!
+//return 1
+//else
+//src.tag.controlling 1
+//src.timerf 10 , src.tag.controlling
+//endif
+TAG.PAGE=
+SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA
+SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA1
+SRC.DIALOGCLOSE D_STAFFBOOK_FELLUCA2
+SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL
+SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL1
+SRC.DIALOGCLOSE D_STAFFBOOK_TRAMMEL2
+SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR
+SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR1
+SRC.DIALOGCLOSE D_STAFFBOOK_ILSHENAR2
+SRC.DIALOGCLOSE D_STAFFBOOK_MALAS
+SRC.DIALOGCLOSE D_STAFFBOOK_MALAS1
+SRC.DIALOGCLOSE D_STAFFBOOK_MALAS2
+SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO
+SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO1
+SRC.DIALOGCLOSE D_STAFFBOOK_TOKUNO2
+SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR
+SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR1
+SRC.DIALOGCLOSE D_STAFFBOOK_TERMUR2
+SDIALOG D_STAFFBOOK_FELLUCA
+src.sound 85
+RETURN 1
+///Fel-0///
+[DIALOG D_STAFFBOOK_FELLUCA]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>//GUMP
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Fel Page-0[1///
+DTEXT 230 1 1152 Felluca 1 //
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 1 1 1
+DTEXT 57 50 1152 Felluca	//1
+RADIO 25 70 4006 4007 0 0 2
+DTEXT 57 75 198 Trammel       	//2
+RADIO 25 95 4006 4007 0 0 3
+DTEXT 57 100 198 İlshenar       //3
+RADIO 25 120 4006 4007 0 0 4
+DTEXT 57 125 198 Malas       	//4 
+RADIO 25 145 4006 4007 0 0 5
+DTEXT 57 150 198 Tokuno      	//5 
+RADIO 25 170 4006 4007 0 0 6
+DTEXT 57 175 198 Termur      	//6
+///Fel Page-0[2///
+dtext 200 15 0 Heartwood	//7
+dtext 200 30 0 Cove		//8
+dtext 200 45 0 Britain		//9
+dtext 200 60 0 Jhelom		//10
+dtext 200 75 0 Minoc		//11
+dtext 200 90 0 Ocllo		//12
+dtext 200 105 0 Trinsic		//13
+dtext 200 120 0 Vesper		//14
+dtext 200 135 0 Yew		//15
+dtext 200 150 0 Wind		//16
+dtext 200 165 0 Serpent's Hold  //17
+dtext 200 180 0 Skara Brae	//18
+[DIALOG D_STAFFBOOK_FELLUCA BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+src.go The Heartwood
+ELSE//?
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0//?
+Sound 92
+return 1//?
+ENDIF//?
+OnButton=8
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Cove
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=9
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Britain
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=10
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Jhelom
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=11
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Minoc
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=12
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Ocllo
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=13
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Trinsic
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=14
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Vesper
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=15
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Yew
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=16
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Wind
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=17
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Serpent's Hold
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=18
+SDIALOG D_STAFFBOOK_FELLUCA
+IF <SRC.RESTEST 100 i_reag_mandrake_root, i_reag_blood_moss, i_reag_black_pearl,>
+SRC.CONSUME=100 i_reag_mandrake_root, 100 i_reag_blood_moss, 100 i_reag_black_pearl
+SRC.SOUND snd_spell_recall
+ELSE
+SRC.SYSMESSAGE @,,1 No material enough in your backpack!.
+SRC.SYSMESSAGE @,,1 [100 Mandrake, 100 Blood Moss, 100 Black Pearl]
+EFFECT 3,i_fx_smoke_small,30,36,0
+Sound 92
+return 1
+ENDIF
+src.go Skara Brae
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=19
+DIALOG D_STAFFBOOK_FELLUCA1
+sound 85
+///Fel-1///
+[DIALOG D_STAFFBOOK_FELLUCA1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Fel Page-1[1///
+DTEXT 75 2 1152 Felluca 2
+dtext 40 30 0 Nujel'm	      //1
+dtext 40 45 0 Moonglow        //2
+dtext 40 60 0 Magincia        //3
+dtext 40 75 0 Bucc's Den      //4
+dtext 40 90 0 Delucia	      //5
+dtext 40 105 0 Papua          //6
+dtext 40 120 0 Painted Caves  //7
+dtext 40 135 0 Prism of light //8
+dtext 40 150 0 Blighted Grove //9
+dtext 40 165 0 Paroxysmus     //10
+dtext 40 180 0 Sanctuary      //11
+///Fel Page-1[2///
+DTEXT 230 1 1152 Felluca 3	
+dtext 200 15 0 Covetous       //12
+dtext 200 30 0 Deceit	      //13
+dtext 200 45 0 Despise        //14
+dtext 200 60 0 Destard        //15
+dtext 200 75 0 Hythloth       //16
+dtext 200 90 0 Khaldun        //17
+dtext 200 105 0 Shame	      //18
+dtext 200 120 0 Wrong	      //19
+dtext 200 135 0 Terathan Keep //20
+dtext 200 150 0 Fire Dungeon  //21
+dtext 200 165 0 Ice Dungeon   //22
+dtext 200 180 0 Orc Cave      //23
+[DIALOG D_STAFFBOOK_FELLUCA1 BUTTON]
+OnButton=0
+OnButton=1
+src.go Nujel'm
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=2
+src.go Moonglow
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=3
+src.go Magincia
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=4
+src.go Buccaneer's Den
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=5
+src.go Delucia
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=6
+src.go Papua
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=7
+src.go Painted Caves
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=8
+src.go Prism Of Light
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=9
+src.go Blighted Grove
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=10
+src.go Palace Of Paroxysmus
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=11
+src.go Sanctuary
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=12
+src.go Covetous level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=13
+src.go Deceit level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=14
+src.go Despise level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=15
+src.go Destard level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=16
+src.go Hythloth level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=17
+src.go Khaldun
+SDIALOG D_STAFFBOOK_FELLUCA1 
+OnButton=18
+src.go Shame level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=19
+src.go Wrong level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=20
+src.go Terathan Keep
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=21
+src.go Fire Dungeon level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=22
+src.go Ice Dungeon level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=23
+src.go Orc Cave level 1
+SDIALOG D_STAFFBOOK_FELLUCA1
+OnButton=24
+DIALOG D_STAFFBOOK_FELLUCA2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_FELLUCA
+sound 85
+///Fel-2///
+[DIALOG D_STAFFBOOK_FELLUCA2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Fel Page-2[1///
+DTEXT 75 2 1152 Felluca 4
+dtext 40 30 0 Britain Sewers	  	//1
+dtext 40 45 0 Britain Moongate   	//2
+dtext 40 60 0 Jhelom Moongate		//3
+dtext 40 75 0 Minoc Moongate     	//4
+dtext 40 90 0 Trinsic Moongate		//5
+dtext 40 105 0 Yew Moongate 	  	//6
+dtext 40 120 0 Skara Moongate 		//7
+dtext 40 135 0 Moonglow Moongate 	//8
+dtext 40 150 0 Magincia Moongate 	//9
+dtext 40 165 0 Britain Graveyard 	//10
+dtext 40 180 0 Nujel'm Cemetery 	//11
+///Fel Page-2[2///
+DTEXT 230 1 1152 Felluca 5
+dtext 200 15 0 Fire Temple		//12
+dtext 200 30 0 Moonglow Lycaeum		//13
+dtext 200 45 0 Sea Market		//14
+dtext 200 60 0 Hopper's Bog		//15
+dtext 200 75 0 Empath Abbey		//16
+dtext 200 90 0 Moonglow Zoo		//17
+dtext 200 105 0 Moonglow Cemetery 	//18
+dtext 200 120 0 Yew Graveyard     	//19
+dtext 200 135 0 Lord British's Castle	//20
+dtext 200 150 0 Cove Graveyard 		//21
+dtext 200 165 0 Vesper Cemetery 	//22
+dtext 200 180 0 Jhelom Cemetery 	//23
+[DIALOG D_STAFFBOOK_FELLUCA2 BUTTON]
+OnButton=0
+OnButton=1
+src.go Britain Sewers
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=2
+src.go 1331,1991 //Britain Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=3
+src.go 1495,3773 //Jhelom Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=4
+src.go 2704,690 //Minoc Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=5
+src.go 1832,2946,-20 //Trinsic Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=6
+src.go 775,750 //Yew Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=7
+src.go 648,2067 //Skara Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=8
+src.go 4471,1282 //Moonglow Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=9
+src.go 3566,2140,31 //Magincia Moongate
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=10
+src.go Britain Graveyard
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=11
+src.go Nujel'm Cemetery
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=12
+src.go Fire Temple
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=13
+src.go Lycaeum
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=14
+src.go Sea Market
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=15
+src.go Hopper's Bog
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=16
+src.go Empath Abbey
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=17
+src.go Moonglow Zoo
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=18
+src.go Moonglow Cemetery
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=19
+src.go Yew Graveyard
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=20
+src.go Lord British's Castle
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=21
+src.go Cove Graveyard
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=22
+src.go Vesper Cemetery
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=23
+src.go Jhelom Cemetery
+SDIALOG D_STAFFBOOK_FELLUCA2
+OnButton=24
+sound 85
+DIALOG D_STAFFBOOK_FELLUCA1
+///////////
+//Trammel//
+///////////
+[DIALOG D_STAFFBOOK_TRAMMEL]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Tra Page-0[1///
+DTEXT 230 1 1152 Trammel 1 //
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 0 0 1
+DTEXT 57 50 198 Felluca		//1
+RADIO 25 70 4006 4007 1 0 2
+DTEXT 57 75 1152 Trammel       	//2
+RADIO 25 95 4006 4007 0 0 3
+DTEXT 57 100 198 İlshenar       //3
+RADIO 25 120 4006 4007 0 0 4
+DTEXT 57 125 198 Malas       	//4 
+RADIO 25 145 4006 4007 0 0 5
+DTEXT 57 150 198 Tokuno      	//5 
+RADIO 25 170 4006 4007 0 0 6
+DTEXT 57 175 198 Termur      	//6
+///Tra Page-0[2///
+dtext 200 15 0 New Haven	//7
+dtext 200 30 0 Cove		//8
+dtext 200 45 0 Britain		//9
+dtext 200 60 0 Jhelom		//10
+dtext 200 75 0 Minoc		//11
+dtext 200 90 0 Ocllo		//12
+dtext 200 105 0 Trinsic		//13
+dtext 200 120 0 Vesper		//14
+dtext 200 135 0 Yew		//15
+dtext 200 150 0 Wind		//16
+dtext 200 165 0 Serpent's Hold 	//17
+dtext 200 180 0 Skara Brae	//18
+[DIALOG D_STAFFBOOK_TRAMMEL BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+src.go Haven Island
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=8
+src.go 2275,1210,2,1 //Cove
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=9
+src.go 1495,1629,10,1 //Britain
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=10
+src.go 1383,3815,2,1 //Jhelom
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=11
+src.go 2466,544,2,1 //Minoc
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=12
+src.go 3650,2519,2,1 //Ocllo
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=13
+src.go 1867,2780,2,1 //Trinsic
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=14
+src.go 2899,676,2,1 //Vesper
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=15
+src.go 546,992,2,1 //Yew
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=16
+src.go 5223,190,5,1 //Wind
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=17
+src.go 3010,3371,15,1 //Serpent's Hold
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=18
+src.go 632,2233,2,1 //Skara Brae
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=19
+DIALOG D_STAFFBOOK_TRAMMEL1
+sound 85
+///Tra-1///
+[DIALOG D_STAFFBOOK_TRAMMEL1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Tra Page-1[1///
+DTEXT 75 2 1152 Trammel 2
+dtext 40 30 0 Nujel'm		//1
+dtext 40 45 0 Moonglow		//2
+dtext 40 60 0 Magincia		//3
+dtext 40 75 0 Bucc's Den     	//4
+dtext 40 90 0 Delucia		//5
+dtext 40 105 0 Papua         	//6
+dtext 40 120 0 Painted Caves 	//7
+dtext 40 135 0 Prism of light	//8
+dtext 40 150 0 Blighted Grove	//9
+dtext 40 165 0 Paroxysmus    	//10
+dtext 40 180 0 Sanctuary     	//11
+///Tra Page-1[2///
+DTEXT 230 1 1152 Trammel 3
+dtext 200 15 0 Covetous     	//12
+dtext 200 30 0 Deceit	      	//13
+dtext 200 45 0 Despise	      	//14
+dtext 200 60 0 Destard	      	//15
+dtext 200 75 0 Hythloth         //16
+dtext 200 90 0 Khaldun	      	//17
+dtext 200 105 0 Shame	      	//18
+dtext 200 120 0 Wrong	      	//19
+dtext 200 135 0 Terathan Keep	//20
+dtext 200 150 0 Fire Dungeon 	//21
+dtext 200 165 0 Ice Dungeon  	//22
+dtext 200 180 0 Orc Cave     	//23
+[DIALOG D_STAFFBOOK_TRAMMEL1 BUTTON]
+OnButton=0
+OnButton=1
+src.go 3732,1279,2,1 //Nujel'm
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=2
+src.go 4442,1172,2,1 //Moonglow
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=3
+src.go 3714,2220,20,1 //Magincia
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=4
+src.go 2706,2163,2,1 //Buccaneer's Den
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=5
+src.go 5272,3995,37,1 //Delucia
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=6
+src.go 5729,3209,-1,1 //Papua
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=7
+src.go 6308,892,2,1 //Painted Caves
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=8
+src.go 6475,188,2,1//Prism Of Light
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=9
+src.go 6500,890,3,1//Blighted Grove
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=10
+src.go 6306,403,58,1//Palace Of Paroxysmus
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=11
+src.go 6170,195,-10,1//Sanctuary
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=12
+src.go 5456,1862,2,1//Covetous level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=13
+src.go 5187,635,2,1//Deceit level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=14
+src.go 5501,570,59,1//Despise level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=15
+src.go 5243,1004,2,1//Destard level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=16
+src.go 5906,22,44,1//Hythloth level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=17
+src.go 5571,1302,2,1//Khaldun 
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=18
+src.go 5395,126,2,1//Shame level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=19
+src.go 5825,630,2,1//Wrong level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=20
+src.go 5451,3140,-60,1//Terathan Keep
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=21
+src.go 5790,1416,40,1//Fire Dungeon level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=22
+src.go 5875,150,15,1//Ice Dungeon level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=23
+src.go 5144,1982,2,1//Orc Cave level 1
+SDIALOG D_STAFFBOOK_TRAMMEL1
+OnButton=24
+DIALOG D_STAFFBOOK_TRAMMEL2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_TRAMMEL
+sound 85
+///Tra-2///
+[DIALOG D_STAFFBOOK_TRAMMEL2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Tra Page-2[1///
+DTEXT 75 2 1152 Trammel 4
+dtext 40 30 0 Britain Sewers	  	//1
+dtext 40 45 0 Britain Moongate   	//2
+dtext 40 60 0 Jhelom Moongate	  	//3
+dtext 40 75 0 Minoc Moongate     	//4
+dtext 40 90 0 Trinsic Moongate	  	//5
+dtext 40 105 0 Yew Moongate 	  	//6
+dtext 40 120 0 Skara Moongate 	  	//7
+dtext 40 135 0 Moonglow Moongate 	//8
+dtext 40 150 0 Magincia Moongate 	//9
+dtext 40 165 0 Britain Graveyard 	//10
+dtext 40 180 0 Nujel'm Cemetery  	//11
+///Tra Page-2[2///
+DTEXT 230 1 1152 Trammel 5
+dtext 200 15 0 Fire Temple		//12
+dtext 200 30 0 Moonglow Lycaeum		//13
+dtext 200 45 0 Sea Market		//14
+dtext 200 60 0 Hopper's Bog		//15
+dtext 200 75 0 Empath Abbey		//16
+dtext 200 90 0 Moonglow Zoo		//17
+dtext 200 105 0 Moonglow Cemetery 	//18
+dtext 200 120 0 Yew Graveyard     	//19
+dtext 200 135 0 Lord British's Castle   //20
+dtext 200 150 0 Cove Graveyard 		//21
+dtext 200 165 0 Vesper Cemetery 	//22
+dtext 200 180 0 Jhelom Cemetery 	//23
+[DIALOG D_STAFFBOOK_TRAMMEL2 BUTTON]
+OnButton=0
+OnButton=1
+src.go 6032,1499,31,1 //Britain Sewers
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=2
+src.go 1331,1991,2,1 //Britain Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=3
+src.go 1495,3773,2,1 //Jhelom Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=4
+src.go 2704,690,2,1 //Minoc Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=5
+src.go 1832,2946,-20,1 //Trinsic Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=6
+src.go 775,750,2,1 //Yew Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=7
+src.go 648,2067,2,1 //Skara Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=8
+src.go 4471,1282,2,1 //Moonglow Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=9
+src.go 3566,2140,31,1 //Magincia Moongate
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=10
+src.go 1384,1492,10,1//Britain Graveyard
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=11
+src.go 3536,1151,20,1//Nujel'm Cemetery
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=12
+src.go 4594,3603,30,1//Fire Temple
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=13
+src.go 4310,1009,2,1//Lycaeum
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=14
+src.go 4551,2313,-2,1//Sea Market
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=15
+src.go 6006,3464,6,1//Hopper's Bog
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=16
+src.go 634,851,2,1//Empath Abbey
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=17
+src.go 4540,1378,20,1//Moonglow Zoo
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=18
+src.go 4546,1333,8,1//Moonglow Cemetery
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=19
+src.go 724,1134,2,1//Yew Graveyard
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=20
+src.go Trammel
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=21
+src.go 2442,1117,8,1//Cove Graveyard
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=22
+src.go 2781,867,2,1//Vesper Cemetery
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=23
+src.go 1291,3719,2,1//Jhelom Cemetery
+SDIALOG D_STAFFBOOK_TRAMMEL2
+OnButton=24
+sound 85
+DIALOG D_STAFFBOOK_TRAMMEL1
+/////////////
+//İlshenar//
+////////////
+[DIALOG D_STAFFBOOK_ILSHENAR]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Ils Page-0[1///
+DTEXT 230 1 1152 İlshenar 1//
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 0 0 1
+DTEXT 57 50 198 Felluca			//1
+RADIO 25 70 4006 4007 0 0 2
+DTEXT 57 75 198 Trammel       		//2
+RADIO 25 95 4006 4007 1 0 3
+DTEXT 57 100 1152 İlshenar      	//3
+RADIO 25 120 4006 4007 0 0 4
+DTEXT 57 125 198 Malas       		//4 
+RADIO 25 145 4006 4007 0 0 5
+DTEXT 57 150 198 Tokuno      		//5 
+RADIO 25 170 4006 4007 0 0 6
+DTEXT 57 175 198 Termur      		//6
+///Ils Page-0[2///
+dtext 200 15 0 Abyss			//7
+dtext 200 30 0 Ancient Citadel		//8
+dtext 200 45 0 Gypsy Camp 4		//9
+dtext 200 60 0 Lenmir Anfinmotas	//10
+dtext 200 75 0 Reg Volon	    	//11
+dtext 200 90 0 Lake Shire		//12
+dtext 200 105 0 Bet-Lem Reg		//13
+dtext 200 120 0 Mistas			//14
+dtext 200 135 0 Terort Skitas		//15
+dtext 200 150 0 Pass Of Karnaugh 	//16
+dtext 200 165 0 Evil Mage Outpost 	//17
+dtext 200 180 0 Twisted Weald		//18
+[DIALOG D_STAFFBOOK_ILSHENAR BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+src.go Abyss
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=8
+src.go 1518,568,-14,2 //Ancient Citadel
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=9
+src.go Gypsy Camp 4
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=10
+src.go 1673,876,-25,2 // Lenmir
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=11
+src.go Reg Volon
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=12
+src.go Lake Shire
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=13
+src.go Bet-Lem Reg
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=14
+src.go Mistas
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=15
+src.go Terort Skitas
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=16
+src.go 911,302,28,2 //Pass Of Karnaugh
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=17
+src.go Evil Mage Outpost
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=18
+src.go Twisted Weald
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=19
+DIALOG D_STAFFBOOK_ILSHENAR1
+sound 85
+///Ils-1///
+[DIALOG D_STAFFBOOK_ILSHENAR1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Ils Page-1[1///
+DTEXT 75 2 1152 İlshenar 2
+dtext 40 30 0 Rock Dungeon     		//1
+dtext 40 45 0 Spider Cave      		//2
+dtext 40 60 0 Spectre Dungeon  		//3
+dtext 40 75 0 Blood Dungeon    		//4
+dtext 40 90 0 Ankh Dungeon     		//5
+dtext 40 105 0 Wisp Dungeon    		//6
+dtext 40 120 0 Exodus Dungeon 	 	//7
+dtext 40 135 0 Ancient Lair   	 	//8
+dtext 40 150 0 Kirin passage  	 	//9
+dtext 40 165 0 Lizard Passage  		//10
+dtext 40 180 0 Lizard Huts     		//11
+///Ils Page-1[2///
+DTEXT 230 1 1152 İlshenar 3
+dtext 200 15 0 Nox Tereg  		//12
+dtext 200 30 0 Gypsy Camp 1  		//13
+dtext 200 45 0 Savage Village 		//14
+dtext 200 60 0 Blackthorn İlshenar     	//15
+dtext 200 75 0 Shrine Virtues  		//16
+dtext 200 90 0 Shrine of Valor 		//17
+dtext 200 105 0 Chaos Shrine 		//18
+dtext 200 120 0 Shrine Sacrifice     	//19
+dtext 200 135 0 Shrine Honesty 		//20
+dtext 200 150 0 Shrine Compassion  	//21
+dtext 200 165 0 Shrine Spirituality    	//22
+dtext 200 180 0 Shrine Humility 	//23
+[DIALOG D_STAFFBOOK_ILSHENAR1 BUTTON]
+OnButton=0
+OnButton=1
+src.go 1787,569,74,2 //Rock Dungeon Level 1
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=2
+src.go Spider Cave
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=3
+src.go Spectre Dungeon
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=4
+src.go Blood Dungeon Entrance
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=5
+src.go Ankh Dungeon
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=6
+src.go Wisp Dungeon Entrance
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=7
+src.go Exodus Dungeon
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=8
+src.go Ancient Lair
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=9
+src.go Kirin passage
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=10
+src.go Lizard Passage
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=11
+src.go Lizard Man's Huts
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=12
+src.go Nox Tereg
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=13
+src.go Gypsy Camp 1
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=14
+src.go Savage Village
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=15
+src.go Lord Blackthorn's ilshenar Castle
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=16
+src.go Shrine Of The Virtues
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=17
+src.go Shrine Of Valor
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=18
+src.go Shrine Of Chaos
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=19
+src.go Shrine Of Sacrifice 
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=20
+src.go Shrine Of Honesty
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=21
+src.go Shrine Of Compassion 
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=22
+src.go Shrine Of Spirituality
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=23
+src.go Shrine Of Humility
+SDIALOG D_STAFFBOOK_ILSHENAR1
+OnButton=24
+DIALOG D_STAFFBOOK_ILSHENAR2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_ILSHENAR
+sound 85
+///Ils-2///
+[DIALOG D_STAFFBOOK_ILSHENAR2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Ils Page-2[1///
+DTEXT 75 2 1152 İlshenar 4
+dtext 40 30 0 Shrine Honor	  //1
+dtext 40 45 0 Shrine Justice      //2
+dtext 40 60 0 Pormir Harm         //3
+dtext 40 75 0 Pormir Felwis       //4
+dtext 40 90 0 Cyclops Temple      //5
+dtext 40 105 0 Rat Fort	   	  //6
+dtext 40 120 0 Termir Flam	  //7
+dtext 40 135 0 Twin Oaks	  //8
+dtext 40 150 0 Mushroom Cave      //9
+dtext 40 165 0 Ratman Cave	  //10
+dtext 40 180 0 Serpentine Passage //11
+///Ils Page-2[2///
+DTEXT 230 1 1152 İlshenar 5
+dtext 200 15 0 Gypsy Camp 5 	  //12
+dtext 200 30 0 		  	  //13
+dtext 200 45 0 		  	  //14
+dtext 200 60 0 		  	  //15
+dtext 200 75 0 		  	  //16
+dtext 200 90 0 		 	  //17
+dtext 200 105 0 		  //18
+dtext 200 120 0    		  //19
+dtext 200 135 0   		  //20
+dtext 200 150 0  	  	  //21
+dtext 200 165 0  		  //22
+dtext 200 180 0 	  	  //23
+[DIALOG D_STAFFBOOK_ILSHENAR2 BUTTON]
+OnButton=0
+OnButton=1
+src.go Shrine Of Honor
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=2
+src.go Shrine Of Justice 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=3
+src.go Pormir Harm  
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=4
+src.go Pormir Felwis  
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=5
+src.go Cyclops Temple 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=6
+src.go Rat Fort
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=7
+src.go 1817,456,-14,2 //Termir Flam
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=8
+src.go Twin Oaks
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=9
+src.go Mushroom Cave
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=10
+src.go Ratman Cave Level 1
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=11
+src.go Serpentine Passage
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=12
+src.go Gypsy Camp 5
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=13
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=14
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=15
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=16
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=18
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=20
+src.go
+SDIALOG D_STAFFBOOK_ILSHENAR2 
+OnButton=21
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=22
+src.go
+SDIALOG D_STAFFBOOK_ILSHENAR2 
+OnButton=23
+src.go 
+SDIALOG D_STAFFBOOK_ILSHENAR2
+OnButton=24
+sound 85
+DIALOG D_STAFFBOOK_ILSHENAR1
+//////////
+//MALAS///
+//////////
+[DIALOG D_STAFFBOOK_MALAS]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Mal Page-0[1///
+DTEXT 230 1 1152 Malas 1 //
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 0 0 1
+DTEXT 57 50 198 Felluca		    //1
+RADIO 25 70 4006 4007 0 0 2
+DTEXT 57 75 198 Trammel             //2
+RADIO 25 95 4006 4007 0 0 3
+DTEXT 57 100 198 İlshenar           //3
+RADIO 25 120 4006 4007 1 0 4
+DTEXT 57 125 1152 Malas       	    //4 
+RADIO 25 145 4006 4007 0 0 5
+DTEXT 57 150 198 Tokuno      	    //5 
+RADIO 25 170 4006 4007 0 0 6
+DTEXT 57 175 198 Termur      	    //6
+///Mal Page-0[2///
+dtext 200 15 0 Luna		    //7
+dtext 200 30 0 Umbra		    //8
+dtext 200 45 0 Bedlam		    //9
+dtext 200 60 0 Citadel		    //10
+dtext 200 75 0 Labyrinth 	    //11
+dtext 200 90 0 Doom		    //12
+dtext 200 105 0 Doom Gauntlet	    //13
+dtext 200 120 0 Ilse of the Divide  //14
+dtext 200 135 0 Crystal Cave Entr   //15
+dtext 200 150 0 Protected Island    //16
+dtext 200 165 0 Grand Arena 	    //17
+dtext 200 180 0 Hanse's Hostel	    //18
+[DIALOG D_STAFFBOOK_MALAS BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+src.go Luna
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=8
+src.go Umbra
+DIALOG D_STAFFBOOK_MALAS
+OnButton=9
+src.go Bedlam
+DIALOG D_STAFFBOOK_MALAS
+OnButton=10
+src.go Citadel
+DIALOG D_STAFFBOOK_MALAS
+OnButton=11
+src.go Labyrinth
+DIALOG D_STAFFBOOK_MALAS
+OnButton=12
+src.go Doom
+DIALOG D_STAFFBOOK_MALAS
+OnButton=13
+src.go Doom Gauntlet
+DIALOG D_STAFFBOOK_MALAS
+OnButton=14
+src.go 329,1973,2,3 //Isle of the Divide
+DIALOG D_STAFFBOOK_MALAS
+OnButton=15
+src.go Crystal Cave Entrance
+DIALOG D_STAFFBOOK_MALAS
+OnButton=16
+src.go Protected Island
+DIALOG D_STAFFBOOK_MALAS
+OnButton=17
+src.go Grand Arena
+DIALOG D_STAFFBOOK_MALAS
+OnButton=18
+src.go Hanse's Hostel
+DIALOG D_STAFFBOOK_MALAS
+OnButton=19
+DIALOG D_STAFFBOOK_MALAS1
+sound 85
+///Mal-1///
+[DIALOG D_STAFFBOOK_MALAS1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Mal Page-1[1///
+DTEXT 75 2 1152 Malas 2
+dtext 40 30 0 Yomotsu Mines       //1
+dtext 40 45 0 Fan Dancer's Dojo   //2
+dtext 40 60 0 Samurai Start 	  //3
+dtext 40 75 0 Ninja Start   	  //4
+dtext 40 90 0 Ninja Cave          //5
+dtext 40 105 0 Malas Gypsy Camp   //6
+dtext 40 120 0  		  //7
+dtext 40 135 0  		  //8
+dtext 40 150 0 		 	  //9
+dtext 40 165 0  		  //10
+dtext 40 180 0  		  //11
+///Tra Page-1[2///
+DTEXT 230 1 1152 Malas 3
+dtext 200 15 0 		          //12
+dtext 200 30 0 	       		  //13
+dtext 200 45 0 			  //14
+dtext 200 60 0 			  //15
+dtext 200 75 0 			  //16
+dtext 200 90 0 			  //17
+dtext 200 105 0 		  //18
+dtext 200 120 0 		  //19
+dtext 200 135 0 		  //20
+dtext 200 150 0 		  //21
+dtext 200 165 0 		  //22
+dtext 200 180 0 		  //23
+[DIALOG D_STAFFBOOK_MALAS1 BUTTON]
+OnButton=0
+OnButton=1
+src.go Yomotsu Mines
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=2
+src.go Fan Dancer's Dojo
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=3
+src.go Samurai Start Location
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=4
+src.go Ninja Start Location 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=5
+src.go Ninja Cave  
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=6
+src.go Gypsy Camp 1
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=7
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=8
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=9
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=10
+src.go
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=11
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=12
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=13
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=14
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=15
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=16
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=18
+src.go
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=20
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=21
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=22
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=23
+src.go 
+SDIALOG D_STAFFBOOK_MALAS1
+OnButton=24
+DIALOG D_STAFFBOOK_MALAS2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_MALAS
+sound 85
+///Mal-2///
+[DIALOG D_STAFFBOOK_MALAS2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Mal Page-2[1///
+DTEXT 75 2 1152 Malas 4
+dtext 40 30 0   		//1
+dtext 40 45 0   		//2
+dtext 40 60 0   		//3
+dtext 40 75 0   		//4
+dtext 40 90 0   		//5
+dtext 40 105 0  		//6
+dtext 40 120 0  		//7
+dtext 40 135 0  		//8
+dtext 40 150 0  		//9
+dtext 40 165 0  		//10
+dtext 40 180 0  		//11
+///Mal Page-2[2///
+DTEXT 230 1 1152 Malas 5
+dtext 200 15 0  		//12
+dtext 200 30 0  		//13
+dtext 200 45 0  		//14
+dtext 200 60 0 			//15
+dtext 200 75 0  		//16
+dtext 200 90 0  		//17
+dtext 200 105 0 		//18
+dtext 200 120 0 		//19
+dtext 200 135 0 		//20
+dtext 200 150 0 		//21
+dtext 200 165 0 		//22
+dtext 200 180 0 		//23
+[DIALOG D_STAFFBOOK_MALAS2 BUTTON]
+OnButton=0
+OnButton=1
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=2
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=3
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=4
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=5
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=6
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=7
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=8
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=9
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=10
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=11
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=12
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=13
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=14
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=15
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=16
+src.go
+SDIALOG D_STAFFBOOK_MALAS2 
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=18
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=20
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=21
+src.go
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=22
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=23
+src.go 
+SDIALOG D_STAFFBOOK_MALAS2
+OnButton=24
+sound 85
+DIALOG D_STAFFBOOK_MALAS1
+///////////
+//Tokuno///
+///////////
+[DIALOG D_STAFFBOOK_TOKUNO ]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Tok Page-0[1///
+DTEXT 230 1 1152 Tokuno 1 //
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 0 0 1
+DTEXT 57 50 198 Felluca		 //1
+RADIO 25 70 4006 4007 0 0 2
+DTEXT 57 75 198 Trammel       	 //2
+RADIO 25 95 4006 4007 0 0 3
+DTEXT 57 100 198 İlshenar        //3
+RADIO 25 120 4006 4007 0 0 4
+DTEXT 57 125 198 Malas       	 //4 
+RADIO 25 145 4006 4007 1 0 5 
+DTEXT 57 150 1152 Tokuno      	 //5 
+RADIO 25 170 4006 4007 0 0 6
+DTEXT 57 175 198 Termur      	 //6
+///Tok Page-0[2///
+dtext 200 15 0 Zento		 //7
+dtext 200 30 0 Zento Inn	 //8
+dtext 200 45 0 Tokuno Castle	 //9
+dtext 200 60 0 Citadel Entrance  //10
+dtext 200 75 0 Homare-Jima	 //11
+dtext 200 90 0 Makoto-Jima	 //12
+dtext 200 105 0 Isamu-Jima 	 //13
+dtext 200 120 0 Yomotsu Mines	 //14
+dtext 200 135 0 Fan Dancer's	 //15
+dtext 200 150 0 Samurai start	 //16
+dtext 200 165 0 Ninja start      //17
+dtext 200 180 0 Ninja cave       //18
+[DIALOG D_STAFFBOOK_TOKUNO BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+src.go Zento
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=8
+src.go Zento Inn
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=9
+src.go Hotaka Plains
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=10
+src.go 1346,765,20,4 //Citadel Entrance
+SDIALOG D_STAFFBOOK_TOKUNO 
+OnButton=11
+src.go 295,712,55,4//Homare-Jima Shrine
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=12
+src.go 718,1161,25,4//makoto shrine
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=13
+src.go 1047,512,15,4//isamu shrine
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=14
+src.go 259,783,70,4//Yomotsu Mines
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=15
+src.go Fan Dancer's Dojo
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=16
+src.go Samurai Start Location//samurai start point
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=17
+src.go Ninja Start Location 
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=18
+src.go Ninja Cave
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=19
+DIALOG D_STAFFBOOK_TOKUNO1
+sound 85
+///Tok-1///
+[DIALOG D_STAFFBOOK_TOKUNO1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Tok Page-1[1///
+DTEXT 75 2 1152 Tokuno 2
+dtext 40 30 0 İsamu Moongate    //1
+dtext 40 45 0 Makoto Moongate   //2
+dtext 40 60 0 Homare Moongate   //3
+dtext 40 75 0 Beetlescape       //4
+dtext 40 90 0 Bushido Dojo      //5
+dtext 40 105 0 Jima Moongate    //6
+dtext 40 120 0 Field Echoes     //7
+dtext 40 135 0 Crane Marsh      //8
+dtext 40 150 0 Lotus Lake       //9
+dtext 40 165 0 Mount Sho        //10
+dtext 40 180 0 Dragon Valley    //11
+///Tok Page-1[2///
+DTEXT 230 1 1152 Tokuno 3
+dtext 200 15 0 Winter Spur      //12
+dtext 200 30 0 Kitsune Woods    //13
+dtext 200 45 0 Y.Mines Entrance //14
+dtext 200 60 0 Yomotsu Pvp Area //15
+dtext 200 75 0 İce Area Fan     //16
+dtext 200 90 0       		//17
+dtext 200 105 0      		//18
+dtext 200 120 0      		//19
+dtext 200 135 0      		//20
+dtext 200 150 0      		//21
+dtext 200 165 0      		//22
+dtext 200 180 0      		//23
+[DIALOG D_STAFFBOOK_TOKUNO1 BUTTON]
+OnButton=0
+OnButton=1
+src.go 1167,996,50,4//moongate isamo
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=2
+src.go 799,1201,25,4//moongate makoto
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=3
+src.go 267,625,15,4//moongate homare
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=4
+src.go 798,245,58,4//beetlescape
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=5
+src.go 320,408,32,4//bushido dojo
+SDIALOG D_STAFFBOOK_TOKUNO1 
+OnButton=6
+src.go 724,943,42,4//the waste makoto-jima Moongate
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=7
+src.go 160,654,36,4//field of echoes
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=8
+src.go 232,1107,10,4//crane marsh
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=9
+src.go 1066,817,20,4//lotus lake
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=10
+src.go 1159,696,70,4//Mount Sho
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=11
+src.go 948,432,8,4//Dragon Valley
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=12
+src.go 926,162,34,4//Winter Spur
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=13
+src.go 532,520,32,4//kitsune woods
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=14
+src.go 258,785,64,4 //Yomotsu Mines Entrance
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=15
+src.go 371,1057,11,4 //Yomotsu Pvp Area
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=16
+src.go 925,160,34,4 //İce Area Fan Dancers
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=18
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=20
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=21
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=22
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO1
+OnButton=23
+src.go
+OnButton=24
+DIALOG D_STAFFBOOK_TOKUNO2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_TOKUNO
+sound 85
+///Tok-2///
+[DIALOG D_STAFFBOOK_TOKUNO2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Tok Page-2[1///
+DTEXT 75 2 1152 Tokuno 4
+dtext 40 30 0 	 	//1
+dtext 40 45 0   	//2
+dtext 40 60 0   	//3
+dtext 40 75 0   	//4
+dtext 40 90 0   	//5
+dtext 40 105 55	 	//6
+dtext 40 120 0  	//7
+dtext 40 135 0  	//8
+dtext 40 150 0  	//9
+dtext 40 165 0 		//10
+dtext 40 180 0 		//11
+///Tok Page-2[2///
+DTEXT 230 1 1152 Tokuno 5
+dtext 200 15 0 		//12
+dtext 200 30 0 		//13
+dtext 200 45 0 		//14
+dtext 200 60 0 		//15
+dtext 200 75 55		//16
+dtext 200 90 0 	        //17
+dtext 200 105 0 	//18
+dtext 200 120 0    	//19
+dtext 200 135 55	//20
+dtext 200 150 0 	//21
+dtext 200 165 0  	//22
+dtext 200 180 0 	//23
+[DIALOG D_STAFFBOOK_TOKUNO2 BUTTON]
+OnButton=0
+OnButton=1
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=2
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=3
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=4
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=5
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=6
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=7
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=8
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=9
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=10
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=11
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=12
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=13
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=14
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=15
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=16
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=18
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=20
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=21
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=22
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=23
+src.go 
+SDIALOG D_STAFFBOOK_TOKUNO2
+OnButton=24
+sound 85
+DIALOG D_STAFFBOOK_TOKUNO1
+////////////
+///Termur///
+////////////
+[DIALOG D_STAFFBOOK_TERMUR]
+300,300
+PAGE 0
+PAGE 1
+gumppic -26 -3 02b07
+for 19 19
+gumppictiled 55 <eval (<dlocal._for>*25)-440> 85 2 4 <dlocal._for>
+endfor
+for 1 6
+gumppictiled 25 <eval (<dlocal._for>*25)+42> 135 2 4 <dlocal._for>
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>
+endfor
+for 1 6
+button 25 <eval (<dlocal._for>*25)+20> 4006 4007 1 0 <dlocal._for> //btn1
+endfor
+for 7 18
+button 185 <eval (<dlocal._for>*15)-85> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 19 19
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 0 <dlocal._for> //İleri
+endfor
+///Ter Page-0[1///
+DTEXT 230 1 1152 Termur 1//
+DTEXT 52 5 0 Staff Runebook
+DTEXT 57 20 0 For All Map's
+RADIO 25 45 4006 4007 0 0 1
+DTEXT 57 50 198 Felluca		//1
+RADIO 25 70 4006 4007 0 0 2
+DTEXT 57 75 198 Trammel       	//2
+RADIO 25 95 4006 4007 0 0 3
+DTEXT 57 100 198 İlshenar       //3
+RADIO 25 120 4006 4007 0 0 4
+DTEXT 57 125 198 Malas       	//4 
+RADIO 25 145 4006 4007 0 0 5
+DTEXT 57 150 198 Tokuno      	//5 
+RADIO 25 170 4006 4007 1 0 6
+DTEXT 57 175 1152 Termur      	//6
+///Ter Page-0[2///
+dtext 200 15 0 Termur 	//7
+dtext 200 30 0 Fisher Reach 	//8
+dtext 200 45 0 Holy City Island //9
+dtext 200 60 0 Lost Settlement  //10
+dtext 200 75 0 Royal City 	//11
+dtext 200 90 0 Tomb of Kings	//12
+dtext 200 105 0 Underworld      //13
+dtext 200 120 0 Medusa's Lair	//14
+dtext 200 135 0 Great Stygian	//15
+dtext 200 150 0 Navrey's Lair	//16
+dtext 200 165 0 Stygian Abyss   //17
+dtext 200 180 0 Shrine of Truth //18
+[DIALOG D_STAFFBOOK_TERMUR BUTTON]
+OnButton=0
+OnButton=1
+SDIALOG D_STAFFBOOK_FELLUCA
+OnButton=2
+SDIALOG D_STAFFBOOK_TRAMMEL
+OnButton=3
+SDIALOG D_STAFFBOOK_ILSHENAR
+OnButton=4
+SDIALOG D_STAFFBOOK_MALAS
+OnButton=5
+SDIALOG D_STAFFBOOK_TOKUNO
+OnButton=6 
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=7
+src.go 55,366,20,5//Termur
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=8
+src.go Fishermans Reach
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=9
+src.go Holy City 
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=10
+src.go Lost Settlement
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=11
+src.go Royal City
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=12
+src.go Tomb of Kings
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=13
+src.go Underworld
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=14
+src.go Medusa's Lair
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=15
+src.go Stygian Dragon's Lair
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=16
+src.go Navrey's Lair
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=17
+src.go The Great Stygian Abyss
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=18
+src.go Shrine of Truth
+SDIALOG D_STAFFBOOK_TERMUR
+OnButton=19
+DIALOG D_STAFFBOOK_TERMUR1
+sound 85
+///Ter-1///
+[DIALOG D_STAFFBOOK_TERMUR1]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 295 <eval (<dlocal._for>*0)+5> 2236 2236 1 3 <dlocal._for> //ileri
+endfor
+for 25 25
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Ter Page-1[1///
+DTEXT 75 2 1152 Termur 2//
+dtext 40 30 0 Atoll Bend     	 //1
+dtext 40 45 0 Chicken Chase  	 //2
+dtext 40 60 0 Gated İsle     	 //3
+dtext 40 75 0 Kepetch Waste  	 //4
+dtext 40 90 0 Raptor İsland  	 //5
+dtext 40 105 0 Royal Park    	 //6
+dtext 40 120 0 Slith Valley  	 //7
+dtext 40 135 0 Talon Point   	 //8
+dtext 40 150 0 Void İsle         //9
+dtext 40 165 0 Walled Circus     //10
+dtext 40 180 0 Waterfall Point   //11
+///Ter Page-1[2///
+DTEXT 230 1 1152 Termur 3//
+dtext 200 15 0 Northern Steppes  //12
+dtext 200 30 0 Jerusalem Area    //13
+dtext 200 45 0 Glory Rellic      //14
+dtext 200 60 0 Buff Area         //15
+dtext 200 75 0 Grass Area        //16
+dtext 200 90 0 Linkage Area   	 //17
+dtext 200 105 0 Stygian Cemetery //18
+dtext 200 120 0 Volcano      	 //19
+dtext 200 135 0 Spiral Area  	 //20
+dtext 200 150 0 Spiral Cottage	 //21
+dtext 200 165 0 Activity Area	 //22
+dtext 200 180 0 Quiet Village	 //23
+[DIALOG D_STAFFBOOK_TERMUR1 BUTTON]
+OnButton=0
+OnButton=1
+src.go Atoll Bend
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=2
+src.go Chicken Chase
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=3
+src.go Gated Isle
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=4
+src.go Kepetch Waste
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=5
+src.go Raptor Island
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=6
+src.go Royal Park 
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=7
+src.go Slith Valley
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=8
+src.go Talon Point
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=9
+src.go Void Isle
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=10
+src.go Walled Circus
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=11
+src.go Waterfall Point
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=12
+src.go Northern Steppes
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=13
+src.go 343,617,26,5 //Jerusalem Area
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=14
+src.go 557,805,-45,5 //Glory Rellic
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=15
+src.go 819,668,22,5 //Buff Area
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=16
+src.go 823,392,-15,5 //Grass Area 
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=17
+src.go 750,475,-17,5 //Linkage Area 
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=18
+src.go 549,659,8,5 //Stygian Cemetery
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=19
+src.go Volcano
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=20
+src.go 410,3757,-34,5 //Spiral Area 
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=21
+src.go 1031,3660,60,5 //Spiral Cottage
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=22
+src.go 1030,3567,-5,5 //Activity Area
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=23
+src.go 1111,3624,-44,5 //Quiet Village
+SDIALOG D_STAFFBOOK_TERMUR1
+OnButton=24
+DIALOG D_STAFFBOOK_TERMUR2
+sound 85
+OnButton=25
+DIALOG D_STAFFBOOK_TERMUR
+sound 85
+///Ter-2///
+[DIALOG D_STAFFBOOK_TERMUR2]
+300,300
+page 0
+gumppic -26 -3 02b07
+for 1 11
+gumppictiled 25 <eval (<dlocal._for>*15)+30> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 7 18
+gumppictiled 185 <eval (<dlocal._for>*15)-75> 125 2 4 <dlocal._for>//GUMP
+endfor
+for 1 11
+button 25 <eval (<dlocal._for>*15)+20> 2361 2362 1 0 <dlocal._for> //btn1
+endfor
+for 12 23
+button 185 <eval (<dlocal._for>*15)-160> 2361 2362 1 0 <dlocal._for> //btn2
+endfor
+for 24 24
+button 23 <eval (<dlocal._for>*0)+5> 2235 2235 1 0 <dlocal._for> //Geri
+endfor
+///Ter Page-2[1///
+DTEXT 75 2 1152 Termur 4
+dtext 40 30 0 Serenity Area 	  //1
+dtext 40 45 0 Auditorium    	  //2
+dtext 40 60 0 Wrestling Area	  //3
+dtext 40 75 0 Village İsle 	  //4
+dtext 40 90 0 Termur Cave 	  //5
+dtext 40 105 0 Termur Pvp Area 1  //6
+dtext 40 120 0 Termur Pvp Area 2  //7
+dtext 40 135 0 Termur Orc Cave    //8
+dtext 40 150 0 		 	  //9
+dtext 40 165 0 		          //10
+dtext 40 180 0 			  //11
+///Ter Page-2[2///
+DTEXT 230 1 1152 Termur 5
+dtext 200 15 0 			  //12
+dtext 200 30 0 			  //13
+dtext 200 45 0 		 	  //14
+dtext 200 60 0 			  //15
+dtext 200 75 0 			  //16
+dtext 200 90 0  		  //17
+dtext 200 105 0  		  //18
+dtext 200 120 0  		  //19
+dtext 200 135 0 		  //20
+dtext 200 150 0  		  //21
+dtext 200 165 0 		  //22
+dtext 200 180 0  		  //23
+[DIALOG D_STAFFBOOK_TERMUR2 BUTTON]
+OnButton=0
+OnButton=1
+src.go 850,2777,0,5 //Serenity Area
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=2
+src.go 896,2304,-19,5 //Auditorium
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=3
+src.go 929,1616,0,5 //Wrestling Area
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=4
+src.go 555,1472,40,5 //Village isle
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=5
+src.go 179,1814,80,5 //Termur Cave
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=6
+src.go 111,2384,0,5 //Termur Pvp Area 1
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=7
+src.go 163,2146,-20,5 //Termur Pvp Area 2
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=8
+src.go 701,2107,40,5 //Termur Orc Cave
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=9
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=10
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=11
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=12
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=13
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=14
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=15
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=16
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=17
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=18
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=19
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=20
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=21
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=22
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=23
+src.go 
+SDIALOG D_STAFFBOOK_TERMUR2
+OnButton=24
+DIALOG D_STAFFBOOK_TERMUR1
+sound 85
+[EOF]

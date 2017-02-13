@@ -1,4 +1,4 @@
-//****************************************************************************
+﻿//****************************************************************************
 // SPHERE by : Menasoft �1997-2017
 // www.sphereserver.net
 // All SPHERE script files and formats are copyright Menasoft & Partners.
@@ -92,6 +92,7 @@ scripts/sphere_template_vend.scp
 
 // Customs //
 scripts/customs/
+scripts/customs/items/
 scripts/customs/functions/
 scripts/customs/events/
 scripts/customs/systems/
