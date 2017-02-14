@@ -37,7 +37,7 @@ for 0 5
       new.amount=<argv[<eval 15 + <local._for>>]>			//amount
       new.update
       new.timer=<R15,30>
-      if (<new.type> == t_normal)
+      if (<new.type> == t_normal) || (<new.more1> == 0)
         serv.log <new.uid> not supported, removing...
         new.remove
       endif
