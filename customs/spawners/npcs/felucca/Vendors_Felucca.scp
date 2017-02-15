@@ -57,10 +57,9 @@ create_spawner shipwright,mapmaker,,,,,1416,1754,10,1,5,10,5,0,1,1,1,0,0,0,0
 create_spawner mage,,,,,,1405,1810,0,2,5,10,25,10,1,1,0,0,0,0,0
 create_spawner towncrier,,,,,,1482,1761,-2,2,5,10,4,0,1,1,0,0,0,0,0
 create_spawner farmer,rancher,hirepeasant,,,,1228,1572,0,2,5,10,10,8,1,1,1,1,0,0,0
-create_spawner orderguard,hirefighter,,,,,1355,1754,20,2,5,10,14,8,1,1,1,0,0,0,0
+create_spawner hirefighter,,,,,,1355,1754,20,2,5,10,14,8,1,1,1,0,0,0,0
 create_spawner farmer,rancher,,,,,1243,1699,0,2,5,10,4,4,1,1,1,0,0,0,0
 create_spawner escortablemage,,,,,,1351,1816,0,2,5,10,1,1,1,1,0,0,0,0,0
-create_spawner orderguard,,,,,,1306,1804,0,2,5,10,6,4,1,1,0,0,0,0,0
 create_spawner peasant,,,,,,1304,1826,0,2,5,10,1,1,1,1,0,0,0,0,0
 create_spawner artist,,,,,,1362,1825,0,2,5,10,12,6,1,1,0,0,0,0,0
 create_spawner escortablewanderinghealer,,,,,,1333,1808,0,2,5,10,4,4,1,1,0,0,0,0,0
