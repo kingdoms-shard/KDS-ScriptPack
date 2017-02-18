@@ -1,0 +1,10 @@
+[EVENTS e_general]
+ON=@Death
+if !(<isgm>)
+  TIMERF 3, f_closest //timer allows for death screen change
+endif
+
+ON=@Login //This section to allow for those killed on logout who HAVE NOT used menu
+if (<flags>&statf_dead) && !(<isgm>)
+  f_closest
+endif
