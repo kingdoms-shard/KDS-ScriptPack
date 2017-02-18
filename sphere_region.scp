@@ -48,6 +48,26 @@ it's TERRAIN= property.
 REAP=i_unused
 REGEN=60*60*10 // Nothing can be found at this location for this many seconds.
 
+////////////////////////////////
+//   Paroxysmus Palace Acid    //
+////////////////////////////////
+
+[RegionType r_paroxysmus]
+ON=@Step
+if (<src.npc>==0) && !((<src.flags>&statf_invul) || (<src.flags>&statf_dead))
+    if ((<SERV.MAP(<src.p.x>,<src.p.y>,<map>).type>==t_acid) && !(<src.isneartypetop t_arock 0>)) || (<src.isneartypetop t_acid 0>==1) //if terrain above us is t_acid and we are not over t_arock OR we are over t_acid (static t_Acid differs from terrain one, so we have to double check)
+        src.damage=30,dam_Acidic,<uid>// i don't know OSI's real damage for this tiles since there's not info about it
+    endif
+endif
+
+[RegionType r_paroxysmus_lair]
+ON=@Step
+if (<src.npc>==0) && !((<src.flags>&statf_invul) || (<src.flags>&statf_dead))
+    if ((<SERV.MAP(<src.p.x>,<src.p.y>,<map>).type>==t_acid) && !(<src.isneartypetop t_arock 0>)) || (<src.isneartypetop t_acid 0>==1)
+        src.damage=<src.maxhits>,dam_Acidic,<uid>//instakill.
+    endif
+endif
+
 /////////////////////////////////////
 // Resources for herbivores to eat //
 /////////////////////////////////////

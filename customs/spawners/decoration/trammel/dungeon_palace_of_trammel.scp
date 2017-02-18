@@ -3,4 +3,31 @@
 serv.newitem=0857
 new.attr=attr_static
 new.p=6518 492 -50 1//
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6239,350,61
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6238,350,62
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6238,351,62
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6238,352,62
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6237,352,62
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6237,353,63
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6237,354,62
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6237,355,63
+serv.newitem i_floor_marble
+new.attr=090
+new.p=6236,356,62
 [EOF]
