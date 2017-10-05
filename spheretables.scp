@@ -91,29 +91,29 @@ scripts/sphere_template_loot.scp
 scripts/sphere_template_vend.scp
 
 // Customs //
-scripts/customs/
-scripts/customs/items/
-scripts/customs/functions/
-scripts/customs/events/
-scripts/customs/systems/
+scripts-custom/
+scripts-custom/items/
+scripts-custom/functions/
+scripts-custom/events/
+scripts-custom/systems/
 
 // Spawner //
-scripts/customs/spawners/
-scripts/customs/spawners/npcs/
-scripts/customs/spawners/npcs/felucca/
-scripts/customs/spawners/npcs/ilshenar/
-scripts/customs/spawners/npcs/malas/
-scripts/customs/spawners/npcs/tokuno/
-scripts/customs/spawners/npcs/trammel/
-scripts/customs/spawners/npcs/uoclassic/
-scripts/customs/spawners/decoration/
-scripts/customs/spawners/decoration/felucca/
-scripts/customs/spawners/decoration/ilshenar/
-scripts/customs/spawners/decoration/malas/
-scripts/customs/spawners/decoration/misc/
-scripts/customs/spawners/decoration/ter_mur/
-scripts/customs/spawners/decoration/tokuno/
-scripts/customs/spawners/decoration/trammel/
+scripts-custom/spawners/
+scripts-custom/spawners/npcs/
+scripts-custom/spawners/npcs/felucca/
+scripts-custom/spawners/npcs/ilshenar/
+scripts-custom/spawners/npcs/malas/
+scripts-custom/spawners/npcs/tokuno/
+scripts-custom/spawners/npcs/trammel/
+scripts-custom/spawners/npcs/uoclassic/
+scripts-custom/spawners/decoration/
+scripts-custom/spawners/decoration/felucca/
+scripts-custom/spawners/decoration/ilshenar/
+scripts-custom/spawners/decoration/malas/
+scripts-custom/spawners/decoration/misc/
+scripts-custom/spawners/decoration/ter_mur/
+scripts-custom/spawners/decoration/tokuno/
+scripts-custom/spawners/decoration/trammel/
 
 [OBSCENE]
 
