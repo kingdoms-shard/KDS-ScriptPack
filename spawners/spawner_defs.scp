@@ -24,8 +24,8 @@ butcher				{c_butcher 1 c_butcher_f 1}
 carpenter			{c_carpenter 1 c_carpenter_f 1}
 cobbler				{c_cobbler 1 c_cobbler_f 1}
 cook				{c_cook 1 c_cook_f 1}
-customhairstylist		{c_barber 1 c_barber_f 1}
-hairstylist			{c_barber 1 c_barber_f 1}
+customhairstylist		{c_hairstylist 1 c_hairstylist_f 1}
+hairstylist			{c_hairstylist 1 c_hairstylist_f 1}
 dockmaster			{c_shipwright 1 c_shipwright_f 1}
 escortablewanderinghealer	{c_healer 1 c_healer_f 1}
 farmer				{c_farmer 1 c_farmer_f 1}
