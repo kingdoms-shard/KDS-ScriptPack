@@ -38,7 +38,7 @@ scripts/sphere_events_human.scp
 scripts/sphere_events_npcs.scp
 scripts/sphere_menu.scp
 scripts/sphere_name.scp
-scripts/sphere_serv_triggers.scp
+// scripts/sphere_serv_triggers.scp
 scripts/sphere_skills.scp
 scripts/sphere_skillmenu.scp
 scripts/sphere_newb.scp
