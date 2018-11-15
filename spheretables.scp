@@ -45,6 +45,8 @@ scripts/sphere_newb.scp
 scripts/sphere_speech.scp
 scripts/sphere_types.scp
 scripts/items/
+// FORCE //
+scripts-custom/items/sphere_item_typedef_equipitem.scp
 scripts/items/multis/
 scripts/stones/
 scripts/stones/guilds/
